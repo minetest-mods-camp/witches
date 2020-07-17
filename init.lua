@@ -1,10 +1,13 @@
+--Witches is copyright 2020 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
+--The MIT License (MIT)
 
 --local mod_name = "witches"
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200611"
+witches.version = "20200716"
 print("this is Witches "..witches.version)
+
 
 -- Strips any kind of escape codes (translation, colors) from a string
 -- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
@@ -43,58 +46,13 @@ local S = minetest.get_translator("witches")
 local witches_version = witches.version
 dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
+dofile(path .. "/items.lua")
 print("enter the witches! version: "..witches.version)
 
-local witch_hat = {}
-witch_hat = {
-  initial_properties = {
-      --physical = true,
-      pointable = false,
-      collisionbox = {0,0,0,0,0,0},
-      visual = "mesh",
-      mesh = "witches_witch-hat.b3d",
-      visual_size = {x = 1, y = 1, z = 1},
-      textures = {"witches_witch_hat.png"},
-  },
-  message = "Default message",
-  on_step =  function(self)
-    if not self.owner or not self.owner:get_luaentity() then
-      self.object:remove()
-    else
-      -- local owner_head_bone = self.owner:get_luaentity().head_bone
-      --  local position,rotation = self.owner:get_bone_position(owner_head_bone)
-      --  self.object:set_attach(self.owner, owner_head_bone, vector.new(0,0,0), rotation)
-    end
-  end 
-  
-}
-
-minetest.register_entity("witches:witch_hat",witch_hat)
-
-local witch_tool = {}
-witch_tool = {
-  initial_properties = {
-      --physical = true,
-      pointable = false,
-      collisionbox = {0,0,0,0,0,0},
-      visual = "wielditem",
-      
-      visual_size = {x = 0.3, y = 0.3},
-      wield_item = "default:stick",
-      --inventory_image = "default_tool_woodpick.png",
-  },
-  
-  message = "Default message",
-  on_step =  function(self)
-    if not self.owner or not self.owner:get_luaentity() then
-      self.object:remove()
-    end
-  end 
-}
-
-minetest.register_entity("witches:witch_tool",witch_tool)
-
-
+local variance = witches.variance
+local rnd_color = witches.rnd_color
+local rnd_colors = witches.rnd_colors
+local hair_colors = witches.hair_colors
 
 local spawning = {
   generic = {
@@ -119,23 +77,6 @@ local witch_types = {
 }
 
 
-local rnd_colors = {"none", "red","green","blue","orange","yellow","violet","cyan"}
-local hair_colors = {"black","brown","blonde","gray","red","blue","green"}
-local hat_bling = {"band","feather","veil"}
-local function rnd_color(rnd_colors)
-  local color = rnd_colors[math.random(1,#rnd_colors)]
-  return color
-end
-local function color_mod_string()
-  local str = "^[colorize:\""..rnd_color(rnd_colors)..":50\""
-  return str
-end
---for rng of small floats
-local function variance(min,max)
-  local target = math.random(min,max) / 100
-  print(target)
-  return target
- end
 
 local witch_template = {  --your average witch,
   description = "Basic Witch",
@@ -216,10 +157,9 @@ local witch_template = {  --your average witch,
   "default:blueberries", "default:torch", "default:stick",
   "flowers:mushroom_brown","flowers:mushroom_red"
   },
-  on_rightclick = function(self,clicker)
 
-    local pname = clicker:get_player_name()
-    witches.guessing.show_to(self, pname)
+  on_rightclick = function(self,clicker)
+    witches.quests(self,clicker)
   end,
 
   on_spawn = function(self)
@@ -233,7 +173,7 @@ local witch_template = {  --your average witch,
       self.speed_mod = math.random(-1, 1)
       
     end
-  print("speed mod: "..self.speed_mod)
+  --print("speed mod: "..self.speed_mod)
 --rng for testing variants
     if not self.size then
       self.size = {x = variance(90,100), y = variance(75,105), z = variance(90,100)}
@@ -270,9 +210,20 @@ local witch_template = {  --your average witch,
       self.object:set_texture_mod("^witches_skin"..self.skin..".png^witches_accessories.png^witches_witch_hair_"..self.hair_color..".png")
     end
     if not self.secret_name then
-      self.secret_name = witches.generate_name(witches.name_parts_female).." the "..self.color_mod
+      self.secret_name = witches.generate_name(witches.name_parts_female)
     end
-    print(self.secret_name.." has spawned")
+    if not self.secret_title then
+      self.secret_title =  witches.generate_name(witches.words_desc, {"titles"})
+    end
+    if not self.secret_locale then
+      self.secret_locale = witches.generate_name(witches.name_parts_female, {"syllablesStart","syllablesEnd"})
+    end
+   
+    self.item_request =  witches.generate_name(witches.quest_dialogs, {"item_request"}) 
+
+    
+
+    --print(self.secret_name.." has spawned")
     --print("self: "..dump(self.follow))
    -- print("self properties "..dump(self.object:get_properties()))
     witches.looking_for(self)
@@ -284,46 +235,11 @@ local witch_template = {  --your average witch,
 
   after_activate = function(self)
 --maddest hatter <|%\D
-  self.head_bone = "Head"
-  local hat = minetest.add_entity(self.object:get_pos(), "witches:witch_hat") 
-  hat:set_attach(self.object, "Head", vector.new(0,4,0), vector.new(0,180,0))
-  local hat_ent = hat:get_luaentity()
-  hat_ent.owner = self.object
-  print("HAT: "..dump(hat_ent))
-  local he_props = hat_ent.object:get_properties() 
-  --print("he props: "..dump(he_props))
-  local hat_size = variance(90, 120)
-  local hat_mods = ""
-  for i,v in pairs(hat_bling) do
-    if v == "veil" and math.random() < 0.1 then 
-      hat_mods = hat_mods.."^witches_witch_hat_"..v..".png"
-    else
-      if v ~= "veil" and math.random() < 0.5 then
-        hat_mods = hat_mods.."^witches_witch_hat_"..v..".png"
-      end
-    end
-  end
-  self.hat_mods = hat_mods
-  print("hat_mods: "..self.hat_mods)
-  if self.color_mod ~= "none" then
-     hat_ent.object:set_texture_mod("^[colorize:"..self.color_mod..":60"..self.hat_mods)
-  else
-    if self.hat_mods then hat_ent.object:set_texture_mod(self.hat_mods) end
-  end
-  he_props.visual_size.y = hat_size
-  print("he props: "..dump(he_props))
-  hat_ent.object:set_properties(he_props)
-
-  local tool = minetest.add_entity(self.object:get_pos(), "witches:witch_tool") 
-  tool:set_attach(self.object, "Arm_Right", {x=0.3, y=4.0, z=2}, {x=-100, y=225, z=90})
-  tool:get_luaentity().owner = self.object
-  
+    witches.attach_hat(self,"witches:witch_hat")
+    witches.attach_tool(self,"witches:witch_tool")
   end,
 
 }
-
-
-
 
 --- This can build all the mobs in our mod.
 -- @witch_types is a table with the key used to build the subtype with values that are unique to that subtype
