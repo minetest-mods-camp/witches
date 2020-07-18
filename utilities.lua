@@ -19,13 +19,83 @@ witches.name_parts_female = {
 }
 
 witches.words_desc = {
-  tool_adj = S("shiny, polished, favorite, beloved, cherished"),
+  tool_adj = S("shiny, polished, favorite, beloved, cherished, sharpened"),
   titles = S("artificer, librarian, logician, sorcerant, thaumaturgist, polymorphist, elementalist, hedge, herbologist, arcanologist, tutor, historian, mendicant, restorationist"),
 }
 
-witches.quest_dialogs = {
-  item_request = S("Can you retrieve, Would you happen to have, Would you kindly retrieve, Might you please return with, Do you know I seek only, Have you but one, Why must my task require, Is it so difficult to find, Wherefor art, Must there be but a few, Could I trouble you for")
-}
+
+local function quest_dialogs(self)
+  local dialogs = {
+    intro = {
+      S("Hello, @1, I am @2, @3 of @4! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
+      S("Just one minute, @1, @2, @3 of @4 seeks your assistance! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
+      S("If you are indeed @1, perhaps you and I, @2, @3 of @4 can help each other! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
+
+    },
+    item_request = {
+      S("I've been looking all over for the @1! ",self.item_request.item.desc),
+      S("I seem to have misplaced the @1! ",self.item_request.item.desc),
+      S("Would you happen to have some number of @1? ",self.item_request.item.desc),
+      S("Would you kindly retrieve for me the @1? ",self.item_request.item.desc),
+      S("Might you please return with the @1? ",self.item_request.item.desc),
+      S("Do you know I seek only the @1? ",self.item_request.item.desc),
+      S("Have you but some number of @1? ",self.item_request.item.desc),
+      S("Why must my task require the @1? ",self.item_request.item.desc),
+      S("Is it so difficult to find the @1? ",self.item_request.item.desc),
+      S("Wherefor about this land art the @1? ",self.item_request.item.desc),
+      S("Must there be but a few the @1? ",self.item_request.item.desc),
+      S("Could I trouble you for some kind of @1? ",self.item_request.item.desc),
+      S("The @1 would make my collection complete!",self.item_request.item.desc),
+      S("I sense the @1 are not far away...",self.item_request.item.desc),
+      S("Certainly the @1 is not as rare as a blood moon!",self.item_request.item.desc),
+      S("You look like you know where to find the @1!",self.item_request.item.desc)
+    }
+  }
+  --print(dump(dialogs))
+  return dialogs
+end
+
+
+function witches.generate_text(name_parts, rules, separator)
+  -- print_s("generating name")
+  local name_arrays = {}
+  local r_parts = {}
+  local generated_name = {}
+  for k,v in pairs(name_parts) do
+    --  name_arrays.k = mysplit(v)
+    if separator then
+      name_arrays.k = string.split(v,separator)
+    else
+      name_arrays.k = string.split(v,", ")
+    end
+    -- print_s(dump(name_arrays.k))
+    r_parts[k] = k
+    r_parts[k] = name_arrays.k[math.random(1,#name_arrays.k)]
+  end
+  --local r_parts.k = name_arrays.k[math.random(1,#name_arrays.k)] did not work
+  --print_s(name_a)
+  if r_parts.list_opt and math.random() <= 0.5 then r_parts.list_opt = "" end
+  --print_s(r_parts.list_a..r_parts.list_b..r_parts.list_opt)
+  if rules then
+    --print_s(dump(rules))
+    local gen_name = ""
+    for i, v in ipairs(rules) do
+      if v == "-" then
+        gen_name = gen_name.."-"
+      elseif v == "\'" then
+        gen_name = gen_name.."\'"
+      else
+        gen_name = gen_name..r_parts[v]
+      end
+    end
+    generated_name = gen_name
+    --print_s(dump(generated_name))
+    return generated_name
+  else
+    generated_name = r_parts.syllablesStart..r_parts.syllablesMiddle..r_parts.syllablesEnd
+    return generated_name
+  end
+end
 
 witches.rnd_colors = {"none", "red","green","blue","orange","yellow","violet","cyan","pink","black","magenta","grey"}
 
@@ -52,13 +122,8 @@ function witches.variance(min,max)
   return target
  end
 
+ 
 
-function witches.item_quest(self)
-  if not self.item_request then
-   self.item_request = witches.generate_name(witches.quest_dialogs, {"item_request"})
-   return self.item_request
-  end
-end
 
 --- Drops a special personlized item
 function witches.special_gifts(self, pname, drop_chance, max_drops)
@@ -90,30 +155,33 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
             max_hear_distance = self.sounds.distance or 10
           })
           --]]
-          local item_wear = math.random(5000,10000)
+          local item_wear = math.random(8000,10000)
           local stack = ItemStack({name = v, wear = item_wear })
           local org_desc = minetest.registered_items[v].description
           local meta = stack:get_meta()
           --boost the stats!
           local capabilities = stack:get_tool_capabilities()
+          
+          local bonuses = {}
           for x,y in pairs(capabilities) do
             if x == "groupcaps" then
               for a,b in pairs(y) do
                 --print(dump(a).." is "..dump(b).."\n---")
                 if b and b.uses then
-                   print("original uses: "..capabilities.groupcaps[a].uses)
+                   --print("original uses: "..capabilities.groupcaps[a].uses)
+                   
                    capabilities.groupcaps[a].uses = b.uses + 10
-                   print("boosted uses: "..capabilities.groupcaps[a].uses)
+                   --print("boosted uses: "..capabilities.groupcaps[a].uses)
+                   
                   --print(dump(a).." is now "..dump(b))
                 end
                 if b and b.times then
                   for i,v in pairs(b.times) do
-                    
                     if v > 0.3 then
-                       print("original time:".. v )
+                       --print("original time:".. v )
                        local v_rnd = math.random(1,3) / 10
                        v = v - v_rnd
-                       print("boosted time:".. v )
+                      -- print("boosted time:".. v )
                     end
                     capabilities.groupcaps[a].times[i] = v
                   end  
@@ -122,26 +190,42 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
             elseif x == "damage_groups" then
               for a,b in pairs(y) do
                 --print(dump(a.." = "..capabilities.damage_groups[a]))
-                capabilities.damage_groups[a] = b + 1
+                capabilities.damage_groups[a] = b + math.random(0,1)
                 --print(dump(capabilities.damage_groups[a]))
               end 
             end
           end
           meta:set_tool_capabilities(capabilities)
           --print (dump(capabilities))
-          local tool_adj = witches.generate_name(witches.words_desc, {"tool_adj"})
+          local tool_adj = witches.generate_text(witches.words_desc, {"tool_adj"})
           -- special thanks here to rubenwardy for showing me how translation works!
           meta:set_string(
             "description", S("@1's @2 @3", self.secret_name, tool_adj, org_desc)
           )
-          local obj = minetest.add_item(pos, stack)
           --minetest.chat_send_player()
-          local reward_text =  S("@1 drops @2",self.secret_name, meta:get_string("description"))
+          local inv = minetest.get_inventory({ type="player", name= pname })     
+          local reward_text = {}
+          local reward = {}
+          for i,_ in pairs(inv:get_lists()) do
+            --print(i.." = "..dump(v))
+            if i == "main" and stack and inv:room_for_item(i, stack) then
+              reward_text = S("You are rewarded with @1",meta:get_string("description"))
+              --print("generated text: "..reward_text)
+              local reward_item = stack:get_name()
+              --print("generated:"..stack:get_name())
+               reward = {r_text = reward_text, r_item = reward_item}
+              inv:add_item(i,stack)
+              return reward
+            end
+          end
+          reward_text = S("You are rewarded with @1, but you cannot carry it",meta:get_string("description"))
           --print("generated text: "..reward_text)
           local reward_item = stack:get_name()
           --print("generated:"..stack:get_name())
-          local rewards = {r_text = reward_text, r_item = reward_item}
-          return rewards
+           reward = {r_text = reward_text, r_item = reward_item}
+           minetest.add_item(pos, stack)
+          --print("generated text: "..reward_text)
+          return reward
         end
       end
     end
@@ -159,11 +243,47 @@ function witches.attachment_check(self)
 	end
 end
 
+local function stop_and_face(self,pos)
+  mobs:yaw_to_pos(self, pos)
+  self.state = "stand"
+  self:set_velocity(0)
+  self:set_animation("stand")
+  self.attack = nil
+  self.v_start = false
+  self.timer = 0
+  self.blinktimer = 0
+  self.path.way = nil
+end
+
+function witches.item_request(self,name)
+  self.speaking_to = name
+  if not self.item_request then self.item_request = {} end
+  if not self.item_request.item then
+    --we'd be in trouble if we dont have it already!
+    self.item_request.item = witches.looking_for(self)
+  end
+  if not self.item_request.text then
+    --we need text for the quest!
+   -- print("generating")
+    local dialog_list = quest_dialogs(self)
+    local dli_num = math.random(1,#dialog_list.intro)
+    local intro_text = dialog_list.intro[dli_num]
+
+    --print(intro_text)
+    local quest_item = self.item_request.item.desc
+    local dlr_num = math.random(1,#dialog_list.item_request)
+    local request_text = dialog_list.item_request[dlr_num]
+   -- print(request_text)
+    self.item_request.text = { intro = intro_text, request = request_text }
+    --print(dump(self.item_request.text))
+   return self.item_request.text
+  end
+end
 
 function witches.found_item(self,clicker)
   local item = clicker:get_wielded_item()
   
-  if item and item:get_name() == self.item_quest.name then
+  if item and item:get_name() == self.item_request.item.name then
     local pname = clicker:get_player_name()
     if not minetest.settings:get_bool("creative_mode") then
       item:take_item()
@@ -186,7 +306,7 @@ function witches.found_item(self,clicker)
 
     self.players[pname].favors = self.players[pname].favors + 1
     local reward = {}
-    print(self.secret_name.." has now received 2 favors"..self.players[pname].favors.." from " ..pname)
+    --print(self.secret_name.." has now received 2 favors"..self.players[pname].favors.." from " ..pname)
     
     --if self.players[pname].favors >=3 and math.fmod(18, self.players[pname].favors) == 0 then
       reward = witches.special_gifts(self,pname)
@@ -201,39 +321,18 @@ function witches.found_item(self,clicker)
 
    -- end
     witches.found_item_quest.show_to(self, clicker)
-    self.item_quest = nil
+    self.item_request = nil
   return item
   end
 
 end
 
-function witches.quests(self, clicker)
-  local pname = clicker:get_player_name()
-  --print(pname.."  clicked on a witch!")
-  local item = clicker:get_wielded_item()
-  local pos = clicker:getpos() 
-  mobs:yaw_to_pos(self, pos)
-  self.state = "stand"
-  self:set_velocity(0)
-  self:set_animation("stand")
-  self.attack = nil
-  self.v_start = false
-  self.timer = 0
-  self.blinktimer = 0
-  self.path.way = nil
-  --print("we are holding a "..dump(item:get_name()))
-  if not self.item_quest or item:get_name() ~= self.item_quest.name then
-    --print("we should start a quest")
-    witches.find_item_quest.show_to(self, pname)
-   -- print(self.secret_name.." wants a ".. self.item_quest.name)
-  elseif self.item_quest and item and item:get_name() == self.item_quest.name then
-    --print(self.item_quest.name.." and "..item:get_name())
-    witches.found_item(self,clicker)
-  end
-end
-
+--call this to set the self.item_request.item from the witches follow list!
 function witches.looking_for(self)
-  if not self.item_quest then
+  if not self.item_request then
+    self.item_request = {}
+  end
+  if not self.item_request.item then
     if self.follow then
 
       local item = self.follow[math.random(1,#self.follow)]
@@ -243,15 +342,45 @@ function witches.looking_for(self)
       --local meta = item:get_meta()
       --print_s(S(dump(desc)))
       --print(dump(find))
-      self.item_quest = find
-      return self.item_quest
+
+      self.item_request.item = find
+      return self.item_request
       
     end
 
   else
-    return self.item_quest
+    return self.item_request
   end
 end
+
+--first thing on right click
+function witches.quests(self, clicker)
+  local pname = clicker:get_player_name()
+  --print(pname.."  clicked on a witch!")
+  local item = clicker:get_wielded_item()
+  local pos = clicker:getpos() 
+  stop_and_face(self,pos)
+
+  --make sure we are looking for an item
+  witches.looking_for(self)
+
+  --print("we are holding a "..dump(item:get_name()))
+  if item:get_name() ~= self.item_request.item.name then
+   --create the dialog 
+   witches.item_request(self,pname)
+    --we can now show the quest!
+   witches.find_item_quest.show_to(self, pname)
+   -- now that we said what we had to say, we reset our phrasing
+   self.item_request.text = nil
+
+   -- print(self.secret_name.." wants a ".. self.item_quest.name)
+  elseif self.item_request and self.item_request.item and item and item:get_name() == self.item_request.item.name then
+    --print(self.item_quest.name.." and "..item:get_name())
+    witches.found_item(self,clicker)
+  end
+end
+
+
 
 --- Our mobs, territories, etc can have randomly generated names.
 -- @name_parts is the name parts table: {list_a = "foo bar baz"}
@@ -259,39 +388,3 @@ end
 -- "-" and "\'" are rules that can be used to add a hyphen or apostrophe respectively
 
 
-function witches.generate_name(name_parts, rules)
-  -- print_s("generating name")
-  local name_arrays = {}
-  local r_parts = {}
-  local generated_name = {}
-  for k,v in pairs(name_parts) do
-    --  name_arrays.k = mysplit(v)
-    name_arrays.k = string.split(v,", ")
-    -- print_s(dump(name_arrays.k))
-    r_parts[k] = k
-    r_parts[k] = name_arrays.k[math.random(1,#name_arrays.k)]
-  end
-  --local r_parts.k = name_arrays.k[math.random(1,#name_arrays.k)] did not work
-  --print_s(name_a)
-  if r_parts.list_opt and math.random() <= 0.5 then r_parts.list_opt = "" end
-  --print_s(r_parts.list_a..r_parts.list_b..r_parts.list_opt)
-  if rules then
-    --print_s(dump(rules))
-    local gen_name = ""
-    for i, v in ipairs(rules) do
-      if v == "-" then
-        gen_name = gen_name.."-"
-      elseif v == "\'" then
-        gen_name = gen_name.."\'"
-      else
-        gen_name = gen_name..r_parts[v]
-      end
-    end
-    generated_name = gen_name
-    --print_s(dump(generated_name))
-    return generated_name
-  else
-    generated_name = r_parts.syllablesStart..r_parts.syllablesMiddle..r_parts.syllablesEnd
-    return generated_name
-  end
-end

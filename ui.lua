@@ -8,28 +8,34 @@ local S = minetest.get_translator("witches")
 
 witches.find_item_quest = {}
 witches.found_item_quest = {}
-local item_request = witches.generate_name(witches.quest_dialogs, {"item_request"})
+--local item_request = witches.generate_name(witches.quest_dialogs, {"item_request"})
 
 function witches.find_item_quest.get_formspec(self,name)
     -- retrieve the thing
-    local quest_item = witches.looking_for(self)
-    witches.item_quest(self)
-    local text = S("My name is @1, @2 of @3. @4 @5?",self.secret_name,self.secret_title,self.secret_locale,self.item_request,quest_item.desc)
-    self.item_request = nil
+    --local quest_item = witches.looking_for(self)
+    local text = "" 
+    if self.item_request.text and type(self.item_request.text) == "table" then
+        local intro = self.item_request.text.intro
+        local request = self.item_request.text.request     
+        text = S("@1 @2",intro,request)
+    else
+      text = "hey, "..name..", I am error!"
+    end
+    
     local formspec = {
         "formspec_version[3]",
-        "size[6,3,true]",
+        "size[6,3.5,true]",
         "position[0.5,0.7]",
         "anchor[0.5,0.5]",
         --"bgcolor[red]",
-        "textarea[0.25,0.25;5.5,1.25;;;", minetest.formspec_escape(text), "]",
-        "item_image[2.5,1.5;1,1;"..quest_item.name.. "]"
+        "textarea[0.25,0.25;5.75,2.0;;;", minetest.formspec_escape(text), "]",
+        "item_image[2.5,2;1,1;"..self.item_request.item.name.. "]"
     --[[
         "field[0.375,1.25;5.25,0.8;number;Number;]",
         "button[1.5,2.3;3,0.8;guess;Guess]"
             --]]
     }
-
+    -- 
     -- table.concat is faster than string concatenation - `..`
     return table.concat(formspec, "")
 
@@ -38,7 +44,7 @@ end
 function witches.found_item_quest.get_formspec(self,name)
   local display_item = ""
   -- retrieve the thing
-  local quest_item = witches.looking_for(self)
+  local quest_item = self.item_request.item
 
   local text = S("Thank you @1, for finding @2!",name,quest_item.desc)
   --print(dump(self.players[name].reward_text))
@@ -57,6 +63,7 @@ function witches.found_item_quest.get_formspec(self,name)
       "anchor[0.5,0.5]",
       "textarea[0.25,0.25;5.5,2;;;", minetest.formspec_escape(text), "]",
       "item_image[2.5,2.25;1,1;"..display_item.. "]"
+      
   --[[
       "field[0.375,1.25;5.25,0.8;number;Number;]",
       "button[1.5,2.3;3,0.8;guess;Guess]"

@@ -5,33 +5,42 @@ local variance = witches.variance
 local rnd_color = witches.rnd_color
 local rnd_colors = witches.rnd_colors
 
+witches.witch_hat_styles = {"a", "b", "c", "d"}
+
 local hat_bling = {"band","feather","veil"}
 
-local witch_hat = {}
-witch_hat = {
-  initial_properties = {
-      --physical = true,
-      pointable = false,
-      collisionbox = {0,0,0,0,0,0},
-      visual = "mesh",
-      mesh = "witches_witch-hat.b3d",
-      visual_size = {x = 1, y = 1, z = 1},
-      textures = {"witches_witch_hat.png"},
-  },
-  message = "Default message",
-  on_step =  function(self)
-    if not self.owner or not self.owner:get_luaentity() then
-      self.object:remove()
-    else
-      -- local owner_head_bone = self.owner:get_luaentity().head_bone
-      --  local position,rotation = self.owner:get_bone_position(owner_head_bone)
-      --  self.object:set_attach(self.owner, owner_head_bone, vector.new(0,0,0), rotation)
-    end
-  end 
-  
-}
+local witch_hats = {}
+for _,v in pairs(witches.witch_hat_styles) do 
+  witch_hats[v] = {
+    initial_properties = {
+        --physical = true,
+        pointable = false,
+        collisionbox = {0,0,0,0,0,0},
+        visual = "mesh",
+        mesh = "witches_witch-hat_"..v..".b3d",
+        visual_size = {x = 1, y = 1, z = 1},
+        textures = {"witches_witch_hat.png"},
+    },
+    message = "Default message",
+    on_step =  function(self)
+      if not self.owner or not self.owner:get_luaentity() then
+        self.object:remove()
+      else
+        -- local owner_head_bone = self.owner:get_luaentity().head_bone
+        --  local position,rotation = self.owner:get_bone_position(owner_head_bone)
+        --  self.object:set_attach(self.owner, owner_head_bone, vector.new(0,0,0), rotation)
+      end
+    end 
+  }
+end
 
-minetest.register_entity("witches:witch_hat",witch_hat)
+
+for i,v in pairs(witches.witch_hat_styles) do
+  minetest.register_entity("witches:witch_hat_"..v,witch_hats[v])
+end
+
+--minetest.register_entity("witches:witch_hat",witch_hat)
+
 
 local witch_tool = {}
 witch_tool = {
@@ -52,6 +61,9 @@ witch_tool = {
     end
   end 
 }
+
+
+
 
 minetest.register_entity("witches:witch_tool",witch_tool)
 

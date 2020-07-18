@@ -44,6 +44,7 @@ end
 local S = minetest.get_translator("witches")
 
 local witches_version = witches.version
+
 dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
@@ -210,16 +211,16 @@ local witch_template = {  --your average witch,
       self.object:set_texture_mod("^witches_skin"..self.skin..".png^witches_accessories.png^witches_witch_hair_"..self.hair_color..".png")
     end
     if not self.secret_name then
-      self.secret_name = witches.generate_name(witches.name_parts_female)
+      self.secret_name = witches.generate_text(witches.name_parts_female)
     end
     if not self.secret_title then
-      self.secret_title =  witches.generate_name(witches.words_desc, {"titles"})
+      self.secret_title =  witches.generate_text(witches.words_desc, {"titles"})
     end
     if not self.secret_locale then
-      self.secret_locale = witches.generate_name(witches.name_parts_female, {"syllablesStart","syllablesEnd"})
+      self.secret_locale = witches.generate_text(witches.name_parts_female, {"syllablesStart","syllablesEnd"})
     end
    
-    self.item_request =  witches.generate_name(witches.quest_dialogs, {"item_request"}) 
+    --self.item_request.text =  witches.generate_name(witches.quest_dialogs, {"item_request"}) 
 
     
 
@@ -235,7 +236,8 @@ local witch_template = {  --your average witch,
 
   after_activate = function(self)
 --maddest hatter <|%\D
-    witches.attach_hat(self,"witches:witch_hat")
+    local style = witches.witch_hat_styles[math.random(1,#witches.witch_hat_styles)]
+    witches.attach_hat(self,"witches:witch_hat_"..style)
     witches.attach_tool(self,"witches:witch_tool")
   end,
 
