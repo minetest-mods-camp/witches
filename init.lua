@@ -5,9 +5,8 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200716"
+witches.version = "20200719"
 print("this is Witches "..witches.version)
-
 
 -- Strips any kind of escape codes (translation, colors) from a string
 -- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
@@ -45,6 +44,18 @@ local S = minetest.get_translator("witches")
 
 local witches_version = witches.version
 
+if mobs.version then
+  if tonumber(mobs.version) >= tonumber(20200516) then
+    print_s(S("Mobs Redo 20200516 or greater found!"))
+  else
+    print_s(S("You should find a more recent version of Mobs Redo!"))
+    print_s(S("https://notabug.org/TenPlus1/mobs_redo"))
+  end
+else
+  print_s(S("This mod requires Mobs Redo version 2020516 or greater!"))
+  print_s(S("https://notabug.org/TenPlus1/mobs_redo"))
+end
+
 dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
@@ -76,8 +87,6 @@ local witch_types = {
 
   }
 }
-
-
 
 local witch_template = {  --your average witch,
   description = "Basic Witch",
@@ -152,7 +161,7 @@ local witch_template = {  --your average witch,
     {name = "default:axe_stone",
       chance = 5, min = 0, max = 1},
   },
-  
+
   follow = {
   "default:diamond", "default:gold_lump", "default:apple",
   "default:blueberries", "default:torch", "default:stick",
@@ -172,14 +181,14 @@ local witch_template = {  --your average witch,
     --then set modifiers for each individual
     if not self.speed_mod then
       self.speed_mod = math.random(-1, 1)
-      
+
     end
   --print("speed mod: "..self.speed_mod)
 --rng for testing variants
     if not self.size then
       self.size = {x = variance(90,100), y = variance(75,105), z = variance(90,100)}
     end
-    
+
     if not self.skin then
       self.skin = math.random(1,5)
     end
@@ -191,7 +200,7 @@ local witch_template = {  --your average witch,
     if not self.hair_color then
       self.hair_color= rnd_color(hair_colors)
     end
-    
+
     local self_properties = self.object:get_properties()
     self_properties.visual_size = self.size
     self.object:set_properties(self_properties)
@@ -219,27 +228,24 @@ local witch_template = {  --your average witch,
     if not self.secret_locale then
       self.secret_locale = witches.generate_text(witches.name_parts_female, {"syllablesStart","syllablesEnd"})
     end
-   
-    --self.item_request.text =  witches.generate_name(witches.quest_dialogs, {"item_request"}) 
 
-    
-
+    --self.item_request.text =  witches.generate_name(witches.quest_dialogs, {"item_request"})
     --print(self.secret_name.." has spawned")
     --print("self: "..dump(self.follow))
    -- print("self properties "..dump(self.object:get_properties()))
     witches.looking_for(self)
-
-
   end,
-    
+
   spawning = spawning.generic,
 
   after_activate = function(self)
 --maddest hatter <|%\D
-    local style = witches.witch_hat_styles[math.random(1,#witches.witch_hat_styles)]
-    witches.attach_hat(self,"witches:witch_hat_"..style)
+  self.hair_style = math.random(1,#witches.witch_hair_styles)
+  self.hat_style = math.random(1,#witches.witch_hat_styles)
+    witches.attach_hair(self,"witches:witch_hair_"..self.hair_style)
+    witches.attach_hat(self,"witches:witch_hat_"..self.hat_style)
     witches.attach_tool(self,"witches:witch_tool")
-  end,
+  end
 
 }
 
@@ -256,7 +262,7 @@ function witches.generate(witch_types,witch_template)
       -- print_s("found template modifiers " ..dump(x).." = "..dump(y))
       g_template[x] = g_type[x]
     end
-    
+
     print_s("Assembling the "..g_template.description..":")
     if g_template.lore then print_s("  "..g_template.lore) end
     --print_s("resulting template: " ..dump(g_template))

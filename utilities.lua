@@ -12,6 +12,7 @@ witches.name_parts_male = {
   syllablesMiddle = "de, do, dra, du, duna, ga, go, hara, kaltho, la, latha, le, ma, nari, ra, re, rego, ro, rodda, romi, rui, sa, to, ya, zila",
   syllablesEnd = "bar, bers, blek, chak, chik, dan, dar, das, dig, dil, din, dir, dor, dur, fang, fast, gar, gas, gen, gorn, grim, gund, had, hek, hell, hir, hor, kan, kath, khad, kor, lach, lar, ldil, ldir, leg, len, lin, mas, mnir, ndil, ndur, neg, nik, ntir, rab, rach, rain, rak, ran, rand, rath, rek, rig, rim, rin, rion, sin, sta, stir, sus, tar, thad, thel, tir, von, vor, yon, zor",
 }
+
 witches.name_parts_female = {
   syllablesStart = "Ad, Aer, Ar, Bel, Bet, Beth, Ce'N, Cyr, Eilin, El, Em, Emel, G, Gl, Glor, Is, Isl, Iv, Lay, Lis, May, Ner, Pol, Por, Sal, Sil, Vel, Vor, X, Xan, Xer, Yv, Zub",
   syllablesMiddle = "bre, da, dhe, ga, lda, le, lra, mi, ra, ri, ria, re, se, ya",
@@ -28,7 +29,7 @@ local function quest_dialogs(self)
   local dialogs = {
     intro = {
       S("Hello, @1, I am @2, @3 of @4! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
-      S("Just one minute, @1, @2, @3 of @4 seeks your assistance! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
+      S("Just one minute, @1! @2, @3 of @4 seeks your assistance! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
       S("If you are indeed @1, perhaps you and I, @2, @3 of @4 can help each other! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
 
     },
@@ -45,10 +46,10 @@ local function quest_dialogs(self)
       S("Wherefor about this land art the @1? ",self.item_request.item.desc),
       S("Must there be but a few the @1? ",self.item_request.item.desc),
       S("Could I trouble you for some kind of @1? ",self.item_request.item.desc),
-      S("The @1 would make my collection complete!",self.item_request.item.desc),
+      S("The @1 would make my collection complete! ",self.item_request.item.desc),
       S("I sense the @1 are not far away...",self.item_request.item.desc),
-      S("Certainly the @1 is not as rare as a blood moon!",self.item_request.item.desc),
-      S("You look like you know where to find the @1!",self.item_request.item.desc)
+      S("Certainly the @1 is not as rare as a blood moon! ",self.item_request.item.desc),
+      S("You look like you know where to find the @1! ",self.item_request.item.desc)
     }
   }
   --print(dump(dialogs))
@@ -121,8 +122,6 @@ function witches.variance(min,max)
   --print(target)
   return target
  end
-
- 
 
 
 --- Drops a special personlized item
@@ -232,7 +231,6 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
   end
 end
 
-
 function witches.attachment_check(self)
 	if not self.owner or not self.owner:get_luaentity() then
 		self.object:remove()
@@ -321,6 +319,7 @@ function witches.found_item(self,clicker)
 
    -- end
     witches.found_item_quest.show_to(self, clicker)
+
     self.item_request = nil
   return item
   end
@@ -364,20 +363,32 @@ function witches.quests(self, clicker)
   --make sure we are looking for an item
   witches.looking_for(self)
 
+  local var1 = item:get_name()
+  local var2 = self.name
+  --print(var1.."  "..var2)
+
+  if var1 == var2 then
+    self.dev_mode = pname
+    print("dev mode active for: "..pname)
+  end
+
   --print("we are holding a "..dump(item:get_name()))
   if item:get_name() ~= self.item_request.item.name then
    --create the dialog 
    witches.item_request(self,pname)
     --we can now show the quest!
    witches.find_item_quest.show_to(self, pname)
-   -- now that we said what we had to say, we reset our phrasing
-   self.item_request.text = nil
+   -- now that we said what we had to say, we clean up!
+
+    self.item_request.text = nil
+    self.dev_mode = nil
 
    -- print(self.secret_name.." wants a ".. self.item_quest.name)
   elseif self.item_request and self.item_request.item and item and item:get_name() == self.item_request.item.name then
     --print(self.item_quest.name.." and "..item:get_name())
     witches.found_item(self,clicker)
   end
+
 end
 
 

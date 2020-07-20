@@ -18,8 +18,14 @@ function witches.find_item_quest.get_formspec(self,name)
         local intro = self.item_request.text.intro
         local request = self.item_request.text.request     
         text = S("@1 @2",intro,request)
+    --print(text)
+
     else
       text = "hey, "..name..", I am error!"
+    end
+    
+    if self.dev_mode == name and self.hair_style and self.hat_style then
+      text = text .."\nhair: ".. self.hair_style..",hat: "..self.hat_style
     end
     
     local formspec = {
@@ -30,10 +36,7 @@ function witches.find_item_quest.get_formspec(self,name)
         --"bgcolor[red]",
         "textarea[0.25,0.25;5.75,2.0;;;", minetest.formspec_escape(text), "]",
         "item_image[2.5,2;1,1;"..self.item_request.item.name.. "]"
-    --[[
-        "field[0.375,1.25;5.25,0.8;number;Number;]",
-        "button[1.5,2.3;3,0.8;guess;Guess]"
-            --]]
+
     }
     -- 
     -- table.concat is faster than string concatenation - `..`
@@ -64,10 +67,6 @@ function witches.found_item_quest.get_formspec(self,name)
       "textarea[0.25,0.25;5.5,2;;;", minetest.formspec_escape(text), "]",
       "item_image[2.5,2.25;1,1;"..display_item.. "]"
       
-  --[[
-      "field[0.375,1.25;5.25,0.8;number;Number;]",
-      "button[1.5,2.3;3,0.8;guess;Guess]"
-          --]]
   }
 
   -- table.concat is faster than string concatenation - `..`
@@ -76,6 +75,8 @@ end
 
 function witches.find_item_quest.show_to(self,name)
   minetest.show_formspec(name, "witches.find_item_quest:game", witches.find_item_quest.get_formspec(self,name))
+  self.item_request.text = nil
+  self.dev_mode = nil
 end
 
 function witches.found_item_quest.show_to(self,clicker)
