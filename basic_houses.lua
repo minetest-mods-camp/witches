@@ -69,7 +69,7 @@ witches.bh.chest = "default:chest";
 witches.bh.glass = {"default:fence_junglewood","default:fence_wood"};
 -- some walls are tree logs, some wooden planks, some colored plasterwork (if installed)
 -- - and some nodes are made out of these materials here
-witches.bh.walls = {"default:tree","default:jungletree","default:acacia_tree","default:cobble","default:mossycobble"};
+witches.bh.walls = {"default:cobble","default:mossycobble"};
 -- doors
 witches.bh.door_bottom = "doors:door_wood_witch_a";
 witches.bh.door_top    = "doors:hidden";
@@ -381,8 +381,8 @@ witches.bh.place_door = function( p, sizex, sizez, door_places, wall_with_ladder
 	vm:set_node_at( {x=res.x, y=p.y+1, z=res.z}, {name=witches.bh.door_bottom, param2 = 0 });
 	vm:set_node_at( {x=res.x, y=p.y+2, z=res.z}, {name=witches.bh.door_top, param2 = 0});
 	-- light so that the door can be found
-	--vm:set_node_at( {x=res.x, y=p.y+3, z=res.z}, {name=witches.bh.lamp});
-
+	vm:set_node_at( {x=res.x+1, y=p.y+3, z=res.z+1}, {name=witches.bh.lamp});
+	vm:set_node_at( {x=res.x-1, y=p.y+3, z=res.z-1}, {name=witches.bh.lamp});
 	-- add some light to the upper floors as well
 	for i,height in ipairs( floor_height ) do
 		if( i>2) then
@@ -524,9 +524,8 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 
 	-- windows 3 nodes high, 2 high, or just 1?
 	local r = pr:next(1,6);
-	if(     r==1 or r==2) then
-		materials.window_at_height = {0,1,1,1,0};
-	elseif( r==3 or r==4 or r==5) then
+--	if(     r==1 or r==2) then	materials.window_at_height = {0,1,1,1,0};
+	if( r==1 or r==3 or r==5) then
 		materials.window_at_height = {0,0,1,1,0};
 	else
 		materials.window_at_height = {0,0,1,0,0};
@@ -539,7 +538,6 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 	else
 		materials.floors = pr:next(1,math.min(2,math.max(1,max_floors_possible-1)));
 	end
-
 
 	-- some houses may have a flat roof instead of a saddle roof
 	materials.flat_roof = false;
@@ -556,9 +554,10 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 		materials.walls = plasterwork.node_list[ pr:next(1, #plasterwork.node_list)];
 		materials.color = pr:next(0,255);
 	else
-		local r = pr:next(1,3);
-		-- wooden house
+		local r = pr:next(1,1);
+		--[[ wooden house
 		if(     r==1 ) then
+
 			materials.walls = wood;
 			-- wooden houses with more than 3 floors would be strange
 			materials.floors = pr:next(1, math.min( 2, math.max(2,max_floors_possible-1 )));
@@ -568,16 +567,19 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 			if( pr:next(1,2)==1 ) then
 				materials.wall_orients = {12,18,9,7};
 			end
+			
 		-- tree logs
-		elseif( r==2 ) then
+		--]]
+		if( r==1 ) then
 			materials.walls = replacements_group['wood'].data[ wood ][4]; -- tree trunk
 			-- log cabins with more than 2 floors are unlikely
 			materials.floors = pr:next(1, math.min( 2, math.max(2,max_floors_possible-1 )));
 			-- log cabins do not have a flat roof either
 			materials.flat_roof = false;
 			materials.wall_orients = {12,18,9,7};
-		else
-			materials.walls = witches.bh.walls[ pr:next(1,#witches.bh.walls)];
+			
+		--else
+			--materials.walls = witches.bh.walls[ pr:next(1,#witches.bh.walls)];
 		end
 	end
 	-- if there are less than three houses in a mapchunk: do not place skyscrapers
@@ -669,6 +671,7 @@ end
 --   materials.floors           how many floors does the house have?
 --   materials.flat_roof        if true: add a flat roof; else saddle roof
 --   pr                         PseudoRandom number generator for reproducability
+local tree_pos = {}
 witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	local p = data.p2;
 	local sizex = data.sizex-1;
@@ -706,7 +709,7 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	-- build the two walls in z direction
 	local s2 = witches.bh.build_two_walls(p_start, sizex-2, sizez-2, false, materials, vm, pr ); -- 9,  7, vm );
 
-	-- each floor is 4 blocks heigh
+	-- each floor is 3 blocks heigh
 	local roof_starts_at = p.y + (3*materials.floors);
 	p_start = {x=p.x-sizex, y=roof_starts_at, z=p.z-sizez, ymax = p.ymax};
 	-- make the roof one higher - so that players/mobs can stay upright on
@@ -731,34 +734,49 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 		end
 	end
 	end
-
+	
+	local max_trees = 2
 	local around_house_node = {name=materials.around_house, param2=0};
 	local air_node = {name="air"};
 	for dx = p.x-sizex, p.x do
 		-- path around the house
-		vm:set_node_at( {x=dx, y=p.y,   z=p.z-sizez}, around_house_node );
-		vm:set_node_at( {x=dx, y=p.y,   z=p.z      }, around_house_node );
+		if math.random(1,sizex) and max_trees >= 1 then
+			tree_pos[1] = {x=dx, y=p.y, z=p.z-(sizez+math.random(8,12))}
+			--default.grow_new_apple_tree
+			max_trees = max_trees - 1 
+				
+		end
+		max_trees = 2
+		if math.random(1,sizez) and max_trees >= 1 then
+			 tree_pos[2] = {x=dx, y=p.y, z=p.z+math.random(8,12)}
+				max_trees = max_trees - 1
+				
+		end
+		vm:set_node_at( {x=dx, y=p.y,  z=p.z-sizez}, around_house_node );
+		vm:set_node_at( {x=dx, y=p.y,  z=p.z-(sizez+1)}, around_house_node );
+		vm:set_node_at( {x=dx, y=p.y,  z=p.z        }, around_house_node );
+		vm:set_node_at( {x=dx, y=p.y,  z=p.z+1        }, around_house_node );
+
 		-- make sure there is no snow blocking entrance
 		vm:set_node_at( {x=dx, y=p.y+1, z=p.z-sizez}, air_node );
 		vm:set_node_at( {x=dx, y=p.y+1, z=p.z      }, air_node );
 	end
-	local max_trees = 2
-	for dz = p.z-sizez+1, p.z-1 do
+	 max_trees = 2
+	for dz = p.z-sizez, p.z do
 		-- path around the house
-		if math.random(1,100) and max_trees >= 1 then
-			
-			local tree_pos = {x=p.x-(sizex+20), y=p.y,   z=dz}
-			--default.grow_new_apple_tree
-			if math.random() < .5 then
-			minetest.spawn_tree(tree_pos,witches.acacia_tree)
-			else
-			minetest.spawn_tree(tree_pos,witches.apple_tree)
-			end
-			print("growing tree at "..minetest.pos_to_string(vector.round(tree_pos)))
+		if math.random(1,sizez) and max_trees >= 1 then
+		 tree_pos[3] = {x=p.x-(sizex+math.random(8,12)), y=p.y,   z=dz}
+			max_trees = max_trees - 1
+		end
+    max_trees = 2
+		if math.random(1,sizez) and max_trees >= 1 then
+		 tree_pos[4] = {x=p.x+math.random(8,12),       y=p.y,   z=dz}
 			max_trees = max_trees - 1
 		end
 		vm:set_node_at( {x=p.x-sizex, y=p.y,   z=dz}, around_house_node );
+		vm:set_node_at( {x=p.x-(sizex+1), y=p.y,   z=dz}, around_house_node );
 		vm:set_node_at( {x=p.x,       y=p.y,   z=dz}, around_house_node );
+		vm:set_node_at( {x=p.x+1,       y=p.y,   z=dz}, around_house_node );
 		-- make sure there is no snow blocking entrance
 		vm:set_node_at( {x=p.x-sizex, y=p.y+1, z=dz}, air_node );
 		vm:set_node_at( {x=p.x,       y=p.y+1, z=dz}, air_node );
@@ -797,6 +815,29 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 		{x=p.x, y=p.ymax, z=p.z});
 	witches.bh.simple_hut_place_hut_using_vm( data, materials, vm, pr )
 	vm:write_to_map(true);
+	for _,v in pairs(tree_pos) do
+				--default.grow_new_apple_tree
+				
+				local pos1 = {}
+				local pos2 = {}
+				pos1.x = v.x+1
+				pos1.y = v.y-1
+				pos1.z = v.z+1
+				pos2.x = v.x-1
+				pos2.y = v.y-3
+				pos2.z = v.z-1
+				local air_nodes = minetest.find_nodes_in_area(pos1, pos2, "air")
+				for _,p in pairs(air_nodes) do
+				  minetest.set_node(p,{name = "default:tree"})
+				end
+				if math.random() < .5 then
+					minetest.spawn_tree(v,witches.acacia_tree)
+				else
+					minetest.spawn_tree(v,witches.apple_tree)
+				end
+					print("growing tree at "..minetest.pos_to_string(vector.round(v)))
+	end
+	
 end
 
 
