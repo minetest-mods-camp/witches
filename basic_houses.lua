@@ -1,5 +1,10 @@
---Adapted from Sokomine's basic_houses mod under GPLv3 requires
---Sokomine's handle_schematics mod (also GPLv3)
+--[[
+* Witch houses adapted from Sokomine's basic_houses 
+  (https://github.com/Sokomine/basic_houses) mod under GPLv3
+* Optional Depends:
+  Sokomine's handle_schematics mod (also GPLv3)
+  https://github.com/Sokomine/handle_schematics
+--]]
 
 -- Features:
 --   * each house has a door and one mese lamp per floor

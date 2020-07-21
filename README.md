@@ -25,6 +25,12 @@ The MIT License (MIT)
       Creative Commons  Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0) 
     * http://creativecommons.org/licenses/by-sa/3.0/
 
+* Witch houses adapted from Sokomine's basic_houses 
+  (https://github.com/Sokomine/basic_houses) mod under GPLv3
+* Optional Depends:
+  Sokomine's handle_schematics mod (also GPLv3)
+  https://github.com/Sokomine/handle_schematics
+
   Thanks to TenPlus1 for keeping the Mobs_Redo going!
   Thanks to rubenwardy for awesome help and the Minetest ContentDB
   Thanks to everyone in the Minetest forums and IRC for just being great!
