@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200719"
+witches.version = "20200720"
 print("this is Witches "..witches.version)
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -59,7 +59,20 @@ end
 dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
+dofile(path .. "/nodes.lua")
+
+if not handle_schematics then
+  return
+else
+  
+  dofile(path .. "/basic_houses.lua")
+  print("handle_schematics found! Witch houses enabled!")
+end
 print("enter the witches! version: "..witches.version)
+
+print(minetest.colorize("red","sometext"))
+
+print("crgbtest: " ..colorsRGB.RGB("red"))
 
 local variance = witches.variance
 local rnd_color = witches.rnd_color
@@ -68,17 +81,20 @@ local hair_colors = witches.hair_colors
 
 local spawning = {
   generic = {
-      nodes = {"group:stone"},
-      neighbors = "air",
-      min_light = 0,
+      nodes = {"group:wood","default:mossycobble","default:cobble"},
+      neighbors = {"air","default:chest","doors:wood_witch_a"},
+      min_light = 5,
       max_light = 15,
       interval = 30,
-      chance = 1000,
+      chance = 10,
       active_object_count = 2,
       min_height = 0,
       max_height = 200,
       day_toggle = nil,
-      on_spawn = nil,
+      on_spawn = function(self) 
+        local pos = self.object:get_pos()
+        print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
+       end,
   },
 }
 
