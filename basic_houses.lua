@@ -1,6 +1,8 @@
 --[[
-* Witch houses adapted from Sokomine's basic_houses 
-  (https://github.com/Sokomine/basic_houses) mod under GPLv3
+* Witch houses adapted from Sokomine's basic_houses
+	(https://github.com/Sokomine/basic_houses) mod under MIT
+	with permission from author.
+	
 * Optional Depends:
   Sokomine's handle_schematics mod (also GPLv3)
   https://github.com/Sokomine/handle_schematics
@@ -56,15 +58,18 @@ witches.bh.mapchunks_processed = 0;
 witches.bh.houses_generated = 0;
 
 
+
 -- materials the houses can be made out of
 -- allows to reach upper floors
 witches.bh.ladder = "default:ladder_wood";
 -- gets placed over the door
-witches.bh.lamp   = "default:torch";
+witches.bh.lamp   = "default:torch_wall";
 -- floor at the entrance level of the house
 witches.bh.floor = "default:cobble";
 -- placed randomly in some houses
 witches.bh.chest = "default:chest";
+witches.bh.bookshelf ="default:bookshelf"
+witches.bh.bed = "beds:bed"
 -- glass can be glass panes, iron bars or solid glass
 witches.bh.glass = {"default:fence_junglewood","default:fence_wood"};
 -- some walls are tree logs, some wooden planks, some colored plasterwork (if installed)
@@ -75,6 +80,12 @@ witches.bh.door_bottom = "doors:door_wood_witch_a";
 witches.bh.door_top    = "doors:hidden";
 -- make sure the place in front of the door will not get griefed by mapgen
 witches.bh.around_house = {"default:mossycobble","default:tree","default:jungletree","default:acacia_tree","default:cobble"};
+
+--check for mods (found in MTG but not default)
+if minetest.get_modpath("fireflies") then
+	witches.bh.lamp   = "fireflies:firefly";
+end
+
 
 
 -- if the realtest game is choosen: adjust materials
@@ -101,7 +112,6 @@ elseif( minetest.get_modpath("mcl_core")) then
 	witches.bh.lamp   = "mcl_ocean:sea_lantern";
 	witches.bh.floor  = "mcl_core:brick_block";
 	witches.bh.chest  = "mcl_chests:chest";
-
 	witches.bh.glass = {"mcl_core:glass", "mcl_core:glass", "mcl_core:glass",
 			"xpanes:bar_flat"};
 	for i,k in ipairs( colors ) do
@@ -139,6 +149,7 @@ end
 --    rotation_1  param2 for materials.wall nodes for the first wall
 --    rotation_2  param2 for materials.wall nodes for the second wall
 --    vm          voxel manipulator
+local window_pos = {}
 witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, materials, vm, pr)
 
 	local v = 0;
@@ -147,8 +158,8 @@ witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, material
 	end
 	-- param2 (orientation or color) for the first two walls;
 	-- tree logs need to be orientated correctly, colored nodes have to keep their color;
-	local node_wall_1  = {name=materials.walls, param2 = (materials.color or materials.wall_orients[1+v])};
-	local node_wall_2  = {name=materials.walls, param2 = (materials.color or materials.wall_orients[2+v])};
+	local node_wall_1  = {name=materials.walls, param2 = materials.wall_orients[1+v]};
+	local node_wall_2  = {name=materials.walls, param2 = materials.wall_orients[2+v]};
 	-- glass panes and metal bars need the correct rotation and no color value
 	local node_glass_1 = {name=materials.glass, param2 = materials.glass_orients[1+v]};
 	local node_glass_2 = {name=materials.glass, param2 = materials.glass_orients[2+v]};
@@ -211,24 +222,49 @@ witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, material
 				wall_2_has_window = (not_special and ( pr:next(1,2)~=2));
 			end
 		end
+
 		-- actually build the wall from bottom to top
+		--print("size= "..size.." step:  "..dump(lauf))
 		for height = 1,wall_height do
+
+			--print("h= "..height)
 			local node = nil;
 			-- if there is a window in this wall...
 			if( materials.window_at_height[ height ]==1 and wall_1_has_window) then
 				node = node_glass_1;
-			else
+				if  minetest.get_modpath("beds") then
+					window_pos[#window_pos+1] = {x= w1_x, y=p.y+1,z=w1_z}
+        end
+		  else
+				--print("wall1: x"..w1_x.."  z"..w1_z)
 				node = node_wall_1;
+
+				if math.random(1,height) == height    then
+					node = node_wall_2;
+				end
+
+
 			end
+
 			vm:set_node_at( {x=w1_x, y=p.y+height, z=w1_z}, node);
 
 			-- ..or in the other wall
 			if( materials.window_at_height[ height ]==1 and (wall_2_has_window)) then
 				node = node_glass_2;
+				if minetest.get_modpath("beds") then
+					window_pos[#window_pos+1] = {x= w2_x, y=p.y+1,z=w2_z}
+        end
 			else
-				node = node_wall_2;
-			end
+					--print("wall2: x"..w2_x.."  z"..w2_z)
+					node = node_wall_2;
+
+					if  math.random(1,height) == height then
+						node = node_wall_1;
+					end
+
+				end
 			vm:set_node_at( {x=w2_x, y=p.y+height, z=w2_z}, node);
+
 		end
 
 		if( in_x_direction ) then
@@ -298,6 +334,7 @@ witches.bh.build_roof_and_gable = function( p_orig, sizex, sizez, in_x_direction
 		for dz = p.z, p.z+sizez do
 			if( dy <= p_orig.ymax ) then
 				vm:set_node_at( pswap({x=p.x+xhalf,y=p.y+xhalf,z=dz},swap), node_slab );
+			
 			else
 				vm:set_node_at( pswap({x=p.x+xhalf,y=p_orig.ymax,z=dz},swap), node_slab );
 			end
@@ -372,6 +409,7 @@ witches.bh.place_ladder = function( p, sizex, sizez, ladder_places, ladder_heigh
 		vm:set_node_at( {x=res.x, y=height, z=res.z}, ladder_node );
 	end
 	return res.used;
+
 end
 
 -- place the door into one of the reserved places
@@ -396,13 +434,14 @@ end
 -- additional building material
 witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladder, floor_height, vm, materials, pr )
 	-- not each building needs a chest
-	--[[yes it does! 
+	--[[yes it does!
 	if( pr:next(1,2)>1 ) then
 		return;
 	end
 --]]
 	local res = witches.bh.get_random_place( p, sizex, sizez, chest_places, -1, wall_with_ladder, 1, pr );
 	local height = floor_height[ pr:next(2,math.max(2,#floor_height))];
+	local height_bk = floor_height[ 1 ];
 	-- translate wallmounted (for ladder) to facedir for chest
 	res.p2 = res.p2;
 	if(     res.p2 == 5 ) then
@@ -416,6 +455,9 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 	end
 	-- determine target position
 	local pos = {x=res.x, y=height+1, z=res.z};
+	
+	local pos_bk = {x=res.x, y=height_bk+1, z=res.z};
+  
 	-- if plasterwork is installed: place a machine
 	if( materials.color and minetest.global_exists("plasterwork")) then -- and pr:next(1,10)==1) then
 		vm:set_node_at( pos, {name=materials.walls, param2 = materials.color});
@@ -432,10 +474,17 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 		return;
 	end
 	-- place the chest
+	--place bookshelf on first floor
 	vm:set_node_at( pos, {name=witches.bh.chest, param2 = res.p2n});
+	
+	--if math.random()< 0.50 and not minetest.find_node_near(pos_bk, 2, {witches.bh.door_bottom,witches.bh.ladder}) then
+	--	vm:set_node_at( pos_bk, {name=witches.bh.bookshelf, param2 = res.p2n});
+	--end
+
 	-- if we are operating inside handle_schematics, positions do not directly correspond
 	-- to real map positions; we can't change the map directly at this time. Therefore,
 	-- we're finished for now.
+
 	if( vm.is_fake_vm ) then
 		return;
 	end
@@ -567,7 +616,7 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 			if( pr:next(1,2)==1 ) then
 				materials.wall_orients = {12,18,9,7};
 			end
-			
+
 		-- tree logs
 		--]]
 		if( r==1 ) then
@@ -577,7 +626,7 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 			-- log cabins do not have a flat roof either
 			materials.flat_roof = false;
 			materials.wall_orients = {12,18,9,7};
-			
+
 		--else
 			--materials.walls = witches.bh.walls[ pr:next(1,#witches.bh.walls)];
 		end
@@ -672,6 +721,8 @@ end
 --   materials.flat_roof        if true: add a flat roof; else saddle roof
 --   pr                         PseudoRandom number generator for reproducability
 local tree_pos = {}
+local flower_pos = {}
+
 witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	local p = data.p2;
 	local sizex = data.sizex-1;
@@ -734,26 +785,30 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 		end
 	end
 	end
-	
+
 	local max_trees = 2
 	local around_house_node = {name=materials.around_house, param2=0};
 	local air_node = {name="air"};
 	for dx = p.x-sizex, p.x do
 		-- path around the house
+		flower_pos[#flower_pos+1] = {x=dx-math.random(1,12), y=p.y, z=p.z-(sizez+math.random(4,12))}
+		
 		if math.random(1,sizex) and max_trees >= 1 then
-			tree_pos[1] = {x=dx, y=p.y, z=p.z-(sizez+math.random(8,12))}
-			--default.grow_new_apple_tree
-			max_trees = max_trees - 1 
-				
+			tree_pos[1] = {x=dx-math.random(1,12), y=p.y, z=p.z-(sizez+math.random(8,12))}
+			max_trees = max_trees - 1
+
 		end
-		max_trees = 2
-		if math.random(1,sizez) and max_trees >= 1 then
-			 tree_pos[2] = {x=dx, y=p.y, z=p.z+math.random(8,12)}
-				max_trees = max_trees - 1
-				
+
+		flower_pos[#flower_pos+1] = {x=dx+math.random(1,12), y=p.y, z=p.z+math.random(4,12)}
+		
+		if math.random(1,sizex) and max_trees >= 1 then
+			tree_pos[2] = {x=dx+math.random(1,12), y=p.y, z=p.z+math.random(8,12)}
+			max_trees = max_trees - 1
+
 		end
 		vm:set_node_at( {x=dx, y=p.y,  z=p.z-sizez}, around_house_node );
 		vm:set_node_at( {x=dx, y=p.y,  z=p.z-(sizez+1)}, around_house_node );
+		--additional perimeter
 		vm:set_node_at( {x=dx, y=p.y,  z=p.z        }, around_house_node );
 		vm:set_node_at( {x=dx, y=p.y,  z=p.z+1        }, around_house_node );
 
@@ -761,20 +816,29 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 		vm:set_node_at( {x=dx, y=p.y+1, z=p.z-sizez}, air_node );
 		vm:set_node_at( {x=dx, y=p.y+1, z=p.z      }, air_node );
 	end
-	 max_trees = 2
+	max_trees = 2
+	
 	for dz = p.z-sizez, p.z do
 		-- path around the house
+	
+		flower_pos[#flower_pos+1] = {x=p.x-(sizex+math.random(4,12)), y=p.y,   z=dz+math.random(1,12)}
+		
 		if math.random(1,sizez) and max_trees >= 1 then
-		 tree_pos[3] = {x=p.x-(sizex+math.random(8,12)), y=p.y,   z=dz}
+			tree_pos[3] = {x=p.x-(sizex+math.random(8,12)), y=p.y,   z=dz+math.random(1,12)}
 			max_trees = max_trees - 1
 		end
-    max_trees = 2
+	
+
+		flower_pos[#flower_pos+1] =  {x=p.x+math.random(4,12),  y=p.y,   z=dz-math.random(1,12)}
+	
 		if math.random(1,sizez) and max_trees >= 1 then
-		 tree_pos[4] = {x=p.x+math.random(8,12),       y=p.y,   z=dz}
+			tree_pos[4] = {x=p.x+math.random(8,12),  y=p.y,   z=dz-math.random(1,12)}
 			max_trees = max_trees - 1
 		end
+	
 		vm:set_node_at( {x=p.x-sizex, y=p.y,   z=dz}, around_house_node );
 		vm:set_node_at( {x=p.x-(sizex+1), y=p.y,   z=dz}, around_house_node );
+				--additional perimeter
 		vm:set_node_at( {x=p.x,       y=p.y,   z=dz}, around_house_node );
 		vm:set_node_at( {x=p.x+1,       y=p.y,   z=dz}, around_house_node );
 		-- make sure there is no snow blocking entrance
@@ -792,8 +856,13 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 
 	witches.bh.place_door( p_start, sizex, sizez, reserved_places, wall_with_ladder, floor_height, vm, pr );
 	witches.bh.place_chest( p_start, sizex, sizez, reserved_places, wall_with_ladder, floor_height, vm, materials, pr );
-
+	
+	---this is for more furniture later
+--	local wp = window_pos[math.random(#window_pos)]
+	
+	
 	-- return where the hut has been placed
+	
 	return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p};
 end
 
@@ -815,29 +884,72 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 		{x=p.x, y=p.ymax, z=p.z});
 	witches.bh.simple_hut_place_hut_using_vm( data, materials, vm, pr )
 	vm:write_to_map(true);
-	for _,v in pairs(tree_pos) do
-				--default.grow_new_apple_tree
+
+
+
+	if tree_pos then
+		local biome_name = ""
+		for _,v in pairs(tree_pos) do
+		
+			local check = minetest.get_node(v)
+			--print(dump(check.name))
+
+			if check.name == "air" then
+				v = nil
+			elseif check.name == "ignore" then
+					v = nil
+			elseif minetest.get_decoration_id(check.name) then
+				v = nil
+			else
 				
-				local pos1 = {}
-				local pos2 = {}
-				pos1.x = v.x+1
-				pos1.y = v.y-1
-				pos1.z = v.z+1
-				pos2.x = v.x-1
-				pos2.y = v.y-3
-				pos2.z = v.z-1
-				local air_nodes = minetest.find_nodes_in_area(pos1, pos2, "air")
-				for _,p in pairs(air_nodes) do
-				  minetest.set_node(p,{name = "default:tree"})
-				end
-				if math.random() < .5 then
+				local biome_id = minetest.get_biome_data(v)
+				--print(dump(biome_id))
+				biome_name = minetest.get_biome_name(biome_id.biome)
+				--print(dump(biome_name))
+				
+			end
+      if v then
+				if string.find(biome_name,"desert") then
+					--print(dump(v))
+					if math.random() <.20 then
+						minetest.spawn_tree(v,witches.acacia_tree)
+					else
+						local v2 = {x = v.x, y = v.y +1, z = v.z}
+						default.grow_large_cactus(v2)
+					end
+				elseif string.find(biome_name,"jungle") then
+					if math.random() <.40 then
+						minetest.spawn_tree(v,witches.apple_tree)
+					elseif math.random() <.50 then
+						default.grow_new_emergent_jungle_tree(v)
+					else
+						default.grow_new_jungle_tree(v)
+					end	
+				elseif math.random() < .2 then
+
 					minetest.spawn_tree(v,witches.acacia_tree)
+					--print("growing tree at "..minetest.pos_to_string(vector.round(v)))
+
 				else
+
 					minetest.spawn_tree(v,witches.apple_tree)
+					--print("growing tree at "..minetest.pos_to_string(vector.round(v)))
+				
 				end
-					print("growing tree at "..minetest.pos_to_string(vector.round(v)))
+      end
+		end
 	end
-	
+
+	if flower_pos then
+		for _,v in pairs(flower_pos) do
+			if math.random(1,#flower_pos) then
+				witches.flower_patch(v)
+
+				--print("flowers planted at: "..minetest.pos_to_string(v))
+			end
+		end
+	end
+
 end
 
 

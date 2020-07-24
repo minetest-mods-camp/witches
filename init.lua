@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200720"
+witches.version = "20200723"
 print("this is Witches "..witches.version)
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -69,10 +69,6 @@ else
   print("handle_schematics found! Witch houses enabled!")
 end
 print("enter the witches! version: "..witches.version)
-
-print(minetest.colorize("red","sometext"))
-
-print("crgbtest: " ..colorsRGB.RGB("red"))
 
 local variance = witches.variance
 local rnd_color = witches.rnd_color

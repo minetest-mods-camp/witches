@@ -19,6 +19,8 @@ else
   })
 end
 
+-- the following are based on: https://dev.minetest.net/L-system_tree_examples
+
 witches.acacia_tree={
   axiom="FFFFFFccccA",
   rules_a = "[B]//[B]//[B]//[B]",
@@ -66,3 +68,43 @@ witches.apple_tree={
 	fruit_chance=10,
   fruit="default:apple"
 }
+
+local flowers_types = {}
+if flowers.datas then
+  for i,v in pairs(flowers.datas) do
+    flowers_types[i] = "flowers:" .. v[1]
+    
+  end
+end
+
+function witches.flower_patch(pos)
+  if not pos then 
+    print("no pos for flowers!")
+    return
+  end
+  local fpos = pos
+	if minetest.get_modpath("flowers") then
+
+    --print(dump(flowers_types))
+		local r_flower = flowers_types[math.random(#flowers_types)]
+    local node = r_flower
+    --print(r_flower)
+    local check = minetest.get_node(pos)
+    if string.find(check.name,"dirt") then
+        minetest.place_node({x=fpos.x, y=fpos.y+1, z=fpos.z}, {name = r_flower})
+        --flowers.flower_spread(fpos, {name = r_flower}) 
+        return r_flower
+    elseif string.find(check.name,"sand") then
+        if math.random() < 0.20 then
+          minetest.set_node({x=fpos.x, y=fpos.y+1, z=fpos.z}, {name = "default:large_cactus_seedling"})
+        elseif minetest.get_modpath("farming") then
+          minetest.set_node({x=fpos.x, y=fpos.y+1, z=fpos.z}, {name = "farming:cotton_wild"})
+        else
+          minetest.set_node({x=fpos.x, y=fpos.y+1, z=fpos.z}, {name = "default:dry_shrub"})
+        end
+
+    end
+    
+  
+	end
+end
