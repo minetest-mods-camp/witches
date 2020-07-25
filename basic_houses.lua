@@ -1,8 +1,10 @@
+
+
 --[[
 * Witch houses adapted from Sokomine's basic_houses
 	(https://github.com/Sokomine/basic_houses) mod under MIT
 	with permission from author.
-	
+
 * Optional Depends:
   Sokomine's handle_schematics mod (also GPLv3)
   https://github.com/Sokomine/handle_schematics
@@ -44,7 +46,7 @@ witches.bh = {};
 witches.bh.max_per_mapchunk = 2;
 
 -- how many houses shall be generated on average per mapchunk?
-witches.bh.houses_wanted_per_mapchunk = 0.1;
+witches.bh.houses_wanted_per_mapchunk = 0.05;
 
 -- even if there would not be any house here due to amount of houses
 -- generated beeing equal or larger than the amount of houses expected,
@@ -85,8 +87,6 @@ witches.bh.around_house = {"default:mossycobble","default:tree","default:junglet
 if minetest.get_modpath("fireflies") then
 	witches.bh.lamp   = "fireflies:firefly";
 end
-
-
 
 -- if the realtest game is choosen: adjust materials
 if( minetest.get_modpath("core") and minetest.get_modpath("trees")) then
@@ -134,6 +134,27 @@ elseif( minetest.get_modpath("mcl_core")) then
 	witches.bh.door_bottom = "mcl_doors:wooden_door_b_1";
 	witches.bh.door_top    = "mcl_doors:wooden_door_t_1";
 end
+
+--lets see if any dungeons are near
+minetest.set_gen_notify("dungeon")
+local dungeon_cellar = {
+									 attempts = 1000,
+									 max_depth = -15
+}
+local dungeon_list ={}
+
+minetest.register_on_generated(function(minp, maxp, blockseed)
+  local dg = minetest.get_mapgen_object("gennotify")
+	if dg and dg.dungeon and #dg.dungeon > 2 then
+		 for i=1,#dg.dungeon do
+      if dg.dungeon[i].y >= dungeon_cellar.max_depth then
+			--print("dungeon found: "..minetest.pos_to_string(dg.dungeon[i]))
+
+			table.insert(dungeon_list, dg.dungeon[i])
+			end
+		 end
+	end
+end)
 
 -- build either the two walls of the box that forms the house in x or z direction;
 -- windows are added randomly
@@ -334,7 +355,7 @@ witches.bh.build_roof_and_gable = function( p_orig, sizex, sizez, in_x_direction
 		for dz = p.z, p.z+sizez do
 			if( dy <= p_orig.ymax ) then
 				vm:set_node_at( pswap({x=p.x+xhalf,y=p.y+xhalf,z=dz},swap), node_slab );
-			
+
 			else
 				vm:set_node_at( pswap({x=p.x+xhalf,y=p_orig.ymax,z=dz},swap), node_slab );
 			end
@@ -392,7 +413,7 @@ end
 -- if flat_roof is false, the ladder needs to be placed on the smaller side so that people can
 --   actually climb it;
 -- ladder_places are the special places witches.bh.build_two_walls(..) has reserved
-witches.bh.place_ladder = function( p, sizex, sizez, ladder_places, ladder_height, flat_roof, vm, pr )
+witches.bh.place_ladder = function( p, sizex, sizez, ladder_places, ladder_height, flat_roof, vm, pr, d1)
 	-- place the ladder at the galbe side in houses with a real roof (else
 	-- climbing the ladder up to the roof would fail due to lack of room)
 	local use_place = nil;
@@ -407,6 +428,15 @@ witches.bh.place_ladder = function( p, sizex, sizez, ladder_places, ladder_heigh
 	-- actually place the ladders
 	for height=p.y+1, p.y + ladder_height do
 		vm:set_node_at( {x=res.x, y=height, z=res.z}, ladder_node );
+	end
+	if d1 and d1.y and d1.y < p.y-1 then
+		for height=d1.y,p.y do
+			
+			vm:set_node_at( {x=res.x, y=height, z=res.z}, {name = "air"} );
+			vm:set_node_at( {x=res.x, y=height, z=res.z}, ladder_node );
+			
+		end
+		vm:set_node_at( {x=res.x, y=p.y+1, z=res.z}, {name = "doors:trapdoor"})
 	end
 	return res.used;
 
@@ -455,9 +485,9 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 	end
 	-- determine target position
 	local pos = {x=res.x, y=height+1, z=res.z};
-	
+
 	local pos_bk = {x=res.x, y=height_bk+1, z=res.z};
-  
+
 	-- if plasterwork is installed: place a machine
 	if( materials.color and minetest.global_exists("plasterwork")) then -- and pr:next(1,10)==1) then
 		vm:set_node_at( pos, {name=materials.walls, param2 = materials.color});
@@ -476,7 +506,7 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 	-- place the chest
 	--place bookshelf on first floor
 	vm:set_node_at( pos, {name=witches.bh.chest, param2 = res.p2n});
-	
+
 	--if math.random()< 0.50 and not minetest.find_node_near(pos_bk, 2, {witches.bh.door_bottom,witches.bh.ladder}) then
 	--	vm:set_node_at( pos_bk, {name=witches.bh.bookshelf, param2 = res.p2n});
 	--end
@@ -519,9 +549,9 @@ witches.bh.simple_hut_find_place = function( heightmap, minp, maxp, sizex, sizez
 	local res = handle_schematics.find_flat_land_get_candidates_fast( heightmap, minp, maxp,
 		sizex, sizez, minheight, maxheight );
 
---	print( "Places found of size "..tostring( sizex ).."x"..tostring(sizez)..": "..tostring( #res.places_x )..
---			       " and "..tostring( sizez ).."x"..tostring(sizex)..": "..tostring( #res.places_z )..
---		".");
+--print( "Places found of size "..tostring( sizex ).."x"..tostring(sizez)..": "..tostring( #res.places_x )..
+--		       " and "..tostring( sizez ).."x"..tostring(sizex)..": "..tostring( #res.places_z )..
+--	".");
 
 	if( (#res.places_x + #res.places_z )< 1 ) then
 --		print( "  Aborting. No place found.");
@@ -529,25 +559,68 @@ witches.bh.simple_hut_find_place = function( heightmap, minp, maxp, sizex, sizez
 	end
 
 	-- select a random place - either sizex x sizez or sizez x sizex
-	local c = math.random( 1, #res.places_x + #res.places_z );
-	local i = 1;
-	if( c > #res.places_x ) then
-		i = res.places_z[ c-#res.places_x ];
-		-- swap x and z due to rotation of 90 or 270 degree
-		local tmp = sizex;
-		sizex = sizez;
-		sizez = tmp;
-		tmp = nil;
-	else
-		i = res.places_x[ c ];
-	end
+ --first find a place over a dungeon
+ local near_dungeon = {};
+ local attempts = 1 
+ local fails = 0
+ --if not near_dungeon.x then near_dungeon.x = {} end
+--print(dump(dungeon_list))
 
-	local chunksize = maxp.x - minp.x + 1;
-	-- translate index back into coordinates
-	local p = {x=minp.x+(i%chunksize)-1, y=heightmap[ i ], z=minp.z+math.floor(i/chunksize), i=i};
-	return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez};
+	if dungeon_cellar then 
+		attempts = dungeon_cellar.attempts
+		
+	end
+	
+	for n=1,attempts do
+		
+		local c = math.random( 1, #res.places_x + #res.places_z );
+		local i = 1;
+		if( c > #res.places_x ) then
+			i = res.places_z[ c-#res.places_x ];
+			-- swap x and z due to rotation of 90 or 270 degree
+			local tmp = sizex;
+			sizex = sizez;
+			sizez = tmp;
+			tmp = nil;
+		else
+			i = res.places_x[ c ];
+		end
+
+		local chunksize = maxp.x - minp.x + 1;
+		-- translate index back into coordinates
+		local p = {x=minp.x+(i%chunksize)-1, y=heightmap[ i ], z=minp.z+math.floor(i/chunksize), i=i};
+		
+		if attempts > 1 and n < attempts then
+			for d=1,#dungeon_list do
+        
+				local check = {x = p.x, y = dungeon_list[d].y, z = p.z}
+				 -- print(dump(vector.distance(dungeon_list[d], check)))
+					if vector.distance (dungeon_list[d], check) <= 2 then
+						table.insert(near_dungeon,dungeon_list[d])
+					end
+			end
+
+		--print("near dungeon list: "..dump(near_dungeon))
+
+			if #near_dungeon >= 1 then
+				print("near dungeon list: "..dump(near_dungeon))
+
+				local t = minetest.find_node_near(near_dungeon[1],3,"air")
+					 p.x = math.floor(t.x +sizex/2)
+					 p.z = math.floor(t.z +sizez/2)
+				return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez, d1=near_dungeon[1]};			
+			else
+				fails = fails + 1
+			end
+		else 
+			--print(tostring(fails+1).." attempts made")
+			
+			return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez};
+		end
+	end
 end
 
+local build_type = "default"
 
 -- chooses random materials, amount of floors etc.;
 -- sets data.materials and data.p2.ymax
@@ -604,7 +677,7 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 		materials.color = pr:next(0,255);
 	else
 		local r = pr:next(1,1);
-		--[[ wooden house
+		--[[ wooden house unused for now
 		if(     r==1 ) then
 
 			materials.walls = wood;
@@ -620,6 +693,9 @@ witches.bh.simple_hut_get_materials = function( data, amount_in_this_mapchunk, c
 		-- tree logs
 		--]]
 		if( r==1 ) then
+
+			build_type = "log_cabin" --sets the corner orientation and extention
+
 			materials.walls = replacements_group['wood'].data[ wood ][4]; -- tree trunk
 			-- log cabins with more than 2 floors are unlikely
 			materials.floors = pr:next(1, math.min( 2, math.max(2,max_floors_possible-1 )));
@@ -727,12 +803,15 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	local p = data.p2;
 	local sizex = data.sizex-1;
 	local sizez = data.sizez-1;
+	local d1 = data.d1 or p
 	-- house too small or too large
 	if( sizex < 2 or sizez < 2 or sizex>64 or sizez>64) then
 		return nil;
 	end
-
+	--adjust height for foundation
+  p.y = p.y+1
 	-- replaicate the pattern of windows for the other floors
+
 	local first_floor_height = #materials.window_at_height;
 	local floor_height = {p.y};
 	local floor_materials = {{name=materials.first_floor}};
@@ -760,6 +839,44 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	-- build the two walls in z direction
 	local s2 = witches.bh.build_two_walls(p_start, sizex-2, sizez-2, false, materials, vm, pr ); -- 9,  7, vm );
 
+	if build_type == "log_cabin" then
+	--alternating log cabin ends (thanks again, Sokomine!)
+
+		local wall1 = {name=materials.walls, param2 = (materials.color or materials.wall_orients[4])}
+		local wall2 = {name=materials.walls, param2 = (materials.color or materials.wall_orients[2])}
+		for h=1,#materials.window_at_height do
+			if(h%2~=0) then
+
+							--vm:set_node_at({x=p_start.x,         z=p_start.z, y=p_start.y+h}, wall1)
+							vm:set_node_at({x=p_start.x,         z=p_start.z-1, y=p_start.y+h}, wall1)
+
+							--vm:set_node_at({x=p_start.x+sizex-2, z=p_start.z, y=p_start.y+h}, wall1)
+							vm:set_node_at({x=p_start.x+sizex-2, z=p_start.z-1, y=p_start.y+h}, wall1)
+
+							--vm:set_node_at({x=p_start.x,         z=p_start.z+sizez-2, y=p_start.y+h}, wall1)
+							vm:set_node_at({x=p_start.x,         z=p_start.z+sizez-1, y=p_start.y+h}, wall1)
+
+							--vm:set_node_at({x=p_start.x+sizex-2, z=p_start.z+sizez-2, y=p_start.y+h}, wall2)
+							vm:set_node_at({x=p_start.x+sizex-2, z=p_start.z+sizez-1, y=p_start.y+h}, wall1)
+			end
+		end
+		for h=1,#materials.window_at_height do
+			if(h%2==0) then
+
+							vm:set_node_at({x=p_start.x,         z=p_start.z, y=p_start.y+h}, wall2)
+							vm:set_node_at({x=p_start.x-1,         z=p_start.z, y=p_start.y+h}, wall2)
+
+							vm:set_node_at({x=p_start.x+sizex-2, z=p_start.z, y=p_start.y+h}, wall2)
+							vm:set_node_at({x=p_start.x+sizex-1, z=p_start.z, y=p_start.y+h}, wall2)
+
+							vm:set_node_at({x=p_start.x,         z=p_start.z+sizez-2, y=p_start.y+h}, wall2)
+							vm:set_node_at({x=p_start.x-1,         z=p_start.z+sizez-2, y=p_start.y+h}, wall2)
+
+							vm:set_node_at({x=p_start.x+sizex-2, z=p_start.z+sizez-2, y=p_start.y+h}, wall2)
+							vm:set_node_at({x=p_start.x+sizex-1, z=p_start.z+sizez-2, y=p_start.y+h}, wall2)
+			end
+		end
+	end
 	-- each floor is 3 blocks heigh
 	local roof_starts_at = p.y + (3*materials.floors);
 	p_start = {x=p.x-sizex, y=roof_starts_at, z=p.z-sizez, ymax = p.ymax};
@@ -785,62 +902,88 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 		end
 	end
 	end
+	--foundation
+	for dx = p.x-sizex+2, p.x-2 do
+		for dz = p.z-sizez+2, p.z-2 do
+				vm:set_node_at( {x=dx,y=p.y-2,z=dz},floor_materials[1]);
+		end
+  end
 
+	local fstyle = math.random(2)
 	local max_trees = 2
 	local around_house_node = {name=materials.around_house, param2=0};
 	local air_node = {name="air"};
 	for dx = p.x-sizex, p.x do
 		-- path around the house
-		flower_pos[#flower_pos+1] = {x=dx-math.random(1,12), y=p.y, z=p.z-(sizez+math.random(4,12))}
-		
+		flower_pos[#flower_pos+1] = {x=dx-math.random(1,12), y=p.y-1, z=p.z-(sizez+math.random(4,12))}
+
 		if math.random(1,sizex) and max_trees >= 1 then
-			tree_pos[1] = {x=dx-math.random(1,12), y=p.y, z=p.z-(sizez+math.random(8,12))}
+			tree_pos[1] = {x=dx-math.random(1,12), y=p.y-1, z=p.z-(sizez+math.random(8,12))}
 			max_trees = max_trees - 1
 
 		end
 
-		flower_pos[#flower_pos+1] = {x=dx+math.random(1,12), y=p.y, z=p.z+math.random(4,12)}
-		
+		flower_pos[#flower_pos+1] = {x=dx+math.random(1,12), y=p.y-1, z=p.z+math.random(4,12)}
+
 		if math.random(1,sizex) and max_trees >= 1 then
-			tree_pos[2] = {x=dx+math.random(1,12), y=p.y, z=p.z+math.random(8,12)}
+			tree_pos[2] = {x=dx+math.random(1,12), y=p.y-1, z=p.z+math.random(8,12)}
 			max_trees = max_trees - 1
 
 		end
+
+	if fstyle == 1 then
+
 		vm:set_node_at( {x=dx, y=p.y,  z=p.z-sizez}, around_house_node );
-		vm:set_node_at( {x=dx, y=p.y,  z=p.z-(sizez+1)}, around_house_node );
-		--additional perimeter
 		vm:set_node_at( {x=dx, y=p.y,  z=p.z        }, around_house_node );
-		vm:set_node_at( {x=dx, y=p.y,  z=p.z+1        }, around_house_node );
+
+	elseif fstyle == 2 then
+
+		vm:set_node_at( {x=dx, y=p.y,  z=p.z-sizez}, around_house_node );
+		vm:set_node_at( {x=dx, y=p.y-1,  z=p.z-(sizez+1)}, around_house_node );
+
+		vm:set_node_at( {x=dx, y=p.y,  z=p.z        }, around_house_node );
+		vm:set_node_at( {x=dx, y=p.y-1,  z=p.z+1        }, around_house_node );
+
+	end
 
 		-- make sure there is no snow blocking entrance
 		vm:set_node_at( {x=dx, y=p.y+1, z=p.z-sizez}, air_node );
 		vm:set_node_at( {x=dx, y=p.y+1, z=p.z      }, air_node );
 	end
 	max_trees = 2
-	
+
 	for dz = p.z-sizez, p.z do
 		-- path around the house
-	
-		flower_pos[#flower_pos+1] = {x=p.x-(sizex+math.random(4,12)), y=p.y,   z=dz+math.random(1,12)}
-		
-		if math.random(1,sizez) and max_trees >= 1 then
-			tree_pos[3] = {x=p.x-(sizex+math.random(8,12)), y=p.y,   z=dz+math.random(1,12)}
-			max_trees = max_trees - 1
-		end
-	
 
-		flower_pos[#flower_pos+1] =  {x=p.x+math.random(4,12),  y=p.y,   z=dz-math.random(1,12)}
-	
+		flower_pos[#flower_pos+1] = {x=p.x-(sizex+math.random(4,12)), y=p.y-1,   z=dz+math.random(1,12)}
+
 		if math.random(1,sizez) and max_trees >= 1 then
-			tree_pos[4] = {x=p.x+math.random(8,12),  y=p.y,   z=dz-math.random(1,12)}
+			tree_pos[3] = {x=p.x-(sizex+math.random(8,12)), y=p.y-1,   z=dz+math.random(1,12)}
 			max_trees = max_trees - 1
 		end
-	
+
+
+		flower_pos[#flower_pos+1] =  {x=p.x+math.random(4,12),  y=p.y-1,   z=dz-math.random(1,12)}
+
+		if math.random(1,sizez) and max_trees >= 1 then
+			tree_pos[4] = {x=p.x+math.random(8,12),  y=p.y-1,   z=dz-math.random(1,12)}
+			max_trees = max_trees - 1
+		end
+
+	if fstyle == 1 then
+
 		vm:set_node_at( {x=p.x-sizex, y=p.y,   z=dz}, around_house_node );
-		vm:set_node_at( {x=p.x-(sizex+1), y=p.y,   z=dz}, around_house_node );
-				--additional perimeter
 		vm:set_node_at( {x=p.x,       y=p.y,   z=dz}, around_house_node );
-		vm:set_node_at( {x=p.x+1,       y=p.y,   z=dz}, around_house_node );
+
+	elseif fstyle == 2 then
+
+		vm:set_node_at( {x=p.x-sizex, y=p.y,   z=dz}, around_house_node );
+		vm:set_node_at( {x=p.x-(sizex+1), y=p.y-1,   z=dz}, around_house_node );
+
+		vm:set_node_at( {x=p.x,       y=p.y,   z=dz}, around_house_node );
+		vm:set_node_at( {x=p.x+1,       y=p.y-1,   z=dz}, around_house_node );
+
+	end
 		-- make sure there is no snow blocking entrance
 		vm:set_node_at( {x=p.x-sizex, y=p.y+1, z=dz}, air_node );
 		vm:set_node_at( {x=p.x,       y=p.y+1, z=dz}, air_node );
@@ -852,17 +995,17 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	local reserved_places = {s1[1], s1[2], s2[1], s2[2], s1[3], s2[3]};
 	p_start = {x=p.x-sizex, y=p.y, z=p.z-sizez};
 	local wall_with_ladder = witches.bh.place_ladder( p_start, sizex, sizez,
-		reserved_places, #materials.window_at_height-1, materials.flat_roof, vm, pr );
+		reserved_places, #materials.window_at_height-1, materials.flat_roof, vm, pr, d1 );
 
 	witches.bh.place_door( p_start, sizex, sizez, reserved_places, wall_with_ladder, floor_height, vm, pr );
 	witches.bh.place_chest( p_start, sizex, sizez, reserved_places, wall_with_ladder, floor_height, vm, materials, pr );
-	
+
 	---this is for more furniture later
 --	local wp = window_pos[math.random(#window_pos)]
-	
-	
+
+
 	-- return where the hut has been placed
-	
+
 	return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p};
 end
 
@@ -880,17 +1023,16 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 
 	local vm = minetest.get_voxel_manip();
 	vm:read_from_map(
+
 		{x=p.x - sizex, y=p.y-1, z=p.z - sizez },
 		{x=p.x, y=p.ymax, z=p.z});
 	witches.bh.simple_hut_place_hut_using_vm( data, materials, vm, pr )
 	vm:write_to_map(true);
 
-
-
 	if tree_pos then
 		local biome_name = ""
 		for _,v in pairs(tree_pos) do
-		
+
 			local check = minetest.get_node(v)
 			--print(dump(check.name))
 
@@ -901,12 +1043,12 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 			elseif minetest.get_decoration_id(check.name) then
 				v = nil
 			else
-				
+
 				local biome_id = minetest.get_biome_data(v)
 				--print(dump(biome_id))
 				biome_name = minetest.get_biome_name(biome_id.biome)
 				--print(dump(biome_name))
-				
+
 			end
       if v then
 				if string.find(biome_name,"desert") then
@@ -924,7 +1066,7 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 						default.grow_new_emergent_jungle_tree(v)
 					else
 						default.grow_new_jungle_tree(v)
-					end	
+					end
 				elseif math.random() < .2 then
 
 					minetest.spawn_tree(v,witches.acacia_tree)
@@ -934,7 +1076,7 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 
 					minetest.spawn_tree(v,witches.apple_tree)
 					--print("growing tree at "..minetest.pos_to_string(vector.round(v)))
-				
+
 				end
       end
 		end
@@ -997,6 +1139,7 @@ if(not(minetest.get_modpath("mg_villages"))) then
 	local house_data = {};
 	local anz_houses = math.random( math.min( missing, math.floor(witches.bh.max_per_mapchunk/2 )),
 					witches.bh.max_per_mapchunk );
+
 	for i=1,anz_houses do
 		local res = witches.bh.simple_hut_get_size_and_place( heightmap, minp, maxp);
 		if( res and res.p1 and res.p2
@@ -1008,6 +1151,9 @@ if(not(minetest.get_modpath("mg_villages"))) then
 					(res.p2.z-res.p1.z));
 			table.insert( house_data, res );
 			houses_placed = houses_placed + 1;
+			if res.d1 then
+				print("res.d1 "..minetest.pos_to_string(res.d1))
+		  end
 		end
 	end
 	-- use the same material around the houses in the entire mapchunk
