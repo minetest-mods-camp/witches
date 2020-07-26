@@ -160,7 +160,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
           local meta = stack:get_meta()
           --boost the stats!
           local capabilities = stack:get_tool_capabilities()
-          
+
           local bonuses = {}
           for x,y in pairs(capabilities) do
             if x == "groupcaps" then
@@ -168,10 +168,10 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                 --print(dump(a).." is "..dump(b).."\n---")
                 if b and b.uses then
                    --print("original uses: "..capabilities.groupcaps[a].uses)
-                   
+
                    capabilities.groupcaps[a].uses = b.uses + 10
                    --print("boosted uses: "..capabilities.groupcaps[a].uses)
-                   
+
                   --print(dump(a).." is now "..dump(b))
                 end
                 if b and b.times then
@@ -183,7 +183,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                       -- print("boosted time:".. v )
                     end
                     capabilities.groupcaps[a].times[i] = v
-                  end  
+                  end
                 end
               end
             elseif x == "damage_groups" then
@@ -191,7 +191,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                 --print(dump(a.." = "..capabilities.damage_groups[a]))
                 capabilities.damage_groups[a] = b + math.random(0,1)
                 --print(dump(capabilities.damage_groups[a]))
-              end 
+              end
             end
           end
           meta:set_tool_capabilities(capabilities)
@@ -202,7 +202,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
             "description", S("@1's @2 @3", self.secret_name, tool_adj, org_desc)
           )
           --minetest.chat_send_player()
-          local inv = minetest.get_inventory({ type="player", name= pname })     
+          local inv = minetest.get_inventory({ type="player", name= pname })
           local reward_text = {}
           local reward = {}
           for i,_ in pairs(inv:get_lists()) do
@@ -230,6 +230,70 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
     end
   end
 end
+
+
+function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear )
+  if not pname then
+      print("no player defined!")
+      return
+  end
+  if not self.drops then
+      print("no droplist defined in this mob!")
+      return
+  end
+  local list = {}
+  local reward_text = {}
+  local reward_item = {}
+  local reward = {}
+  local inv = minetest.get_inventory({ type="player", name= pname })
+  local pos = self.object:getpos()
+  pos.y = pos.y + 0.5
+
+  drop_chance_min = drop_chance_min or 0
+  drop_chance_max = drop_chance_max or 100
+
+  for i=1,#self.drops do
+    if self.drops[i].chance <= drop_chance_max and
+       self.drops[i].chance >= drop_chance_min then
+      table.insert(list,self.drops[i])
+    end
+  end
+
+  local item_name = list[math.random(#list)].name
+  local item_wear = item_wear or math.random(8000,10000)
+  local stack = ItemStack({name = item_name, wear = item_wear })
+  local org_desc = minetest.registered_items[item_name].description
+  local meta = stack:get_meta()
+  meta:set_string(
+    "description", S("@1's @2", self.secret_name, org_desc)
+  )
+  print("stack meta "..dump(meta))
+
+  for i=1,#inv:get_lists() do
+    --print(i.." = "..dump(v))
+    if i == "main" and stack and inv:room_for_item(i, stack) then
+      reward_text = S("You are rewarded with @1",meta:get_string("description"))
+      --print("generated text: "..reward_text)
+       reward_item = stack:get_name()
+      --print("generated:"..stack:get_name())
+        reward = {r_text = reward_text, r_item = reward_item}
+      inv:add_item(i,stack)
+      return reward
+    else
+    end
+  end
+
+  reward_text = S("You are rewarded with @1, but you cannot carry it",meta:get_string("description"))
+  --print("generated text: "..reward_text)
+  reward_item = stack:get_name()
+  --print("generated:"..stack:get_name())
+  reward = {r_text = reward_text, r_item = reward_item}
+    minetest.add_item(pos, stack)
+  --print("generated text: "..reward_text)
+  return reward
+
+end
+
 
 function witches.attachment_check(self)
 	if not self.owner or not self.owner:get_luaentity() then
@@ -280,7 +344,7 @@ end
 
 function witches.found_item(self,clicker)
   local item = clicker:get_wielded_item()
-  
+
   if item and item:get_name() == self.item_request.item.name then
     local pname = clicker:get_player_name()
     if not minetest.settings:get_bool("creative_mode") then
@@ -288,27 +352,31 @@ function witches.found_item(self,clicker)
       clicker:set_wielded_item(item)
     end
 
-    if not self.players then 
-      self.players = {} 
+    if not self.players then
+      self.players = {}
       --print("no records")
     end
-    
-    if not self.players[pname] then 
-      self.players[pname] = {} 
+
+    if not self.players[pname] then
+      self.players[pname] = {}
       --print("no records 2")
     end
     --print(dump(self.players))
-    if not self.players[pname].favors then 
+    if not self.players[pname].favors then
       self.players[pname] = { favors = 0 }
     end
 
     self.players[pname].favors = self.players[pname].favors + 1
     local reward = {}
     --print(self.secret_name.." has now received 2 favors"..self.players[pname].favors.." from " ..pname)
-    
-    --if self.players[pname].favors >=3 and math.fmod(18, self.players[pname].favors) == 0 then
+
+    if self.players[pname].favors >=3 and math.fmod(18, self.players[pname].favors) == 0 then
       reward = witches.special_gifts(self,pname)
+    else
+      reward = witches.gift(self,pname)
+
     --print(reward_text)
+    end
       if reward and reward.r_text then
         self.players[pname].reward_text = reward.r_text
       end
@@ -321,6 +389,11 @@ function witches.found_item(self,clicker)
     witches.found_item_quest.show_to(self, clicker)
 
     self.item_request = nil
+    --change the requested item
+    if self.special_follow then
+      self.follow = {}
+      table.insert(self.follow,self.special_follow[math.random(#self.special_follow)])
+    end
   return item
   end
 
@@ -332,11 +405,11 @@ function witches.looking_for(self)
     self.item_request = {}
   end
   if not self.item_request.item then
-    if self.follow then
-
+    if self.follow and #self.follow >= 1 then
+      --print("testing: "..type(self.follow).." "..#self.follow.." "..dump(self.follow).." "..math.random(1,#self.follow))
       local item = self.follow[math.random(1,#self.follow)]
       --local stack = ItemStack({name = item})
-
+      --print("item: "..item)
       local find = {name = minetest.registered_items[item].name, desc = minetest.registered_items[item].description, icon = minetest.registered_items[item].inventory_image}
       --local meta = item:get_meta()
       --print_s(S(dump(desc)))
@@ -344,7 +417,11 @@ function witches.looking_for(self)
 
       self.item_request.item = find
       return self.item_request
-      
+
+    else
+      if not self.follow or #self.follow < 1 then
+        table.insert(self.follow,self.special_follow[math.random(#self.special_follow)])
+      end
     end
 
   else
@@ -357,7 +434,7 @@ function witches.quests(self, clicker)
   local pname = clicker:get_player_name()
   --print(pname.."  clicked on a witch!")
   local item = clicker:get_wielded_item()
-  local pos = clicker:getpos() 
+  local pos = clicker:getpos()
   stop_and_face(self,pos)
 
   --make sure we are looking for an item
@@ -374,7 +451,7 @@ function witches.quests(self, clicker)
 
   --print("we are holding a "..dump(item:get_name()))
   if item:get_name() ~= self.item_request.item.name then
-   --create the dialog 
+   --create the dialog
    witches.item_request(self,pname)
     --we can now show the quest!
    witches.find_item_quest.show_to(self, pname)

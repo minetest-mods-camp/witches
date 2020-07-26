@@ -38,15 +38,18 @@
 --   * cavegen may eat holes into the ground below the house
 --   * houses may very seldom overlap
 
+local witches_dungon_cellar_chance = tonumber(minetest.settings:get("witches_dungon_cellar_chance")) or .50
+local witches_dungon_cellar_depth = tonumber(minetest.settings:get("witches_dungon_cellar_depth")) or -5
+
 witches.bh = {};
 
 -- generate at max this many houses per mapchunk;
 -- Note: This amount will likely only spawn if your mapgen is very flat.
 --       Else you will see far less houses.
-witches.bh.max_per_mapchunk = 2;
+witches.bh.max_per_mapchunk = tonumber(minetest.settings:get("witches_house_max_per_mapchunk")) or 2;
 
 -- how many houses shall be generated on average per mapchunk?
-witches.bh.houses_wanted_per_mapchunk = 0.05;
+witches.bh.houses_wanted_per_mapchunk = tonumber(minetest.settings:get("witches_houses_wanted_per_mapchunk")) or  .05;
 
 -- even if there would not be any house here due to amount of houses
 -- generated beeing equal or larger than the amount of houses expected,
@@ -58,8 +61,6 @@ witches.bh.additional_chance = 1;
 witches.bh.mapchunks_processed = 0;
 -- how many houses have been generated in these mapchunks?
 witches.bh.houses_generated = 0;
-
-
 
 -- materials the houses can be made out of
 -- allows to reach upper floors
@@ -138,9 +139,10 @@ end
 --lets see if any dungeons are near
 minetest.set_gen_notify("dungeon")
 local dungeon_cellar = {
-									 attempts = 1000,
-									 max_depth = -15
+									 chance = tonumber(witches_dungon_cellar_chance), -- chance to try putting cottage over dungeon instead of anywhere else
+									 max_depth = tonumber(witches_dungon_cellar_depth) -- deepest dungeon depth to check
 }
+
 local dungeon_list ={}
 
 minetest.register_on_generated(function(minp, maxp, blockseed)
@@ -430,7 +432,7 @@ witches.bh.place_ladder = function( p, sizex, sizez, ladder_places, ladder_heigh
 		vm:set_node_at( {x=res.x, y=height, z=res.z}, ladder_node );
 	end
 	if d1 and d1.y and d1.y < p.y-1 then
-		for height=d1.y,p.y do
+		for height=d1.y-2,p.y do
 			
 			vm:set_node_at( {x=res.x, y=height, z=res.z}, {name = "air"} );
 			vm:set_node_at( {x=res.x, y=height, z=res.z}, ladder_node );
@@ -561,20 +563,81 @@ witches.bh.simple_hut_find_place = function( heightmap, minp, maxp, sizex, sizez
 	-- select a random place - either sizex x sizez or sizez x sizex
  --first find a place over a dungeon
  local near_dungeon = {};
- local attempts = 1 
- local fails = 0
- --if not near_dungeon.x then near_dungeon.x = {} end
---print(dump(dungeon_list))
 
-	if dungeon_cellar then 
-		attempts = dungeon_cellar.attempts
-		
+ --if not near_dungeon.x then near_dungeon.x = {} end
+	if #dungeon_list >=1  then
+		for i=1,#dungeon_list do
+		--print("dungeon list:"..minetest.pos_to_string(dungeon_list[i]))
+		end
+	else
+		--print("no dungeon list!")
 	end
+
+	local chunksize = maxp.x - minp.x + 1;
+	local c = math.random( 1, #res.places_x + #res.places_z );
+	--local i = 1;
+	--local d = 1;
 	
-	for n=1,attempts do
-		
-		local c = math.random( 1, #res.places_x + #res.places_z );
-		local i = 1;
+	if #dungeon_list >=1 then
+		--print("there is a list!")
+		local nearest_dungeon = 10000
+		--make a list from either of the res 
+		if math.random() <= 0.5 then
+
+			for dc=1,#res.places_z do
+				if res.places_x[dc] and res.places_z[dc] then
+					for d=1,#dungeon_list do
+							
+						--local check = {x = res.places_x[dc], y = dungeon_list[d].y, z = res.places_z[dc]}
+						local check = {x = minp.x+(dc%chunksize)-1, y = dungeon_list[d].y, z=minp.z+math.floor(dc/chunksize)}
+						local dist = vector.distance(dungeon_list[d], check)
+						--print("checking for z: "..minetest.pos_to_string(check))
+						if dist < nearest_dungeon then nearest_dungeon = math.floor(dist)  end
+						if dist <= 2 then
+								--print("found for z! "..dump(dist))
+								dungeon_list[d].i = dc
+								dungeon_list[d].sizex = sizez
+								dungeon_list[d].sizez = sizex
+								table.insert(near_dungeon,dungeon_list[d])
+						end
+							
+					end
+				end
+			end
+			
+			
+		else
+
+			for dc=1,#res.places_x do
+			  if res.places_x[dc] and res.places_z[dc] then
+					for d=1,#dungeon_list do
+							--{x=minp.x+(i%chunksize)-1, y=heightmap[ i ], z=minp.z+math.floor(i/chunksize), i=i};
+						local check = {x = minp.x+(dc%chunksize)-1, y = dungeon_list[d].y, z=minp.z+math.floor(dc/chunksize)}
+						local dist = vector.distance(dungeon_list[d], check)
+						--print("checking for x: "..minetest.pos_to_string(check))
+						if dist < nearest_dungeon then nearest_dungeon = math.floor(dist) end
+						if dist <= 2 then
+								--print("found for x! "..dump(dist))
+								dungeon_list[d].i = dc
+								dungeon_list[d].sizex = sizex
+								dungeon_list[d].sizez = sizez
+								table.insert(near_dungeon,dungeon_list[d])
+						end
+					end		
+				end
+			end
+
+		end
+		print("\n nearest dungeon was "..nearest_dungeon.."\n")
+	end
+
+	if #near_dungeon < 1 and math.random() < (1-dungeon_cellar.chance) then	
+	 --print("standard placement")
+	 --print("failed dungeon_list count: " ..#dungeon_list)
+	 --for f=1,#dungeon_list do
+	--	print("dungeon list:"..minetest.pos_to_string(dungeon_list[f]))
+	 --end
+  local i = 1
 		if( c > #res.places_x ) then
 			i = res.places_z[ c-#res.places_x ];
 			-- swap x and z due to rotation of 90 or 270 degree
@@ -586,38 +649,44 @@ witches.bh.simple_hut_find_place = function( heightmap, minp, maxp, sizex, sizez
 			i = res.places_x[ c ];
 		end
 
-		local chunksize = maxp.x - minp.x + 1;
 		-- translate index back into coordinates
 		local p = {x=minp.x+(i%chunksize)-1, y=heightmap[ i ], z=minp.z+math.floor(i/chunksize), i=i};
+		--print("standard placement of cottage: "..minetest.pos_to_string(p))
+		return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez};
+    
+	else
 		
-		if attempts > 1 and n < attempts then
-			for d=1,#dungeon_list do
-        
-				local check = {x = p.x, y = dungeon_list[d].y, z = p.z}
-				 -- print(dump(vector.distance(dungeon_list[d], check)))
-					if vector.distance (dungeon_list[d], check) <= 2 then
-						table.insert(near_dungeon,dungeon_list[d])
-					end
-			end
+		-- translate index back into coordinates
+		--local p = {x=minp.x+(i%chunksize)-1, y=heightmap[ i ], z=minp.z+math.floor(i/chunksize), i=i};
 
-		--print("near dungeon list: "..dump(near_dungeon))
-
-			if #near_dungeon >= 1 then
-				print("near dungeon list: "..dump(near_dungeon))
-
-				local t = minetest.find_node_near(near_dungeon[1],3,"air")
-					 p.x = math.floor(t.x +sizex/2)
-					 p.z = math.floor(t.z +sizez/2)
-				return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez, d1=near_dungeon[1]};			
-			else
-				fails = fails + 1
-			end
-		else 
-			--print(tostring(fails+1).." attempts made")
+		if #near_dungeon >= 1 then
 			
-			return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez};
+			--print("near dungeon count: "..#near_dungeon)
+			local choice = math.random(1,#near_dungeon)
+			--print("dungeon found:  "..minetest.pos_to_string(near_dungeon[choice]))
+			local t = minetest.find_node_near(near_dungeon[choice],3,"air")
+			--local p = {x=minp.x+(i%chunksize)-1, y=heightmap[ t.y ], z=minp.z+math.floor(i/chunksize), i=t.i};
+			local i = near_dungeon[choice].i
+			--print("i = "..i)
+			local p = {
+				 x = math.floor(t.x + (near_dungeon[choice].sizex / 2)),
+				 y = heightmap[ i ],
+				 z = math.floor(t.z + (near_dungeon[choice].sizez / 2)),
+				 i = i,
+			}	
+			--print(dump(p))
+			return {p1={x=p.x - sizex, y=p.y, z=p.z - sizez }, p2=p, sizex=sizex, sizez=sizez, d1=near_dungeon[choice]};			
+		else
+		--	print("dungeon chance: ".. dungeon_cellar.chance.." dungeon_list: "..#dungeon_list)
+			--for i=1,#dungeon_list do
+			--	print("dungeon list:"..minetest.pos_to_string(dungeon_list[i]))
+			--	end
+				
 		end
+
+		
 	end
+	dungeon_list = {}
 end
 
 local build_type = "default"
@@ -903,9 +972,9 @@ witches.bh.simple_hut_place_hut_using_vm = function( data, materials, vm, pr )
 	end
 	end
 	--foundation
-	for dx = p.x-sizex+2, p.x-2 do
-		for dz = p.z-sizez+2, p.z-2 do
-				vm:set_node_at( {x=dx,y=p.y-2,z=dz},floor_materials[1]);
+	for dx = p.x-sizex, p.x do
+		for dz = p.z-sizez, p.z do
+				vm:set_node_at( {x=dx,y=p.y-1,z=dz},floor_materials[1]);
 		end
   end
 
@@ -1068,12 +1137,12 @@ witches.bh.simple_hut_place_hut = function( data, materials, pr )
 						default.grow_new_jungle_tree(v)
 					end
 				elseif math.random() < .2 then
-
+					minetest.set_node(v,{name = "default:acacia_tree"})
 					minetest.spawn_tree(v,witches.acacia_tree)
 					--print("growing tree at "..minetest.pos_to_string(vector.round(v)))
 
 				else
-
+          minetest.set_node(v,{name =  "default:tree"})
 					minetest.spawn_tree(v,witches.apple_tree)
 					--print("growing tree at "..minetest.pos_to_string(vector.round(v)))
 
@@ -1144,16 +1213,19 @@ if(not(minetest.get_modpath("mg_villages"))) then
 		local res = witches.bh.simple_hut_get_size_and_place( heightmap, minp, maxp);
 		if( res and res.p1 and res.p2
 		  and res.p2.x>=minp.x and res.p2.z>=minp.z
-		  and res.p2.x<=maxp.x and res.p2.z<=maxp.z) then
+			and res.p2.x<=maxp.x and res.p2.z<=maxp.z) then
+			
 			handle_schematics.mark_flat_land_as_used(heightmap, minp, maxp,
 					res.p2.i,
 					(res.p2.x-res.p1.x),
 					(res.p2.z-res.p1.z));
 			table.insert( house_data, res );
 			houses_placed = houses_placed + 1;
+
 			if res.d1 then
-				print("res.d1 "..minetest.pos_to_string(res.d1))
-		  end
+			--	print("res.d1 "..minetest.pos_to_string(res.d1))
+			end
+			
 		end
 	end
 	-- use the same material around the houses in the entire mapchunk

@@ -1,0 +1,14 @@
+
+# chance (1-99) of a witch house spawning over a dungeon instead of anywhere else (requires Sokomines handle_schematics mod!)
+witches_dungon_cellar_chance (chance as decimal like .5  of a witch house spawning over a dungeon instead of anywhere else) float .5 
+
+# depth (1-20) maximum depth of a dungeon to spawn a witch house over (requires Sokomines handle_schematics mod!)
+witches_dungon_cellar_depth (maximum depth 0 to -20 of a dungeon to spawn a witch house over) int -5
+
+#maximum number of houses per mapchunk
+witches_house_max_per_mapchunk (maximum number of houses per mapchunk) int 2 
+
+#average number of houses to mapchunks over the world
+witches_houses_wanted_per_mapchunk (average number of houses to mapchunks over the world) float .05
+
+

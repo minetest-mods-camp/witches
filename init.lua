@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200725"
+witches.version = "20200726"
 print("this is Witches "..witches.version)
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -62,11 +62,12 @@ dofile(path .. "/items.lua")
 dofile(path .. "/nodes.lua")
 
 if not handle_schematics then
+  print("optional handle_schematics not found!\n Witch cottages not available!")
   return
 else
   
   dofile(path .. "/basic_houses.lua")
-  print("handle_schematics found! Witch houses enabled!")
+  print("handle_schematics found! Witch cottages enabled!")
 end
 print("enter the witches! version: "..witches.version)
 
@@ -76,7 +77,7 @@ local rnd_colors = witches.rnd_colors
 local hair_colors = witches.hair_colors
 
 local spawning = {
-  generic = {
+  cottage = {
       nodes = {"group:wood","default:mossycobble","default:cobble"},
       neighbors = {"air","default:chest","doors:wood_witch_a"},
       min_light = 5,
@@ -90,16 +91,92 @@ local spawning = {
       on_spawn = function(self) 
         local pos = self.object:get_pos()
         print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
-       end,
+      end,
+  
   },
+  generic = {
+    nodes = {"group:wood","default:mossycobble","default:cobble"},
+    neighbors = {"air","default:chest"},
+    min_light = 5,
+    max_light = 15,
+    interval = 300,
+    chance = 10,
+    active_object_count = 1,
+    min_height = 0,
+    max_height = 200,
+    day_toggle = nil,
+    on_spawn = function(self) 
+      local pos = self.object:get_pos()
+      print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
+      
+    end
+  
+  }
 }
 
 local witch_types = {
   generic = {
+    description = "Wanderling",
+    lore = "This witch wanders about the land, for what do they seek?",
 
+
+    additional_properties = {
+      special_follow = {"default:diamond", "default:gold_lump", "default:apple",
+      "default:blueberries", "default:torch", "default:stick",
+      "flowers:mushroom_brown","flowers:mushroom_red"},
+
+      do_custom_addendum = function(self)
+        if math.random() < .0005 and  minetest.registered_nodes["fireflies:firefly"] then
+          local pos = self.object:get_pos()
+          pos.y = pos.y+1
+          local pos1 = minetest.find_node_near(pos, 3, "air")        
+          minetest.set_node(pos1, {name = "fireflies:firefly"})
+          --print("setting firefly"..minetest.pos_to_string(pos1))
+        end
+      end,  
+
+      on_spawn_addendum = function(self)
+        --print(dump(self.drops).."and"..dump(minetest.registered_tools))
+        if minetest.registered_tools["fireflies:bug_net"] then
+            
+            local check = 0
+            
+            for i=1,#self.drops do
+            
+              if self.drops[i].name == "fireflies:bug_net" then
+                check = check +1 
+              end
+            
+            end
+
+            if check < 1 then
+
+              table.insert(self.drops,1,
+                {name = "fireflies:bug_net",
+                  chance = 1000, min = 0, max = 1})
+
+              table.insert(self.drops,
+                {name = "fireflies:firefly_bottle",
+                  chance = 100, min = 0, max = 2})
+
+            end
+            
+          end
+      end
+    }  
+  },
+
+  cottage = {
+    description = "Eremitant",
+    lore = "This witch has found a home for themselves, who would bother them?",
+    additional_properties = {
+      special_follow = {"default:diamond", "default:gold_lump", "default:apple",
+      "default:blueberries", "default:torch", "default:stick",
+      "flowers:mushroom_brown","flowers:mushroom_red"},
+    },  
+    spawning = spawning.cottage,
   }
 }
-
 local witch_template = {  --your average witch,
   description = "Basic Witch",
   lore = "This witch has a story yet to be...",
@@ -175,13 +252,21 @@ local witch_template = {  --your average witch,
   },
 
   follow = {
-  "default:diamond", "default:gold_lump", "default:apple",
-  "default:blueberries", "default:torch", "default:stick",
-  "flowers:mushroom_brown","flowers:mushroom_red"
+  
   },
-
+  additional_properties = {
+    special_follow = {"default:diamond", "default:gold_lump", "default:apple",
+    "default:blueberries", "default:torch", "default:stick",
+    "flowers:mushroom_brown","flowers:mushroom_red"},
+  },  
   on_rightclick = function(self,clicker)
     witches.quests(self,clicker)
+  end,
+
+  do_custom = function(self)
+    if  self.do_custom_addendum then
+      self.do_custom_addendum(self)
+    end
   end,
 
   on_spawn = function(self)
@@ -245,6 +330,16 @@ local witch_template = {  --your average witch,
     --print(self.secret_name.." has spawned")
     --print("self: "..dump(self.follow))
    -- print("self properties "..dump(self.object:get_properties()))
+   --self.follow = {}
+    if not self.follow or #self.follow < 1 or type(self.follow) == string then
+      self.follow = {}
+      table.insert(self.follow,self.special_follow[math.random(#self.special_follow)])
+      
+    end
+     
+    if  self.on_spawn_addendum then
+      self.on_spawn_addendum(self)
+    end
     witches.looking_for(self)
   end,
 
@@ -282,6 +377,11 @@ function witches.generate(witch_types,witch_template)
     mobs:register_egg("witches:witch_"..k, S("@1  Egg",g_template.description),"default_mossycobble.png", 1)
     g_template.spawning.name = "witches:witch_"..k --spawn in the name of the key!
     mobs:spawn(g_template.spawning)
+    if g_template.additional_properties then
+      for x,y in pairs(g_template.additional_properties) do
+        minetest.registered_entities["witches:witch_"..k][x] = y
+      end
+    end
     g_template = {}
   end
 end

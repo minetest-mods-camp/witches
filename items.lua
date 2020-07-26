@@ -5,11 +5,29 @@ local variance = witches.variance
 local rnd_color = witches.rnd_color
 local rnd_colors = witches.rnd_colors
 
-witches.witch_hair_styles = {"a","b","c","d","e","f","g","h","p"} 
-witches.witch_hat_styles = {"a_anim","b","c","d","k"} 
+witches.witch_hair_styles = {"a","b","c","d","e","f","g","h","p"}
+witches.witch_hat_styles = {"a_anim","b","c","d","k"}
 
 local hat_bling = {"band","feather","veil"}
 local hair_bling = {}
+
+
+--[[
+minetest.register_tool("witches:witch_wand", {
+  description = "wand",
+  inventory_image = "witches_witch_wand.png",
+  tool_capabilities = {
+    full_punch_interval = 1.2,
+    max_drop_level=0,
+    groupcaps={
+      --cracky = {times={[2]=1.8, [3]=0.90}, uses=25, maxlevel=1},
+    },
+    damage_groups = {fleshy=3},
+  },
+  sound = {breaks = "default_tool_breaks"},
+  --groups = {pickaxe = 1}
+})
+--]]
 
 local function item_set_animation(self, anim, force)
 
@@ -74,12 +92,12 @@ for i,v in pairs(witches.witch_hair_styles) do
     },
     message = "Default message",
 
-    on_step =  function(self)      
+    on_step =  function(self)
       if not self.owner or not self.owner:get_luaentity() then
         self.object:remove()
       else
         local owner = self.owner:get_luaentity()
-        
+
         if owner.state == "stand" and self.state ~= "stand" then
           self.state = "stand"
           item_set_animation(self, "stand")
@@ -99,7 +117,7 @@ for i,v in pairs(witches.witch_hair_styles) do
         --  local position,rotation = self.owner:get_bone_position(owner_head_bone)
         --  self.object:set_attach(self.owner, owner_head_bone, vector.new(0,0,0), rotation)
       end
-    end 
+    end
   }
 
 end
@@ -112,7 +130,7 @@ end
 
 local witch_hats = {}
 
-for i,v in pairs(witches.witch_hat_styles) do 
+for i,v in pairs(witches.witch_hat_styles) do
   witch_hats[i] = {
     initial_properties = {
         --physical = true,
@@ -125,7 +143,7 @@ for i,v in pairs(witches.witch_hat_styles) do
     },
     message = "Default message",
     on_step =  function(self)
-      
+
       if not self.owner or not self.owner:get_luaentity() then
         self.object:remove()
       else
@@ -147,10 +165,10 @@ for i,v in pairs(witches.witch_hat_styles) do
         --  local position,rotation = self.owner:get_bone_position(owner_head_bone)
         --  self.object:set_attach(self.owner, owner_head_bone, vector.new(0,0,0), rotation)
       end
-    end 
+    end
   }
    --print("test: ".. string.find("anim", v) )
-  if string.find(v, "anim") then 
+  if string.find(v, "anim") then
 
     witch_hats[i].animation =   {
       stand_speed = 1,
@@ -184,7 +202,7 @@ witch_tool = {
       pointable = false,
       collisionbox = {0,0,0,0,0,0},
       visual = "wielditem",
-      
+
       visual_size = {x = 0.3, y = 0.3},
       wield_item = "default:stick",
       --inventory_image = "default_tool_woodpick.png",
@@ -194,7 +212,7 @@ witch_tool = {
     if not self.owner or not self.owner:get_luaentity() then
       self.object:remove()
     end
-  end 
+  end
 }
 
 
@@ -208,7 +226,7 @@ minetest.register_entity("witches:witch_tool",witch_tool)
 function witches.attach_hair(self,item)
   self.head_bone = "Head"
   local item = item or "witches:witch_hair"
-  local hair = minetest.add_entity(self.object:get_pos(), item) 
+  local hair = minetest.add_entity(self.object:get_pos(), item)
   hair:set_attach(self.object, "Head", vector.new(0,4.5,0), vector.new(0,180,0))
   local hair_ent = hair:get_luaentity()
   if not hair_ent then
@@ -216,17 +234,17 @@ function witches.attach_hair(self,item)
   end
   hair_ent.owner = self.object
   --print("HAT: "..dump(hair_ent))
-  local he_props = hair_ent.object:get_properties() 
+  local he_props = hair_ent.object:get_properties()
   --print("he props: "..dump(he_props))
   local hair_size = variance(95, 105)
   local hair_mods = ""
   local hair_bling = hair_bling or {}
 
   if not hair_ent.hair_color then
-    hair_ent.hair_color = self.hair_color  
+    hair_ent.hair_color = self.hair_color
     hair_ent.object:set_texture_mod("^witches_witch_hair_"..hair_ent.hair_color..".png")
   end
-  
+
   --[[
 
   self.hair_mods = hair_mods
@@ -247,7 +265,7 @@ end
 function witches.attach_hat(self,item)
   self.head_bone = "Head"
   local item = item or "witches:witch_hat"
-  local hat = minetest.add_entity(self.object:get_pos(), item) 
+  local hat = minetest.add_entity(self.object:get_pos(), item)
   hat:set_attach(self.object, "Head", vector.new(0,4.5,0), vector.new(0,180,0))
   local hat_ent = hat:get_luaentity()
   if not hat_ent then
@@ -255,12 +273,12 @@ function witches.attach_hat(self,item)
   end
   hat_ent.owner = self.object
   --print("HAT: "..dump(hat_ent))
-  local he_props = hat_ent.object:get_properties() 
+  local he_props = hat_ent.object:get_properties()
   --print("he props: "..dump(he_props))
   local hat_size = variance(90, 120)
   local hat_mods = ""
   for i,v in pairs(hat_bling) do
-    if v == "veil" and math.random() < 0.1 then 
+    if v == "veil" and math.random() < 0.1 then
       hat_mods = hat_mods.."^witches_witch_hat_"..v..".png"
     else
       if v ~= "veil" and math.random() < 0.5 then
@@ -282,7 +300,7 @@ end
 
 function witches.attach_tool(self,item)
   item = item or "witches:witch_tool"
-  local tool = minetest.add_entity(self.object:get_pos(), item) 
+  local tool = minetest.add_entity(self.object:get_pos(), item)
   tool:set_attach(self.object, "Arm_Right", {x=0.3, y=4.0, z=2}, {x=-100, y=225, z=90})
   tool:get_luaentity().owner = self.object
 end

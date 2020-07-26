@@ -8,21 +8,25 @@ The MIT License (MIT)
 
 Witches inhabit the land! They are currently in development but, can already:
 
-    * Spawn near wood above ground.
+* Spawn near wood above ground.
 
-    * Witch cottages adapted from Sokomine's basic_houses:
+* Witch cottages adapted from Sokomine's basic_houses:
     (https://github.com/Sokomine/basic_houses) mod under under MIT license
 	  with permission from author.
     Option requires Sokomine's handle_schematics mod (also GPLv3)
     https://github.com/Sokomine/handle_schematics
 
-    *Have a name and origin location which they will tell player.
+    Settings provided from settings menu!
 
-    *Randomly choose hair color and style
+* Some cottages will spawn over a dungeon if they are near the surface
 
-    *Randomly choose hat style and hat ornaments
+* Have a name and origin location which they will tell player.
 
-    *Basic interactivity:
+* Randomly choose hair color and style
+
+* Randomly choose hat style and hat ornaments
+
+* Basic interactivity:
     will follow player for holding certain items.
     one of those items they will request with randomly chosen text, if player right clicks
     if player is holding that requested item and right click witch player will receive a reward
