@@ -267,7 +267,7 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear )
   meta:set_string(
     "description", S("@1's @2", self.secret_name, org_desc)
   )
-  print("stack meta "..dump(meta))
+  --print("stack meta "..dump(meta))
 
   for i=1,#inv:get_lists() do
     --print(i.." = "..dump(v))
@@ -305,17 +305,88 @@ function witches.attachment_check(self)
 	end
 end
 
-local function stop_and_face(self,pos)
+function witches.stop_and_face(self,pos)
   mobs:yaw_to_pos(self, pos)
   self.state = "stand"
   self:set_velocity(0)
   self:set_animation("stand")
   self.attack = nil
   self.v_start = false
-  self.timer = 0
+  self.timer = -5
+  self.pause_timer = .25
   self.blinktimer = 0
   self.path.way = nil
 end
+
+local function stop_and_face(self,pos)
+ witches.stop_and_face(self,pos)
+end
+
+function witches.award_witches_chest(self,player)
+  if player and self.witches_chest and self.witches_chest_owner == self.secret_name then
+    local pname = ""
+    local meta = minetest.get_meta(self.witches_chest_pos)
+
+    if player:is_player() then pname = player:get_player_name() end
+
+    meta:set_string("owner", pname)
+    local sname = meta:get_string("secret_name")
+    local info = {self.secret_name,sname,self.witches_chest_pos,pname}
+    local pos_string = minetest.pos_to_string(info[3])
+    local reward_text = S("You receive permission from @1 to access the magic chest of @2!\n(@3)",
+    info[1],info[2],pos_string)
+    local reward = {r_text = reward_text, r_item = "default:locked_chest"}
+    meta:set_string("infotext",S("@1's chest of @2",info[1],info[2]))
+    return reward
+  end
+end
+
+function witches.claim_witches_chest(self)
+  local pos=self.object:get_pos()
+  pos.min = vector.subtract(pos,10)
+  pos.max = vector.add(pos,10)
+  local meta_table = minetest.find_nodes_with_meta(pos.min, pos.max)
+  --if meta_table then print(dump(meta_table)) end
+  for i=1,#meta_table do
+    local meta = minetest.get_meta(meta_table[i])
+    if meta:get_string("secret_type") == "witches_chest" then
+      local sn = meta:get_string("secret_name")
+      -- if sn then print(sn) end
+      local o = meta:get_string("owner")
+      if o and sn and sn == o then
+        print("unbound chest: "..sn)
+        meta:set_string("owner", self.secret_name)
+        meta:set_string("infotext", self.secret_name.."'s sealed chest of ".. sn)
+
+        self.witches_chest = sn
+        self.witches_chest_owner = self.secret_name
+        self.witches_chest_pos = meta_table[i]
+      end
+    end
+  end
+end
+
+
+function witches.firefly_mod(self)
+if minetest.registered_tools["fireflies:bug_net"] then
+    local check = 0
+    for i=1,#self.drops do
+      if self.drops[i].name == "fireflies:bug_net" then
+        check = check +1
+      end
+    end
+
+    if check < 1 then
+      table.insert(self.drops,1,
+        {name = "fireflies:bug_net",
+          chance = 1000, min = 0, max = 1})
+      table.insert(self.drops,
+        {name = "fireflies:firefly_bottle",
+          chance = 100, min = 0, max = 2})
+    end
+  end
+end
+
 
 function witches.item_request(self,name)
   self.speaking_to = name
@@ -371,7 +442,12 @@ function witches.found_item(self,clicker)
     --print(self.secret_name.." has now received 2 favors"..self.players[pname].favors.." from " ..pname)
 
     if self.players[pname].favors >=3 and math.fmod(18, self.players[pname].favors) == 0 then
-      reward = witches.special_gifts(self,pname)
+      if self.witches_chest and self.witches_chest_owner == self.secret_name then
+        reward = witches.award_witches_chest(self,clicker)
+      else
+        reward = witches.special_gifts(self,pname)
+        
+      end
     else
       reward = witches.gift(self,pname)
 

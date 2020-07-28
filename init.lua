@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200726"
+witches.version = "20200728"
 print("this is Witches "..witches.version)
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -57,6 +57,7 @@ else
 end
 
 dofile(path .. "/utilities.lua")
+dofile(path .. "/magic.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
 dofile(path .. "/nodes.lua")
@@ -126,7 +127,7 @@ local witch_types = {
       "flowers:mushroom_brown","flowers:mushroom_red"},
 
       do_custom_addendum = function(self)
-        if math.random() < .0005 and  minetest.registered_nodes["fireflies:firefly"] then
+        if math.random() < .0001 and  minetest.registered_nodes["fireflies:firefly"] then
           local pos = self.object:get_pos()
           pos.y = pos.y+1
           local pos1 = minetest.find_node_near(pos, 3, "air")        
@@ -137,31 +138,8 @@ local witch_types = {
 
       on_spawn_addendum = function(self)
         --print(dump(self.drops).."and"..dump(minetest.registered_tools))
-        if minetest.registered_tools["fireflies:bug_net"] then
-            
-            local check = 0
-            
-            for i=1,#self.drops do
-            
-              if self.drops[i].name == "fireflies:bug_net" then
-                check = check +1 
-              end
-            
-            end
+        witches.firefly_mod(self)
 
-            if check < 1 then
-
-              table.insert(self.drops,1,
-                {name = "fireflies:bug_net",
-                  chance = 1000, min = 0, max = 1})
-
-              table.insert(self.drops,
-                {name = "fireflies:firefly_bottle",
-                  chance = 100, min = 0, max = 2})
-
-            end
-            
-          end
       end
     }  
   },
@@ -173,6 +151,11 @@ local witch_types = {
       special_follow = {"default:diamond", "default:gold_lump", "default:apple",
       "default:blueberries", "default:torch", "default:stick",
       "flowers:mushroom_brown","flowers:mushroom_red"},
+      do_custom_addendum = function(self)
+      end,  
+      on_spawn_addendum = function(self) 
+        witches.claim_witches_chest(self)
+      end
     },  
     spawning = spawning.cottage,
   }
@@ -258,11 +241,15 @@ local witch_template = {  --your average witch,
     special_follow = {"default:diamond", "default:gold_lump", "default:apple",
     "default:blueberries", "default:torch", "default:stick",
     "flowers:mushroom_brown","flowers:mushroom_red"},
-  },  
+  },
+  do_punch = function(self,hitter)
+    witches.magic.teleport(self,hitter)
+  end,  
+
   on_rightclick = function(self,clicker)
     witches.quests(self,clicker)
   end,
-
+  
   do_custom = function(self)
     if  self.do_custom_addendum then
       self.do_custom_addendum(self)

@@ -38,8 +38,8 @@
 --   * cavegen may eat holes into the ground below the house
 --   * houses may very seldom overlap
 
-local witches_dungon_cellar_chance = tonumber(minetest.settings:get("witches_dungon_cellar_chance")) or .50
-local witches_dungon_cellar_depth = tonumber(minetest.settings:get("witches_dungon_cellar_depth")) or -5
+local witches_dungeon_cellar_chance = tonumber(minetest.settings:get("witches_dungeon_cellar_chance")) or .50
+local witches_dungeon_cellar_depth = tonumber(minetest.settings:get("witches_dungeon_cellar_depth")) or -5
 
 witches.bh = {};
 
@@ -70,7 +70,7 @@ witches.bh.lamp   = "default:torch_wall";
 -- floor at the entrance level of the house
 witches.bh.floor = "default:cobble";
 -- placed randomly in some houses
-witches.bh.chest = "default:chest";
+witches.bh.chest = "default:chest_locked";
 witches.bh.bookshelf ="default:bookshelf"
 witches.bh.bed = "beds:bed"
 -- glass can be glass panes, iron bars or solid glass
@@ -139,8 +139,8 @@ end
 --lets see if any dungeons are near
 minetest.set_gen_notify("dungeon")
 local dungeon_cellar = {
-									 chance = tonumber(witches_dungon_cellar_chance), -- chance to try putting cottage over dungeon instead of anywhere else
-									 max_depth = tonumber(witches_dungon_cellar_depth) -- deepest dungeon depth to check
+									 chance = tonumber(witches_dungeon_cellar_chance), -- chance to try putting cottage over dungeon instead of anywhere else
+									 max_depth = tonumber(witches_dungeon_cellar_depth) -- deepest dungeon depth to check
 }
 
 local dungeon_list ={}
@@ -172,7 +172,7 @@ end)
 --    rotation_1  param2 for materials.wall nodes for the first wall
 --    rotation_2  param2 for materials.wall nodes for the second wall
 --    vm          voxel manipulator
-local window_pos = {}
+
 witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, materials, vm, pr)
 
 	local v = 0;
@@ -255,9 +255,7 @@ witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, material
 			-- if there is a window in this wall...
 			if( materials.window_at_height[ height ]==1 and wall_1_has_window) then
 				node = node_glass_1;
-				if  minetest.get_modpath("beds") then
-					window_pos[#window_pos+1] = {x= w1_x, y=p.y+1,z=w1_z}
-        end
+
 		  else
 				--print("wall1: x"..w1_x.."  z"..w1_z)
 				node = node_wall_1;
@@ -268,15 +266,13 @@ witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, material
 
 
 			end
-
+			
 			vm:set_node_at( {x=w1_x, y=p.y+height, z=w1_z}, node);
 
 			-- ..or in the other wall
 			if( materials.window_at_height[ height ]==1 and (wall_2_has_window)) then
 				node = node_glass_2;
-				if minetest.get_modpath("beds") then
-					window_pos[#window_pos+1] = {x= w2_x, y=p.y+1,z=w2_z}
-        end
+
 			else
 					--print("wall2: x"..w2_x.."  z"..w2_z)
 					node = node_wall_2;
@@ -285,7 +281,8 @@ witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, material
 						node = node_wall_1;
 					end
 
-				end
+			end
+
 			vm:set_node_at( {x=w2_x, y=p.y+height, z=w2_z}, node);
 
 		end
@@ -300,7 +297,6 @@ witches.bh.build_two_walls = function( p, sizex, sizez, in_x_direction, material
 	end
 	return {special_wall_1, special_wall_2, window_at_odd_row};
 end
-
 
 -- roofs may extend in x or z direction
 local pswap = function( pos, swap )
@@ -410,7 +406,6 @@ witches.bh.get_random_place = function( p, sizex, sizez, places, use_this_one, a
 	end
 end
 
-
 -- add a ladder from bottom to top (staircases would be nicer but are too difficult to do well)
 -- if flat_roof is false, the ladder needs to be placed on the smaller side so that people can
 --   actually climb it;
@@ -488,6 +483,7 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 	-- determine target position
 	local pos = {x=res.x, y=height+1, z=res.z};
 
+
 	local pos_bk = {x=res.x, y=height_bk+1, z=res.z};
 
 	-- if plasterwork is installed: place a machine
@@ -506,8 +502,9 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 		return;
 	end
 	-- place the chest
-	--place bookshelf on first floor
+	--set place bookshelf on first floor
 	vm:set_node_at( pos, {name=witches.bh.chest, param2 = res.p2n});
+    --placed_nodes.pos_bk = {name=witches.bh.bookshelf, param2 = res.p2n};
 
 	--if math.random()< 0.50 and not minetest.find_node_near(pos_bk, 2, {witches.bh.door_bottom,witches.bh.ladder}) then
 	--	vm:set_node_at( pos_bk, {name=witches.bh.bookshelf, param2 = res.p2n});
@@ -522,8 +519,25 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 	end
 	-- fill chest with building material
 	minetest.registered_nodes[ witches.bh.chest ].on_construct( pos );
+	local secret_name = witches.generate_text(witches.name_parts_female)
 	local meta = minetest.get_meta(pos);
 	local inv = meta:get_inventory();
+
+	if witches.bh.chest == "default:chest_locked" then
+		meta:set_string("secret_type", "witches_chest")
+		meta:set_string("secret_name", secret_name)
+		meta:set_string("owner",secret_name)  
+		meta:set_string("infotext", "Sealed chest of "..secret_name) 
+		if minetest.get_modpath("fireflies") then
+			inv:add_item( "main", {name = "fireflies:bug_net"})
+		end
+		inv:add_item( "main", {name = "default:mese_lamp"})
+		if math.random() < 0.50 then 
+			for i=1,math.random(3) do
+				inv:add_item( "main", {name = "default:diamond"})
+			end
+		end
+	end
 	local c = pr:next(1,4);
 	for i=1,c do
 		local stack_name = materials.walls.." "..pr:next(1,99);
@@ -541,6 +555,20 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 	if( not( materials.roof_flat )) then
 		inv:add_item( "main", materials.roof.." "..pr:next(1,99) );
 		inv:add_item( "main", materials.roof_middle.." "..pr:next(1,49) );
+	end
+	inv:add_item( "main", {name = witches.bh.bookshelf});
+	if minetest.get_modpath("beds") then
+		inv:add_item( "main", {name = witches.bh.bed} );
+	end
+	if minetest.get_modpath("fireflies") then
+		inv:add_item( "main", {name = "fireflies:firefly_bottle"} );
+	end 
+	if minetest.get_modpath("bucket") then
+		inv:add_item( "main", {name = "bucket:bucket_empty"} );
+	end
+	if minetest.get_modpath("dye") then
+		local dname = dye.dyes[math.random(1,#dye.dyes)][1] 
+ 				inv:add_item( "main", {name = "dye:"..dname })
 	end
 end
 
