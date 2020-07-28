@@ -335,8 +335,9 @@ function witches.award_witches_chest(self,player)
     local pos_string = minetest.pos_to_string(info[3])
     local reward_text = S("You receive permission from @1 to access the magic chest of @2!\n(@3)",
     info[1],info[2],pos_string)
-    local reward = {r_text = reward_text, r_item = "default:locked_chest"}
+    local reward = {r_text = reward_text, r_item = "default:chest"}
     meta:set_string("infotext",S("@1's chest of @2",info[1],info[2]))
+    self.witches_chest_owner = pname
     return reward
   end
 end

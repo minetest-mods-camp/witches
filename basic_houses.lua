@@ -531,7 +531,7 @@ witches.bh.place_chest = function( p, sizex, sizez, chest_places, wall_with_ladd
 		if minetest.get_modpath("fireflies") then
 			inv:add_item( "main", {name = "fireflies:bug_net"})
 		end
-		inv:add_item( "main", {name = "default:mese_lamp"})
+		inv:add_item( "main", {name = "default:meselamp"})
 		if math.random() < 0.50 then 
 			for i=1,math.random(3) do
 				inv:add_item( "main", {name = "default:diamond"})

@@ -9,7 +9,8 @@ The MIT License (MIT)
 Witches inhabit the land! They are currently in development but, can already:
 
 * Spawn near wood above ground.
-
+* Witches have magic!  They will defend themselves and each other!
+* If you are repeatedly helpful to a witch...
 * Witch cottages adapted from Sokomine's basic_houses:
     (https://github.com/Sokomine/basic_houses) mod under under MIT license
 	  with permission from author.

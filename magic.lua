@@ -16,9 +16,12 @@ else
   magic_animation = nil
 end
 
-function witches.magic.teleport(self,target)
+
+function witches.magic.teleport(self,target,strength,height)
   local mob_pos = self.object:get_pos()
   local player_pos = {}
+  strength = strength or 8
+  height = height or 5
   if target then
 
     if target:is_player() then
@@ -28,9 +31,9 @@ function witches.magic.teleport(self,target)
     else
 
     end
-    witches.stop_and_face(self,player_pos)
+    --witches.stop_and_face(self,player_pos)
 
-      local new_player_pos = vector.add(player_pos, vector.multiply(vector.direction(mob_pos, player_pos),8))             
+      local new_player_pos = vector.add(player_pos, vector.multiply(vector.direction(mob_pos, player_pos),strength))             
     new_player_pos.y = player_pos.y +5
     --print(minetest.pos_to_string(player_pos))
     --print(minetest.pos_to_string(mob_pos))
@@ -57,7 +60,7 @@ function witches.magic.teleport(self,target)
                 player = target:get_player_name()
     })
 
-    witches.stop_and_face(self,new_player_pos)
+    --witches.stop_and_face(self,new_player_pos)
   end
   
 end

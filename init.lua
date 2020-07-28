@@ -244,6 +244,7 @@ local witch_template = {  --your average witch,
   },
   do_punch = function(self,hitter)
     witches.magic.teleport(self,hitter)
+    self.attack=hitter
   end,  
 
   on_rightclick = function(self,clicker)
@@ -253,6 +254,20 @@ local witch_template = {  --your average witch,
   do_custom = function(self)
     if  self.do_custom_addendum then
       self.do_custom_addendum(self)
+
+    end
+    if self.attack and self.attack:is_player() then
+      local s = self.object:get_pos()
+      local objs = minetest.get_objects_inside_radius(s, 2)
+      for n = 1, #objs do
+        local ent = objs[n]:get_luaentity()
+        -- are we a player?
+        if objs[n]:is_player() then
+          witches.magic.teleport(self,objs[n],5,2)
+        end
+      end
+    
+
     end
   end,
 
