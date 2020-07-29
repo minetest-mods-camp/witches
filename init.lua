@@ -166,11 +166,11 @@ local witch_template = {  --your average witch,
   type = "npc",
   passive = false,
   attack_type = "dogfight",
-  attack_monsters = false,
+  attack_monsters = true,
   attack_npcs = false,
   attack_players = true,
   group_attack = true,
-  runaway = true,
+  runaway = false,
   damage = 1,
   reach = 2,
   knock_back = true,
@@ -242,10 +242,6 @@ local witch_template = {  --your average witch,
     "default:blueberries", "default:torch", "default:stick",
     "flowers:mushroom_brown","flowers:mushroom_red"},
   },
-  do_punch = function(self,hitter)
-    witches.magic.teleport(self,hitter)
-    self.attack=hitter
-  end,  
 
   on_rightclick = function(self,clicker)
     witches.quests(self,clicker)
@@ -256,18 +252,21 @@ local witch_template = {  --your average witch,
       self.do_custom_addendum(self)
 
     end
-    if self.attack and self.attack:is_player() then
+    if self.attack  then
       local s = self.object:get_pos()
       local objs = minetest.get_objects_inside_radius(s, 2)
       for n = 1, #objs do
         local ent = objs[n]:get_luaentity()
-        -- are we a player?
-        if objs[n]:is_player() then
-          witches.magic.teleport(self,objs[n],5,2)
+        if objs[n] == self.attack then
+          if self.attack:is_player() then
+           -- witches.magic.banish_underground(self,objs[n],10) 
+              witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
+           
+          else 
+            witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
+          end
         end
       end
-    
-
     end
   end,
 

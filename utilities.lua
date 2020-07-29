@@ -260,7 +260,7 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear )
   end
 
   local item_name = list[math.random(#list)].name
-  local item_wear = item_wear or math.random(8000,10000)
+  item_wear = item_wear or math.random(8000,10000)
   local stack = ItemStack({name = item_name, wear = item_wear })
   local org_desc = minetest.registered_items[item_name].description
   local meta = stack:get_meta()
@@ -268,8 +268,8 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear )
     "description", S("@1's @2", self.secret_name, org_desc)
   )
   --print("stack meta "..dump(meta))
-
-  for i=1,#inv:get_lists() do
+  --print(dump(inv:get_lists()))
+  for i,_ in pairs(inv:get_lists()) do
     --print(i.." = "..dump(v))
     if i == "main" and stack and inv:room_for_item(i, stack) then
       reward_text = S("You are rewarded with @1",meta:get_string("description"))
