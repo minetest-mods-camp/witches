@@ -76,6 +76,8 @@ Witches inhabit the land! They are currently in development but, can already:
   (https://github.com/Sokomine/basic_houses) mod under MIT license
 	with permission from author.
 
+* Sound files - see file metadata for artist information!
+   
   Thanks to TenPlus1 for keeping the Mobs_Redo going!
   Thanks to rubenwardy for awesome help and the Minetest ContentDB
   Thanks to everyone in the Minetest forums and IRC for just being great!

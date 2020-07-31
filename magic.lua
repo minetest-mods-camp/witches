@@ -90,6 +90,11 @@ function witches.magic.teleport(self,target,strength,height)
   local description = "Yeet!" --thanks to ctate for naming this so accurately!
   local caster_pos = self.object:get_pos()
   local target_pos = {}
+  minetest.sound_play(self.sounds.teleport or "witches_magic01", {
+		pos = caster_pos,
+		gain = 1.0,
+		max_hear_distance = self.sounds and self.sounds.distance or 32
+  }, true)
   strength = strength or 8
   height = height or 5
   if target then
@@ -132,12 +137,19 @@ end
 function witches.magic.polymorph(self, target, mob, duration)
   duration = duration or 0
   local colors = {}
+  local caster_pos = self.object:get_pos()
+  minetest.sound_play(self.sounds.polymorph or "witches_magic02", {
+		pos = caster_pos,
+		gain = 1.0,
+		max_hear_distance = self.sounds and self.sounds.distance or 32
+  }, true)
+  
   for _, col in ipairs(wsc) do
     table.insert(colors,col[1])
   end
   local r_sheep = "witches:sheep_"..colors[math.random(#colors)]
   mob = mob or r_sheep
-  local caster_pos = self.object:get_pos()
+  
   local ent = target:get_luaentity()
   local ent_pos = ent.object:get_pos()
 

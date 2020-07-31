@@ -46,7 +46,7 @@ for _, col in ipairs(all_colours) do
 		--gotten_mesh = "mobs_sheep_shaved.b3d",
 		makes_footstep_sound = true,
 		sounds = {
-			random = "mobs_sheep",
+			random = "witches_sheep",
 		},
 		walk_velocity = 1,
 		run_velocity = 2,
