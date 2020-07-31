@@ -3,14 +3,18 @@
 Witches is copyright 2020 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
 The MIT License (MIT)
 
-* code :https://gitlab.com/freelikegnu/witches
-* forum discussion: https://forum.minetest.net/viewtopic.php?f=9&t=25084&p=377605#p377605
-
+* code/issue tracking :https://gitlab.com/freelikegnu/witches
+* forum discussion: https://forum.minetest.net/viewtopic.php?t=25084
+* ContentDB: https://content.minetest.net/packages/FreeLikeGNU/witches/
+  
 Witches inhabit the land! They are currently in development but, can already:
 
 * Spawn near wood above ground.
-* Witches have magic!  They will defend themselves and each other!
+  
+* Witches have magic!  They will defend themselves and each other against aggressive players and mobs!
+  
 * If you are repeatedly helpful to a witch...
+  
 * Witch cottages adapted from Sokomine's basic_houses:
     (https://github.com/Sokomine/basic_houses) mod under under MIT license
 	  with permission from author.
@@ -30,7 +34,7 @@ Witches inhabit the land! They are currently in development but, can already:
 * Basic interactivity:
     will follow player for holding certain items.
     one of those items they will request with randomly chosen text, if player right clicks
-    if player is holding that requested item and right click witch player will receive a reward
+    if player is holding that requested item and right click witch player will receive a reward!
     the reward is a personalized tool with increased stats!
 
 ## Required Mods:
@@ -39,9 +43,13 @@ Witches inhabit the land! They are currently in development but, can already:
     * Mobs Redo git repository:  https://notabug.org/TenPlus1/mobs_redo
 
 ## Optional Mods:
-  For Witches Cottages: Sokomine's handle_schematics mod (GPLv3)
+* For Witches Cottages: Sokomine's handle_schematics mod (GPLv3)
     * git repository: https://github.com/Sokomine/handle_schematics
+  
+* Any mobs from any mobs mod attacking Witches may be turned into a sheep!
 
+* Fireflies (Minetest Game) for certain effects and rewards
+  
 ## Licenses of Source Media Files:
 * witches_witch.b3d and witch.blend 
     * copyright 2020 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
@@ -52,11 +60,18 @@ Witches inhabit the land! They are currently in development but, can already:
     * by MirceaKitsune (WTFPL)
     * https://github.com/minetest/minetest_game/blob/master/mods/default/README.txt#L71
 
-* witches_*.png files and witches_*.xcf files
+* witches_*.png files and witches_*.xcf files:
     * copyright 2020 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
       Creative Commons  Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0) 
     * http://creativecommons.org/licenses/by-sa/3.0/
 
+* sheep.blend, sheep.xcf witches_sheep.b3d, witches_sheep.png witches_sheep_wool.png:
+    * copyright 2020 Francisco Athens
+      Creative Commons  Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0) 
+    * http://creativecommons.org/licenses/by-sa/3.0/
+
+* sheep.lua code adapted from mobs_animals by TenPlus1 and authors credited in sheep.lua
+  
 * Witch houses code adapted from Sokomine's basic_houses 
   (https://github.com/Sokomine/basic_houses) mod under MIT license
 	with permission from author.
@@ -64,4 +79,6 @@ Witches inhabit the land! They are currently in development but, can already:
   Thanks to TenPlus1 for keeping the Mobs_Redo going!
   Thanks to rubenwardy for awesome help and the Minetest ContentDB
   Thanks to everyone in the Minetest forums and IRC for just being great!
+  Thanks to ctate for naming the witches first spell "Yeet"!
+
 GET MINETEST: https://www.minetest.net/

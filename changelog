@@ -1,0 +1,9 @@
+    2020/07/31: Witches can turn aggressive mobs into sheep!
+    2020/07/28: Witches will teleport you away from themselves if you are aggressive!
+    2020/07/26: Witch cottage placement refactor and settings menu options!
+    2020/07/25: Witch cottages refinements (thanks Solomine!)
+    2020/07/20: Witches have homes (modified procedural Basic_Houses script by Sokomine)! (If Sokomine's handle_schematics mod is also active) L-System trees are added near witch cottages too!!
+      video: https://youtu.be/qDS3fT-ROR0
+    2020/07/19: Hairstyles are now randomly chosen, animated hat test.
+    Update 2020/07/17: More Quest UI work (reward items try to fit into player inv or drop) and some variations in quest text and hats.
+    video: https://youtu.be/Lor06w5IMIQ

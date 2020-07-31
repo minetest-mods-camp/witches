@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200728"
+witches.version = "20200731"
 print("this is Witches "..witches.version)
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -57,10 +57,11 @@ else
 end
 
 dofile(path .. "/utilities.lua")
-dofile(path .. "/magic.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
 dofile(path .. "/nodes.lua")
+dofile(path .. "/sheep.lua")
+dofile(path .. "/magic.lua")
 
 if not handle_schematics then
   print("optional handle_schematics not found!\n Witch cottages not available!")
@@ -259,11 +260,22 @@ local witch_template = {  --your average witch,
         local ent = objs[n]:get_luaentity()
         if objs[n] == self.attack then
           if self.attack:is_player() then
+
            -- witches.magic.banish_underground(self,objs[n],10) 
               witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
            
           else 
-            witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
+            if math.random() < 0.3 then
+
+              witches.magic.teleport(self,objs[n],math.random(3,5),math.random(2,4))
+              witches.magic.polymorph(self,objs[n])
+
+            else
+
+              witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
+
+            end  
+           -- witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
           end
         end
       end
