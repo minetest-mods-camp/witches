@@ -12,10 +12,10 @@ local hat_bling = {"band","feather","veil"}
 local hair_bling = {}
 
 
---[[
-minetest.register_tool("witches:witch_wand", {
-  description = "wand",
-  inventory_image = "witches_witch_wand.png",
+
+minetest.register_tool("witches:witch_wand_sp", {
+  description = "Sparkle Parkle!",
+  inventory_image = "witches_wand_sparkle_parkle.png",
   tool_capabilities = {
     full_punch_interval = 1.2,
     max_drop_level=0,
@@ -26,8 +26,71 @@ minetest.register_tool("witches:witch_wand", {
   },
   sound = {breaks = "default_tool_breaks"},
   --groups = {pickaxe = 1}
+
 })
---]]
+
+local witch_tool_wand_sp = {}
+witch_tool_wand_sp = {
+  initial_properties = {
+      --physical = true,
+      pointable = false,
+      collisionbox = {0,0,0,0,0,0},
+      visual = "wielditem",
+
+      visual_size = {x = 0.3, y = 0.3},
+      wield_item = "witches:witch_wand_sp",
+
+  },
+
+  on_step =  function(self)
+    if not self.owner or not self.owner:get_luaentity() then
+      self.object:remove()
+    end
+  end
+}
+
+minetest.register_entity("witches:witch_tool_wand_sp",witch_tool_wand_sp)
+
+
+
+minetest.register_tool("witches:witch_wand_btb", {
+  description = "Better Thank Bacon!",
+  inventory_image = "witches_wand_better_than_bacon.png",
+  tool_capabilities = {
+    full_punch_interval = 1.2,
+    max_drop_level=0,
+    groupcaps={
+      --cracky = {times={[2]=1.8, [3]=0.90}, uses=25, maxlevel=1},
+    },
+    damage_groups = {fleshy=3},
+  },
+  sound = {breaks = "default_tool_breaks"},
+  --groups = {pickaxe = 1}
+
+})
+
+local witch_tool_wand_btb = {}
+witch_tool_wand_btb = {
+  initial_properties = {
+      --physical = true,
+      pointable = false,
+      collisionbox = {0,0,0,0,0,0},
+      visual = "wielditem",
+
+      visual_size = {x = 0.3, y = 0.3},
+      wield_item = "witches:witch_wand_btb",
+
+  },
+
+  on_step =  function(self)
+    if not self.owner or not self.owner:get_luaentity() then
+      self.object:remove()
+    end
+  end
+}
+
+minetest.register_entity("witches:witch_tool_wand_btb",witch_tool_wand_btb)
+
 
 local function item_set_animation(self, anim, force)
 
@@ -299,7 +362,7 @@ function witches.attach_hat(self,item)
 end
 
 function witches.attach_tool(self,item)
-  item = item or "witches:witch_tool"
+  item = item or "witches:witch_tool_btb"
   local tool = minetest.add_entity(self.object:get_pos(), item)
   tool:set_attach(self.object, "Arm_Right", {x=0.3, y=4.0, z=2}, {x=-100, y=225, z=90})
   tool:get_luaentity().owner = self.object

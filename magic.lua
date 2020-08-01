@@ -182,11 +182,18 @@ function witches.magic.splash(self,target,volume,height,node)
   local ent_pos = ent.object:get_pos()
   local ent_pos_yoff = vector.add(ent_pos,{x=0,y=height,z=0})
   local vol = pos_to_vol(ent_pos_yoff,volume)
-  
+  minetest.sound_play(self.sounds.drench or "witches_water", {
+    pos = ent_pos,
+    gain = 1.0,
+    max_hear_distance = self.sounds and self.sounds.distance or 32
+  }, true
+  )
+
   local air_nodes = minetest.find_nodes_in_area(vol[1],vol[2], {"air"})
   
   if air_nodes then
-    for i=1, #air_nodes do
+    for i=1, #air_nodes do  
+
       minetest.add_node(air_nodes[i], {name=node})
       witches.magic.effect_area01(vol[1],vol[2],100)
      --print(node.." "..minetest.pos_to_string(air_nodes[i]))
