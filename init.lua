@@ -267,16 +267,20 @@ local witch_template = {  --your average witch,
               witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
            
           else 
-            if math.random() < 0.3 then
+            if math.random() < 0.2 then
 
               witches.magic.teleport(self,objs[n],math.random(3,5),math.random(2,4))
               witches.magic.polymorph(self,objs[n])
 
+            elseif math.random() <.5 then
+              witches.magic.teleport(self,objs[n],math.random(3,5),math.random(1,2))
+              witches.magic.splash(self,objs[n],{x=2,y=2,z=2},math.random(0,1))
+              -- witches.magic.splash(self,target,volume,height,node)
             else
 
               witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
 
-            end  
+            end
            -- witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
           end
         end

@@ -172,3 +172,31 @@ function witches.magic.polymorph(self, target, mob, duration)
   --new_ent.old_mob_name = ent.name
 
 end
+--volume is a vector!
+function witches.magic.splash(self,target,volume,height,node)
+  volume = volume or {x=3,y=3,z=3}
+  height = height or 0
+  node = node or "default:water_flowing"
+  local caster_pos = self.object:get_pos()
+  local ent = target:get_luaentity()
+  local ent_pos = ent.object:get_pos()
+  local ent_pos_yoff = vector.add(ent_pos,{x=0,y=height,z=0})
+  local vol = pos_to_vol(ent_pos_yoff,volume)
+  
+  local air_nodes = minetest.find_nodes_in_area(vol[1],vol[2], {"air"})
+  
+  if air_nodes then
+    for i=1, #air_nodes do
+      minetest.add_node(air_nodes[i], {name=node})
+      witches.magic.effect_area01(vol[1],vol[2],100)
+     --print(node.." "..minetest.pos_to_string(air_nodes[i]))
+      --minetest.spawn_falling_node(i)
+    end
+  end
+
+
+
+
+
+
+end

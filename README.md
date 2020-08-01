@@ -76,7 +76,18 @@ Witches inhabit the land! They are currently in development but, can already:
   (https://github.com/Sokomine/basic_houses) mod under MIT license
 	with permission from author.
 
-* Sound files - see file metadata for artist information!
+* Sound files:
+    witches_magic01.ogg  MATRIXXX_ December 28th, 2018 CC-BY 3.0
+      https://freesound.org/people/MATRIXXX_/sounds/455205/
+
+    witches_magic02.ogg RICHERlandTV January 28th, 2014 CC-BY 3.0
+      https://freesound.org/people/RICHERlandTV/sounds/216089/
+
+    witches_sheep.ogg - zachrau March 6th, 2017 CC0
+      https://freesound.org/people/zachrau/sounds/383144/
+    
+    witches_water.ogg - InspectorJ  March 10th, 2018 CC BY 3.0 
+      https://freesound.org/people/InspectorJ/sounds/421184/
    
   Thanks to TenPlus1 for keeping the Mobs_Redo going!
   Thanks to rubenwardy for awesome help and the Minetest ContentDB
