@@ -44,7 +44,7 @@ local spawning = {
 witches.witch_types = {
   generic = {
     description = "Wanderling",
-    lore = "This witch wanders about the land, for what do they seek?",
+    lore = "The Wanderlings roam the land, for what do they seek?",
 
 
     additional_properties = {
@@ -72,7 +72,7 @@ witches.witch_types = {
 
   cottage = {
     description = "Eremitant",
-    lore = "This witch has found a home for themselves, who would bother them?",
+    lore = "The Eremitant have found homes for themselves, who would bother them?",
     additional_properties = {
       special_follow = {"default:diamond", "default:gold_lump", "default:apple",
       "default:blueberries", "default:torch", "default:stick",

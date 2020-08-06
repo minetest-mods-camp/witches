@@ -3,3 +3,5 @@ mobs
 handle_schematics?
 fireflies?
 mobs_monster?
+doors?
+

@@ -5,8 +5,8 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200801"
-print("this is Witches "..witches.version)
+witches.version = "20200806"
+print("This is Witches "..witches.version.."!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
 -- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
@@ -63,9 +63,10 @@ dofile(path .. "/nodes.lua")
 dofile(path .. "/sheep.lua")
 dofile(path .. "/magic.lua")
 
-if not handle_schematics then
+if not minetest.get_modpath("hunger_ng") then
   print("optional handle_schematics not found!\n Witch cottages not available!")
-  return
+  --dofile(path .. "/cottages.lua")
+  
 else
   
   dofile(path .. "/basic_houses.lua")
@@ -74,7 +75,7 @@ end
 
 dofile(path .. "/witches.lua")
 
-print("enter the witches! version: "..witches.version)
+print("Generating witches! version: "..witches.version)
 
 
 
@@ -92,7 +93,7 @@ function witches.generate(witch_types,witch_template)
       g_template[x] = g_type[x]
     end
 
-    print_s("Assembling the "..g_template.description..":")
+    print_s("Registering the "..g_template.description..": witches:witch_"..k)
     if g_template.lore then print_s("  "..g_template.lore) end
     --print_s("resulting template: " ..dump(g_template))
     mobs:register_mob("witches:witch_"..k, g_template)
