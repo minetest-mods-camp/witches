@@ -63,7 +63,7 @@ dofile(path .. "/nodes.lua")
 dofile(path .. "/sheep.lua")
 dofile(path .. "/magic.lua")
 
-if not minetest.get_modpath("hunger_ng") then
+if not minetest.get_modpath("handle_schematics") then
   print("optional handle_schematics not found!\n Witch cottages not available!")
   --dofile(path .. "/cottages.lua")
   
