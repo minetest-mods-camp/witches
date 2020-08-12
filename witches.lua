@@ -60,6 +60,7 @@ witches.witch_types = {
           minetest.set_node(pos1, {name = "fireflies:firefly"})
           --print("setting firefly"..minetest.pos_to_string(pos1))
         end
+
       end,  
 
       on_spawn_addendum = function(self)
@@ -78,6 +79,18 @@ witches.witch_types = {
       "default:blueberries", "default:torch", "default:stick",
       "flowers:mushroom_brown","flowers:mushroom_red"},
       do_custom_addendum = function(self)
+        if witches.cottages then
+          if math.random() < 0.01 then
+          
+            local volume = witches.grounding(self)
+            if volume then
+              local pos = self.object:get_pos()
+              pos.y = pos.y+3
+              self.object:set_pos(pos)
+              witches.generate_cottage(volume[1],volume[2])
+            end
+          end
+        end
       end,  
       on_spawn_addendum = function(self) 
         witches.claim_witches_chest(self)
@@ -86,6 +99,7 @@ witches.witch_types = {
     spawning = spawning.cottage,
   }
 }
+
 witches.witch_template = {  --your average witch,
   description = "Basic Witch",
   lore = "This witch has a story yet to be...",
