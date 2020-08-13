@@ -80,7 +80,7 @@ witches.witch_types = {
       "flowers:mushroom_brown","flowers:mushroom_red"},
       do_custom_addendum = function(self)
         if witches.cottages then
-          if math.random() < 0.01 then
+          if math.random() < 0.1 then
           
             local volume = witches.grounding(self)
             if volume then
