@@ -39,6 +39,7 @@ end)
 function witches.grounding(self,vol_vec,required_list,exception_list,replacement_node)
   local r_tweak = math.random(-1,1)
   local area = vol_vec or {x=math.random(5+r_tweak,9),y=1,z=math.random(5-r_tweak,9)}
+ 
   local pos = vector.round(self.object:get_pos())
     --drop checks below sea level
     if pos.y < 0 then return end
@@ -47,36 +48,33 @@ function witches.grounding(self,vol_vec,required_list,exception_list,replacement
 
   local pos1 = {x= pos.x-(area.x/2),y=pos.y-area.y ,z= pos.z-(area.z/2)}
   local pos2 = {x= pos.x+(area.x/2),y=pos.y, z= pos.z+(area.z/2)}
+  local ck_pos1 = vector.subtract(pos1,4)
+  local ck_pos2 = vector.add(pos2,4)
+
+  --ck_pos2.y = ck_pos2.y + 12
+
 
   --print("pos = ".. mtpts(pos))
   --print("pos1 = ".. mtpts(pos1))
   --print("pos2 = ".. mtpts(pos2))
 
   --test if area is suitable (no air or water)
-  local rlist = required_list or {"group:soil","group:crumbly"}
-  local elist = exception_list or {}
-  local minichunk = minetest.find_nodes_in_area(pos1, pos2,rlist)
-
-  for i=1, #minichunk do
-    for n=1, #elist do
-      if minetest.get_node(minichunk[i].name) == elist[n] then
-        table.remove(minichunk,i)
-      end
-    end
-  end
-  --print(mts(minichunk))
-  --see that lowest nodes all exist at pos1.y or die
-  local count = 0
-
-  if #minichunk >= (area.x * area.z*1.4)  then
-    print("SUCCESS!".."pos1 = ".. mtpts(pos1).."pos2 = ".. mtpts(pos2).." count = "..#minichunk)
-    if replacement_node then
-      minetest.bulk_set_node(minichunk,{name = replacement_node})
-    end
-    local volume = {pos1,pos2}
-    return volume
+  local rlist = required_list or {"soil","crumbly"}
+  local elist = exception_list or {"group:stone","group:cracky","group:wood", "group:tree"}
+  local exceptions = minetest.find_nodes_in_area_under_air(ck_pos1, ck_pos2,elist)
+  if #exceptions and #exceptions >= 1 then
+    
+   print("exceptions count = "..#exceptions) 
+   return
   else
-    --print("insufficient count = "..#minichunk)
+ 
+    print("SUCCESS!".."pos1 = ".. mtpts(pos1).."pos2 = ".. mtpts(pos2))
+
+    local volume = {pos1,pos2}
+    local ck_volume = {ck_pos1,ck_pos2}
+
+    return volume,ck_volume
+
   end
 
 end
@@ -97,7 +95,7 @@ local default_params = {
   wall_nodes_ftype = {"wall_wdir"}, --wall_dir, wall_fdir, wall_wdir
   wall_height = 3,
   window_nodes = {"default:fence_wood","default:fence_pine_wood","default:fence_acacia_wood","default:fence_junglewood"},
-  window_dimensions = {1,1,1,2}, --width,height min; width,height max
+  window_height = {1,2}, --height min, height max
   orient_materials = true,
   door_bottom = "doors:door_wood_witch_a";
   door_top    = "doors:hidden";
@@ -108,6 +106,7 @@ function witches.generate_cottage(pos1,pos2,params)
   pos1 = vector.round(pos1)
   pos2 = vector.round(pos2)
   local wp = working_parameters
+
   if params then --get defaults for any missing params
     for k,v in default_params do
      if not params[k] then
@@ -118,11 +117,15 @@ function witches.generate_cottage(pos1,pos2,params)
 
   end
 
+  local ps = wp.porch_size or math.random(2)
+  local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
+  local window_node = wp.window_nodes[math.random(#wp.window_nodes)]
+  local window_height = wp.window_height[math.random(#wp.window_height)]
   --start with basement
   --local od = vector.subtract(pos2,pos1)
 
   local lower_corner_nodes = {
-     pos1,
+     {x= pos1.x, y = pos1.y, z = pos1.z},
      {x= pos1.x, y = pos1.y, z = pos2.z},
      {x= pos2.x, y = pos1.y, z = pos2.z},
      {x= pos2.x, y = pos1.y, z = pos1.z},
@@ -131,9 +134,10 @@ function witches.generate_cottage(pos1,pos2,params)
 
     {x= pos1.x, y = pos2.y, z = pos1.z},
     {x= pos1.x, y = pos2.y, z = pos2.z},
-    pos2,
+    {x= pos2.x, y = pos2.y, z = pos2.z},
     {x= pos2.x, y = pos2.y, z = pos1.z},
   }
+
   local ucn = upper_corner_nodes
   for h=1, wp.foundation_depth do
    for i=1, #ucn do
@@ -142,20 +146,24 @@ function witches.generate_cottage(pos1,pos2,params)
    end
   end
 
-
-  local ps = wp.porch_size or math.random(2)
+  for h=1, wp.foundation_depth do
+    for i=1, #ucn do
+     local pos = {x=ucn[i].x, y=ucn[i].y-h+1,z=ucn[i].z}
+     minetest.set_node(pos,{name=wp.foundation_nodes[math.random(#wp.foundation_nodes)]})
+    end
+   end
 
  -- clear the area
- local cpos1 = {x = pos1.x-ps, y=pos2.y+5 ,z=pos1.z-ps}
+ local cpos1 = {x = pos1.x-ps, y=pos2.y ,z=pos1.z-ps}
  local cpos2 = {x = pos2.x+ps, y=pos2.y+13, z=pos2.z+ps}
  local carea = vector.subtract(cpos2,cpos1)
  for h=1,carea.y+2 do
    for i=1, carea.z+1 do
      for j=1, carea.x+1 do
 
-           local pos = {x=cpos1.x+j-1, y=cpos1.y, z=cpos1.z+i-1}
+           local pos = {x=cpos1.x+j-1, y=cpos1.y+h, z=cpos1.z+i-1}
            minetest.set_node(pos,{
-             name="air"
+             name="default:river_water_flowing"
            })
 
      end
@@ -164,7 +172,6 @@ function witches.generate_cottage(pos1,pos2,params)
 
   -- porch
   local prnodes = wp.porch_nodes[math.random(#wp.porch_nodes)]
-
 
   local ppos1 = {x = pos1.x-ps, y=pos2.y ,z=pos1.z-ps}
   local ppos2 = {x = pos2.x+ps, y=pos2.y, z=pos2.z+ps}
@@ -181,6 +188,40 @@ function witches.generate_cottage(pos1,pos2,params)
 
     end
   end
+
+  local pcn = {
+
+    {x= pos1.x-ps, y = pos2.y, z = pos1.z-ps},
+    {x= pos1.x-ps, y = pos2.y, z = pos2.z+ps},
+    {x= pos2.x+ps, y = pos2.y, z = pos2.z+ps},
+    {x= pos2.x+ps, y = pos2.y, z = pos1.z-ps},
+  }
+  local pcn_height = wp.foundation_depth + 1
+
+  for h=1, pcn_height do
+    for i=1, #pcn do
+     local pos = {x=pcn[i].x, y=pcn[i].y-wp.foundation_depth+h,z=pcn[i].z}
+     minetest.set_node(pos,{name=wall_node})
+    end
+  end
+
+  for h=1, pcn_height do
+    for i=1, #pcn do
+     local pos = {x=pcn[i].x, y=pcn[i].y-wp.foundation_depth+h,z=pcn[i].z}
+     minetest.set_node(pos,{name=wall_node})
+    end
+  end
+  
+  
+  local treecn = {
+
+    {x= pcn[1].x-ps, y = pos2.y, z = pcn[1].z-ps},
+    {x= pcn[2].x-ps, y = pos2.y, z = pcn[2].z+ps},
+    {x= pcn[3].x+ps, y = pos2.y, z = pcn[3].z+ps},
+    {x= pcn[4].x+ps, y = pos2.y, z = pcn[4].z-ps},
+  }
+
+  local tree_pos = treecn[math.random(#treecn)]
 
 
   --first floor!
@@ -202,7 +243,7 @@ function witches.generate_cottage(pos1,pos2,params)
     end
   end
 
-  local wlnodes = wp.wall_nodes[math.random(#wp.wall_nodes)]
+  --local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
   if math.random() < 0.9 then
     --wall corners wood
     for h=1, wp.wall_height do
@@ -210,14 +251,14 @@ function witches.generate_cottage(pos1,pos2,params)
         if  h % 2 == 0 then
           local pos = {x=ucn[i].x, y=ucn[i].y+h,z=ucn[i].z}
           minetest.set_node(pos,{
-                                  name=wlnodes,
+                                  name=wall_node,
                                   paramtype2="facedir",
                                   param2=5
                                 })
         else
           local pos = {x=ucn[i].x, y=ucn[i].y+h,z=ucn[i].z}
           minetest.set_node(pos,{
-                                  name=wlnodes,
+                                  name=wall_node,
                                   paramtype2="facedir",
                                   param2=13
                                 })
@@ -236,7 +277,6 @@ function witches.generate_cottage(pos1,pos2,params)
 
   --create first floor wall plan!
   local wall_plan ={}
-
   for i=1,area.z-1 do --west wall
     local pos = {x=ffpos1.x, y=ffpos1.y+1, z=ffpos1.z+i}
     local fpos = {x=ffpos1.x, y=ffpos1.y+1, z=ffpos1.z-1}
@@ -285,7 +325,7 @@ function witches.generate_cottage(pos1,pos2,params)
      for i=1, #wall_plan do
        minetest.set_node(wall_plan[i].pos,{
 
-        name=wlnodes,
+        name=wall_node,
         paramtype2 = "facedir",
         param2 = wall_plan[i].walldir
       })
@@ -294,6 +334,7 @@ function witches.generate_cottage(pos1,pos2,params)
       wall_plan[i].pos.y = wall_plan[i].pos.y+1
     end
   end
+
 --possible door locations, extra offset data
   local p_door_pos = {
                     w = {x = ffpos1.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+1, p ="z", fp={"x",-1}},
@@ -313,7 +354,6 @@ function witches.generate_cottage(pos1,pos2,params)
     end
 
   end
-
 
 --local door_pos= p_door_pos
 
@@ -363,76 +403,105 @@ function witches.generate_cottage(pos1,pos2,params)
       param2 = t_wm
     })
 
-
   end
 --set windows
-  local window_pos = {}
-  window_pos = {
-                    w = {x = ffpos1.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", 1} },
-                    n = {x = ffpos1.x+math.random(2,area.x-2), z = ffpos2.z, y = ffpos1.y+2, p= "x", fp = {"z", -1} },
-                    e = {x = ffpos2.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", -1} },
-                    s = {x = ffpos1.x+math.random(2,area.x-2), z = ffpos1.z, y = ffpos1.y+2, p= "x", fp = {"z", 1} }
-  }
+
+  local window_pos = {w ={},n={},e={},s={}}
+  local az = math.floor((area.z-2)/2)
+  local ax = math.floor((area.x-2)/2)
+  print("az/ax= "..az.."  "..ax)
+  for i=1, az do
+       local wz = {x = ffpos1.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", 1} }
+     table.insert(window_pos.w,wz)
+       local ez = {x = ffpos2.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", -1} }
+     table.insert(window_pos.e, ez)
+  end
+  for i=1, ax do
+    local nx = {x = ffpos1.x+math.random(2,area.x-2), z = ffpos2.z, y = ffpos1.y+2, p= "x", fp = {"z", -1} }
+    table.insert(window_pos.n,nx)
+    local sx = {x = ffpos1.x+math.random(2,area.x-2), z = ffpos1.z, y = ffpos1.y+2, p= "x", fp = {"z", 1} }
+    table.insert(window_pos.s,sx)
+  end
+  print(mts(window_pos))
+
 
   for k,v in pairs(door_pos) do
 
-    for i=v[v.p]+1,v[v.p]-1,-1 do
+    for i=v[v.p]+1,v[v.p]-1,-1 do --start with pos on either side of door
+      for j=1, #window_pos[k] do
 
-      if window_pos[k] and i == window_pos[k][v.p] then
-        window_pos[k] = nil
+        if window_pos[k][j] and i == window_pos[k][j][v.p] then
+          print("removing window_pos[k][j][v.p] = ".. window_pos[k][j][v.p])
+          table.remove(window_pos[k],j)
+        end
       end
-
     end
 
   end
 
   if window_pos then
-    for _,v in pairs(window_pos) do
+    for k,_ in pairs(window_pos) do
+      for _,v in pairs(window_pos[k]) do
 
-        print("window set: "..mtpts(v))
-        minetest.set_node(v,{
-          name="default:fence_wood"
-        })
-        local window_pos_t = v
-      --[[
-        window_pos_t.y = window_pos_t.y+1
-        minetest.set_node(window_pos_t,{
-          name="default:fence_wood"
-        })
-    --]]
+        for i=1,window_height do
+
+          print("window set: "..mtpts(v))
+          minetest.set_node({x= v.x, y=v.y-1+i, z=v.z},{
+            name=window_node
+          })
+          
+        end
+
+      end
     end
   end
 
       --set some torch-like inside near window
   if window_pos then
-    for _,v in pairs(window_pos) do
 
-      local t_pos1 = vector.new(v)
-      --use fp to get inside
-      t_pos1[v.fp[1] ]= t_pos1[v.fp[1] ] + (v.fp[2])
-      --get wallmount param2
-      local t_dir = vector.direction(t_pos1,v)
-      local t_wm = minetest.dir_to_wallmounted(t_dir)
+    for k,_ in pairs(window_pos) do
+      for _,v in ipairs(window_pos[k]) do
+        local t_pos1 = vector.new(v)
+        --use fp to get inside
+        t_pos1[v.fp[1] ]= t_pos1[v.fp[1] ] + (v.fp[2])
+        local t_pos2 = vector.new(t_pos1)
 
-      --t_pos1.y = t_pos1.y + 1
-      --offset from window
+        --get wallmount param2
+        local t_dir = vector.direction(t_pos1,v)
+        local t_wm = minetest.dir_to_wallmounted(t_dir)
 
-      local t_pos2 = vector.new(t_pos1)
-      t_pos1[v.p] = t_pos1[v.p] - 1
+        t_pos1[v.p] = t_pos1[v.p] - 1      
+        t_pos2[v.p] = t_pos2[v.p] + 1
 
-      t_pos2[v.p] = t_pos2[v.p] + 1
-      if math.random() < .5 then
-        minetest.set_node(t_pos1,{
-          name="default:torch_wall",
-          --paramtype2 = "facedir",
-          param2 = t_wm
-        })
-      else
-        minetest.set_node(t_pos2,{
-          name="default:torch_wall",
-          --paramtype2 = "facedir",
-          param2 = t_wm
-        })
+        local ck_pos1 = vector.new(v)
+        ck_pos1[v.p] =  ck_pos1[v.p] - 1
+        local ck_pos2 = vector.new(v)
+        ck_pos2[v.p] =  ck_pos1[v.p] + 1
+
+
+
+        if math.random() < .5 then 
+          local ck = minetest.get_node(ck_pos1) 
+          print("ck: "..ck.name)
+          if ck.name ~= window_node then
+            minetest.set_node(t_pos1,{
+              name="default:torch_wall",
+              --paramtype2 = "facedir",
+              param2 = t_wm
+          
+            })
+          end
+        else
+          local ck = minetest.get_node(ck_pos2) 
+          print("ck: "..ck.name)
+          if ck.name ~= window_node then
+            minetest.set_node(t_pos2,{
+              name="default:torch_wall",
+              --paramtype2 = "facedir",
+              param2 = t_wm
+            })
+          end
+        end
       end
     end
   end
@@ -441,64 +510,66 @@ function witches.generate_cottage(pos1,pos2,params)
   if window_pos then
     local furniture = {"default:bookshelf","default:chest","beds:bed","default:furnace"}
     local f_pos1 ={}
-    for k,v in pairs(window_pos) do
-      if furniture then
-        f_pos1 = vector.new(v)
-        f_pos1[v.fp[1] ] = f_pos1[v.fp[1] ]+v.fp[2]
-        f_pos1.y = f_pos1.y-1
+    for j in pairs(window_pos) do
+      for k,v in ipairs(window_pos[j]) do
+        if furniture and #furniture >= 1 then
+          f_pos1 = vector.new(v)
+          f_pos1[v.fp[1] ] = f_pos1[v.fp[1] ]+v.fp[2]
+          f_pos1.y = f_pos1.y-1
 
-        print("window:"..mtpts(window_pos[k]))
-        print("furniture:"..mtpts(f_pos1))
-        local dir1=vector.direction(f_pos1,v)
-        local dir2=vector.direction(v,f_pos1)
-        local f_facedir1 = minetest.dir_to_facedir(dir1)
-        local f_facedir2 = minetest.dir_to_facedir(dir2)
-        local f_num = math.random(#furniture)
-        local f_name = furniture[f_num]
+          print("window:"..mtpts(v))
+          print("furniture:"..mtpts(f_pos1))
+          local dir1=vector.direction(f_pos1,v)
+          local dir2=vector.direction(v,f_pos1)
+          local f_facedir1 = minetest.dir_to_facedir(dir1)
+          local f_facedir2 = minetest.dir_to_facedir(dir2)
+          local f_num = math.random(#furniture)
+          local f_name = furniture[f_num]
 
-        if f_name == "beds:bed" then
-          local f_pos2 = vector.new(f_pos1)
-          if math.random()<0.001 then
-            f_pos2[v.fp[1] ] = f_pos2[v.fp[1] ]+v.fp[2]
-          else
-            f_pos2[v.p] = f_pos2[v.p] + v.fp[2] --bed along wall_nodes
-            dir1=vector.direction(f_pos2,f_pos1)
-            dir2=vector.direction(f_pos1,f_pos2)
-            f_facedir1 = minetest.dir_to_facedir(dir1)
-            f_facedir2 = minetest.dir_to_facedir(dir2)
+          if f_name == "beds:bed" then
+            local f_pos2 = vector.new(f_pos1)
+            if math.random()<0.001 then
+              f_pos2[v.fp[1] ] = f_pos2[v.fp[1] ]+v.fp[2]
+            else
+              f_pos2[v.p] = f_pos2[v.p] + v.fp[2] --bed along wall_nodes
+              dir1=vector.direction(f_pos2,f_pos1)
+              dir2=vector.direction(f_pos1,f_pos2)
+              f_facedir1 = minetest.dir_to_facedir(dir1)
+              f_facedir2 = minetest.dir_to_facedir(dir2)
+            end
+
+            minetest.set_node(f_pos1,{
+              name=f_name,
+              paramtype2 = "facedir",
+              param2 = f_facedir2
+            })
+            print("bed1:"..mtpts(f_pos1))
+            print("bed2:"..mtpts(f_pos2))
+            minetest.set_node(f_pos2,{
+              name=f_name,
+              paramtype2 = "facedir",
+              param2 = f_facedir1
+            })
+
+          elseif f_name == "default:furnace" then
+            f_pos1[v.fp[1] ] = f_pos1[v.fp[1] ]-v.fp[2]
+            minetest.set_node(f_pos1,{
+              name=f_name,
+              paramtype2 = "facedir",
+              param2 = f_facedir1
+            })
+            furnace_pos = vector.new(f_pos1)
+
+          elseif f_name ~="beds:bed"  then
+            minetest.set_node(f_pos1,{
+              name=f_name,
+              paramtype2 = "facedir",
+              param2 = f_facedir1
+            })
           end
 
-          minetest.set_node(f_pos1,{
-            name=f_name,
-            paramtype2 = "facedir",
-            param2 = f_facedir2
-          })
-          print("bed1:"..mtpts(f_pos1))
-          print("bed2:"..mtpts(f_pos2))
-          minetest.set_node(f_pos2,{
-            name=f_name,
-            paramtype2 = "facedir",
-            param2 = f_facedir1
-          })
-
-        elseif f_name == "default:furnace" then
-          f_pos1[v.fp[1] ] = f_pos1[v.fp[1] ]-v.fp[2]
-          minetest.set_node(f_pos1,{
-            name=f_name,
-            paramtype2 = "facedir",
-            param2 = f_facedir1
-          })
-          furnace_pos = vector.new(f_pos1)
-
-        elseif f_name ~="beds:bed"  then
-          minetest.set_node(f_pos1,{
-            name=f_name,
-            paramtype2 = "facedir",
-            param2 = f_facedir1
-          })
+          table.remove(furniture, f_num)
         end
-
-        table.remove(furniture, f_num)
       end
     end
   end
@@ -531,7 +602,7 @@ function witches.generate_cottage(pos1,pos2,params)
     end
   end
 --]]
-
+local stovepipe_pos = {}
 --gable and roof
   --orientation
   local rfnum = math.random(#wp.roof_nodes)
@@ -716,7 +787,7 @@ function witches.generate_cottage(pos1,pos2,params)
     --print("furnace pos: "..mtpts(furnace_pos))
     local stovepipe = (rfpos2.y - furnace_pos.y) + 1
     --print(rfpos2.y.." "..furnace_pos.y.." "..stovepipe)
-    local stovepipe_pos = vector.new(furnace_pos)
+    stovepipe_pos = vector.new(furnace_pos)
     for i=1, stovepipe do
       stovepipe_pos.y = stovepipe_pos.y + 1
       minetest.set_node(stovepipe_pos,{
@@ -731,21 +802,22 @@ function witches.generate_cottage(pos1,pos2,params)
     for _,d in pairs(door_pos) do
       for k,l in pairs(l_pos) do
         if l.x == d.x and  l.z == d.z then
-          l_pos[k]= nil
+          table.remove(l_pos,k)
         end
       end
     end
   end
 
   if window_pos and l_pos  then
-    for _,w in pairs(window_pos) do
-      for k,l in pairs(l_pos) do
-        print("possible window before check: ".. mtpts(w))
-        print("possible ladder before check: ".. mtpts(l))
-        if math.ceil(l.x) == w.x and  math.ceil(l.z) == w.z then
-          print("removing".. mtpts(l_pos[k]))
-          table.remove(l_pos,k)
-
+    for v,_ in pairs(window_pos) do
+      for _,w in ipairs(window_pos[v]) do
+        for k,l in pairs(l_pos) do
+          print("possible window before check: ".. mtpts(w))
+          print("possible ladder before check: ".. mtpts(l))
+          if math.ceil(l.x) == w.x and  math.ceil(l.z) == w.z then
+            print("removing".. mtpts(l_pos[k]))
+            table.remove(l_pos,k)
+          end
         end
       end
     end
@@ -753,9 +825,9 @@ function witches.generate_cottage(pos1,pos2,params)
 
   print("possible ladder: ".. mts(l_pos))
   if l_pos and #l_pos >= 1 then
-     local lpn =  math.random(#l_pos)
-     local lpc = l_pos[lpn]
 
+    local lpn =  math.random(#l_pos)
+    local lpc = l_pos[lpn]
     local ladder_length = lpc.y - 1 - ffpos1.y
     local fpos = vector.new(lpc)
 
@@ -821,11 +893,19 @@ function witches.generate_cottage(pos1,pos2,params)
   end
 --]]
 
+  local c_area1 = vector.new(ppos1)
+  local c_area2 =vector.new(ppos2)
+  if stovepipe_pos and stovepipe_pos.y then
+  c_area2.y = stovepipe_pos.y
 
-local cottage_dimensions = {ppos1,rfpos2}
-print("porch above ground = "..mtpts(ppos1))
-print("           rooftop = "..mtpts(rfpos2))
-return cottage_dimensions
+  else
+    c_area2.y = c_area2.y + 12
+  end
+
+  local cottage_area = {c_area1,c_area2}
+  local cottage_va = VoxelArea:new{MinEdge = c_area1, MaxEdge = c_area2}
+  --print(mts(VoxelArea))
+  return cottage_area
 end
 
 

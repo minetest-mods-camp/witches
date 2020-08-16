@@ -80,14 +80,18 @@ witches.witch_types = {
       "flowers:mushroom_brown","flowers:mushroom_red"},
       do_custom_addendum = function(self)
         if witches.cottages then
-          if math.random() < 0.1 then
+          if not self.built_house and math.random() < 0.01 then
           
             local volume = witches.grounding(self)
             if volume then
+              print("volume passed: "..dump(volume))
+            
               local pos = self.object:get_pos()
               pos.y = pos.y+3
               self.object:set_pos(pos)
+              self.built_house = pos
               witches.generate_cottage(volume[1],volume[2])
+              
             end
           end
         end
@@ -123,7 +127,7 @@ witches.witch_template = {  --your average witch,
     "witches_clothes.png"
   },
   --blood_texture = "witches_blood.png",
-  collisionbox = {-0.25, 0, -.25, 0.25, 2, 0.25},
+  collisionbox = {-0.2, 0, -.2, 0.2, 1.9, 0.2},
   drawtype = "front",
   makes_footstep_sound = true,
   sounds = {
