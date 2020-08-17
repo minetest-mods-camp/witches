@@ -99,6 +99,7 @@ local default_params = {
   orient_materials = true,
   door_bottom = "doors:door_wood_witch_a";
   door_top    = "doors:hidden";
+  root_nodes = {"witches:treeroots"}
 }
 
 function witches.generate_cottage(pos1,pos2,params)
@@ -119,6 +120,7 @@ function witches.generate_cottage(pos1,pos2,params)
 
   local ps = wp.porch_size or math.random(2)
   local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
+  local root_node = wp.root_nodes [math.random(#wp.root_nodes)]
   local window_node = wp.window_nodes[math.random(#wp.window_nodes)]
   local window_height = wp.window_height[math.random(#wp.window_height)]
   --start with basement
@@ -163,7 +165,7 @@ function witches.generate_cottage(pos1,pos2,params)
 
            local pos = {x=cpos1.x+j-1, y=cpos1.y+h, z=cpos1.z+i-1}
            minetest.set_node(pos,{
-             name="default:river_water_flowing"
+             name="air"
            })
 
      end
@@ -200,28 +202,32 @@ function witches.generate_cottage(pos1,pos2,params)
 
   for h=1, pcn_height do
     for i=1, #pcn do
-     local pos = {x=pcn[i].x, y=pcn[i].y-wp.foundation_depth+h,z=pcn[i].z}
+     local pos = {x=pcn[i].x, y=pcn[i].y+2-h,z=pcn[i].z}
      minetest.set_node(pos,{name=wall_node})
+     minetest.set_node({x=pos.x, y=pos.y-1, z=pos.z},{name=root_node})
     end
   end
 
-  for h=1, pcn_height do
-    for i=1, #pcn do
-     local pos = {x=pcn[i].x, y=pcn[i].y-wp.foundation_depth+h,z=pcn[i].z}
-     minetest.set_node(pos,{name=wall_node})
-    end
+
+  
+  local function mr(min,max)
+   local v = math.random(min,max)
+   return v
   end
-  
-  
+
   local treecn = {
 
-    {x= pcn[1].x-ps, y = pos2.y, z = pcn[1].z-ps},
-    {x= pcn[2].x-ps, y = pos2.y, z = pcn[2].z+ps},
-    {x= pcn[3].x+ps, y = pos2.y, z = pcn[3].z+ps},
-    {x= pcn[4].x+ps, y = pos2.y, z = pcn[4].z-ps},
+    {x= pcn[1].x-ps+mr(-1,1), y = pos2.y-1, z = pcn[1].z-ps+mr(-1,1)},
+    {x= pcn[2].x-ps+mr(-1,1), y = pos2.y-1, z = pcn[2].z+ps+mr(-1,1)},
+    {x= pcn[3].x+ps+mr(-1,1), y = pos2.y-1, z = pcn[3].z+ps+mr(-1,1)},
+    {x= pcn[4].x+ps+mr(-1,1), y = pos2.y-1, z = pcn[4].z-ps+mr(-1,1)},
   }
 
   local tree_pos = treecn[math.random(#treecn)]
+  local root_pos = vector.new(tree_pos)
+  root_pos.y = root_pos.y-1
+  minetest.spawn_tree(tree_pos,witches.acacia_tree)
+  minetest.set_node(root_pos,{name =root_node})
 
 
   --first floor!
@@ -405,14 +411,14 @@ function witches.generate_cottage(pos1,pos2,params)
 
   end
 --set windows
-
+  
   local window_pos = {w ={},n={},e={},s={}}
   local az = math.floor((area.z-2)/2)
   local ax = math.floor((area.x-2)/2)
   print("az/ax= "..az.."  "..ax)
   for i=1, az do
        local wz = {x = ffpos1.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", 1} }
-     table.insert(window_pos.w,wz)
+           table.insert(window_pos.w,wz)
        local ez = {x = ffpos2.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", -1} }
      table.insert(window_pos.e, ez)
   end
@@ -426,13 +432,16 @@ function witches.generate_cottage(pos1,pos2,params)
 
 
   for k,v in pairs(door_pos) do
-
-    for i=v[v.p]+1,v[v.p]-1,-1 do --start with pos on either side of door
-      for j=1, #window_pos[k] do
-
+     --v is the door pos vector table
+    for i=v[v.p]+1,v[v.p]-1,-1 do --start with lateral axis (p) pos on either side of door
+      print("doorpos "..v.p.." "..i)
+      for j,_ in ipairs(window_pos[k]) do --we want the vector table value of each
+        print("windowpos "..mts(window_pos[k][j]).." vs "..i)
         if window_pos[k][j] and i == window_pos[k][j][v.p] then
-          print("removing window_pos[k][j][v.p] = ".. window_pos[k][j][v.p])
-          table.remove(window_pos[k],j)
+          print("windowpos "..window_pos[k][j][v.p].." vs "..i)
+          print("removing window_pos[k][j][v.p] = ".. mtpts(window_pos[k][j]))
+          --table.remove(window_pos[k],j)
+          window_pos[k][j] = nil
         end
       end
     end

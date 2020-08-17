@@ -133,3 +133,59 @@ function witches.flower_patch(pos)
   
 	end
 end
+
+minetest.register_node("witches:treeroots", {
+  description = S("tree roots"),
+	drawtype = "liquid",
+	tiles = {{backface_culling = false, name= "default_tree.png"},{backface_culling = false, name= "default_tree.png"}},
+	--alpha = 220,
+	paramtype = "light",
+	walkable = true,
+	pointable = true,
+	diggable = false,
+	buildable_to = true,
+	is_ground_content = false,
+	drop = "",
+	drowning = 0,
+	liquidtype = "source",
+	liquid_alternative_flowing = "witches:treeroots_growing",
+	liquid_alternative_source = "witches:treeroots",
+	liquid_viscosity = 9,
+	-- Not renewable to avoid horizontal spread of water sources in sloping
+	-- rivers that can cause water to overflow riverbanks and cause floods.
+	-- River water source is instead made renewable by the 'force renew'
+	-- option used in the 'bucket' mod by the river water bucket.
+	liquid_renewable = false,
+	liquid_range = 1,
+	post_effect_color = {a = 200, r = 5, g = 5, b = 0},
+	groups = {liquid = 3, cools_lava = 1, wood = 1, tree =1},
+	--sounds = default.node_sound_water_defaults(),
+})
+
+minetest.register_node("witches:treeroots_growing", {
+  description = S("Flowing River Water"),
+	drawtype = "flowingliquid",
+	tiles = {{backface_culling = false, name= "default_tree.png"}},
+	
+	special_tiles = {{backface_culling = false, name= "default_tree.png"},{backface_culling = false, name= "default_tree.png"}},
+	--alpha = 220,
+	paramtype = "light",
+	paramtype2 = "flowingliquid",
+	walkable = true,
+	pointable = false,
+	diggable = false,
+	buildable_to = true,
+	is_ground_content = false,
+	drop = "",
+	drowning = 0,
+	liquidtype = "flowing",
+	liquid_alternative_flowing = "witches:treeroots_growing",
+	liquid_alternative_source = "witches:treeroots",
+	liquid_viscosity = 9,
+	liquid_renewable = false,
+	liquid_range = 1,
+	post_effect_color = {a = 200, r = 5, g = 5, b = 0},
+	groups = { liquid = 3, not_in_creative_inventory = 1,
+		cools_lava = 1,wood = 1,tree = 1},
+	--sounds = default.node_sound_water_defaults(),
+})
