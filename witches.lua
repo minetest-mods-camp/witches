@@ -55,10 +55,14 @@ witches.witch_types = {
       do_custom_addendum = function(self)
         if math.random() < .0001 and  minetest.registered_nodes["fireflies:firefly"] then
           local pos = self.object:get_pos()
-          pos.y = pos.y+1
-          local pos1 = minetest.find_node_near(pos, 3, "air")        
-          minetest.set_node(pos1, {name = "fireflies:firefly"})
-          --print("setting firefly"..minetest.pos_to_string(pos1))
+          if pos then
+            pos.y = pos.y+1
+            local pos1 = minetest.find_node_near(pos, 3, "air")        
+            if pos1 then
+              minetest.set_node(pos1, {name = "fireflies:firefly"})
+              --print("setting firefly"..minetest.pos_to_string(pos1))
+            end
+          end
         end
 
       end,  
