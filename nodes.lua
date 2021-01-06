@@ -188,15 +188,5 @@ minetest.register_node("witches:treeroots_growing", {
 	groups = { liquid = 3, not_in_creative_inventory = 1,
 		cools_lava = 1,tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
   --sounds = default.node_sound_water_defaults(),
-  on_construct = function()
-    local pos = minetest.get_pos()
-    pos = {
-            x = pos.x+math.random(-1,1),
-            y = pos.y,
-            z = pos.z+math.random(-1,1)
-          }
 
-    minetest.set_node(pos, {name = "witches:treeroots"})
-    print("flowing "..minetest.pos_to_string(pos))
-  end
 })
