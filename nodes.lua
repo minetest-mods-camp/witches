@@ -142,7 +142,7 @@ minetest.register_node("witches:treeroots", {
 	paramtype = "light",
 	walkable = true,
 	pointable = true,
-	diggable = false,
+	diggable = true,
 	buildable_to = true,
 	is_ground_content = false,
 	drop = "",
@@ -158,12 +158,12 @@ minetest.register_node("witches:treeroots", {
 	liquid_renewable = false,
 	liquid_range = 1,
 	post_effect_color = {a = 200, r = 5, g = 5, b = 0},
-	groups = {liquid = 3, cools_lava = 1, wood = 1, tree =1},
+	groups = {liquid = 3, cools_lava = 1, tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
 	--sounds = default.node_sound_water_defaults(),
 })
 
 minetest.register_node("witches:treeroots_growing", {
-  description = S("Flowing River Water"),
+  description = S("Tree Roots"),
 	drawtype = "flowingliquid",
 	tiles = {{backface_culling = false, name= "default_tree.png"}},
 	
@@ -173,7 +173,7 @@ minetest.register_node("witches:treeroots_growing", {
 	paramtype2 = "flowingliquid",
 	walkable = true,
 	pointable = false,
-	diggable = false,
+	diggable = true,
 	buildable_to = true,
 	is_ground_content = false,
 	drop = "",
@@ -186,6 +186,17 @@ minetest.register_node("witches:treeroots_growing", {
 	liquid_range = 1,
 	post_effect_color = {a = 200, r = 5, g = 5, b = 0},
 	groups = { liquid = 3, not_in_creative_inventory = 1,
-		cools_lava = 1,wood = 1,tree = 1},
-	--sounds = default.node_sound_water_defaults(),
+		cools_lava = 1,tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
+  --sounds = default.node_sound_water_defaults(),
+  on_construct = function()
+    local pos = minetest.get_pos()
+    pos = {
+            x = pos.x+math.random(-1,1),
+            y = pos.y,
+            z = pos.z+math.random(-1,1)
+          }
+
+    minetest.set_node(pos, {name = "witches:treeroots"})
+    print("flowing "..minetest.pos_to_string(pos))
+  end
 })
