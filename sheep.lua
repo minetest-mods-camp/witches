@@ -243,7 +243,7 @@ minetest.register_craftitem(":mobs:mutton_raw", {
 -- cooked mutton
 minetest.register_craftitem(":mobs:mutton_cooked", {
 	description = S("Cooked Mutton"),
-	inventory_image = "mobs_meat_cooked.png",
+	inventory_image = "mobs_meat.png",
 	on_use = minetest.item_eat(6),
 	groups = {food_meat = 1, food_mutton = 1, flammable = 2},
 })
