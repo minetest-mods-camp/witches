@@ -139,7 +139,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
       end
       if #rares > 0 then
         --print_s("rares = "..dump(rares))
-        local pos = self.object:getpos()
+        local pos = self.object:get_pos()
         pos.y = pos.y + 0.5
         --witches.mixitup(pos)
         if #rares > max_drops then
@@ -246,7 +246,7 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear )
   local reward_item = {}
   local reward = {}
   local inv = minetest.get_inventory({ type="player", name= pname })
-  local pos = self.object:getpos()
+  local pos = self.object:get_pos()
   pos.y = pos.y + 0.5
 
   drop_chance_min = drop_chance_min or 0
@@ -511,7 +511,7 @@ function witches.quests(self, clicker)
   local pname = clicker:get_player_name()
   --print(pname.."  clicked on a witch!")
   local item = clicker:get_wielded_item()
-  local pos = clicker:getpos()
+  local pos = clicker:get_pos()
   stop_and_face(self,pos)
 
   --make sure we are looking for an item
