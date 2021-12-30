@@ -60,15 +60,33 @@ dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
 dofile(path .. "/nodes.lua")
-dofile(path .. "/sheep.lua")
+
+-- This gets the list of possible sheep that an enemy can be turned into
+if minetest.get_modpath("animalia") then
+	witches.sheep = {"animalia:sheep"}
+elseif minetest.get_modpath("mobs_animal") then
+	witches.sheep = {}
+	for key, value in pairs(minetest.registered_entities) do
+		if string.sub(key, 1, #("mobs_animal:sheep_")) == "mobs_animal:sheep_" then
+			witches.sheep[#witches.sheep + 1] = key
+		end
+	end
+else
+	dofile(path .. "/sheep.lua")
+	witches.sheep = {}
+	for _, col in ipairs(witches.sheep_colors) do
+		witches.sheep[#witches.sheep + 1] = "witches:sheep_" .. col[1]
+	end
+end
+
 dofile(path .. "/magic.lua")
 
 if not minetest.get_modpath("handle_schematics") then
   print("optional handle_schematics not found!\n Witch cottages not available!")
   --dofile(path .. "/cottages.lua")
-  
+
 else
-  
+
   dofile(path .. "/basic_houses.lua")
   print("handle_schematics found! Witch cottages enabled!")
 end
