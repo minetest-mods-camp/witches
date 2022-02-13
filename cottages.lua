@@ -62,13 +62,16 @@ function witches.grounding(self,vol_vec,required_list,exception_list,replacement
   local rlist = required_list or {"soil","crumbly"}
   local elist = exception_list or {"group:stone","group:cracky","group:wood", "group:tree"}
   local exceptions = minetest.find_nodes_in_area_under_air(ck_pos1, ck_pos2,elist)
+  local protected_area = minetest.is_area_protected(ck_pos1, ck_pos2, "", 2)
+
   if #exceptions and #exceptions >= 1 then
-    
    print("exceptions count = "..#exceptions) 
    return
+  elseif protected_area then
+    print("protected area found at "..mtpts(protected_area))
+    return
   else
- 
-    print("SUCCESS!".."pos1 = ".. mtpts(pos1).."pos2 = ".. mtpts(pos2))
+     print("SUCCESS!".."pos1 = ".. mtpts(pos1).."pos2 = ".. mtpts(pos2))
 
     local volume = {pos1,pos2}
     local ck_volume = {ck_pos1,ck_pos2}

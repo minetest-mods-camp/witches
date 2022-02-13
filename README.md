@@ -1,6 +1,6 @@
 # [witches] Witches (Mobs Redo addon) [mod] for Minetest 
 
-Witches is copyright 2020 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
+Witches is copyright 2022 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
 The MIT License (MIT)
 
 * code/issue tracking :https://gitlab.com/freelikegnu/witches
@@ -15,14 +15,10 @@ Witches inhabit the land! They are currently in development but, can already:
   
 * If you are repeatedly helpful to a witch...
   
-* Witch cottages adapted from Sokomine's basic_houses:
-    (https://github.com/Sokomine/basic_houses) mod under under MIT license
-	  with permission from author.
-    Option requires Sokomine's handle_schematics mod (also GPLv3)
-    https://github.com/Sokomine/handle_schematics
+* New Witch cottage code with no additional mod requirements!
 
-    Settings provided from settings menu!
-
+* If Protection mod is available and enabled, Witches will no build in these areas! 
+  
 * Some cottages will spawn over a dungeon if they are near the surface
 
 * Have a name and origin location which they will tell player.
@@ -43,8 +39,7 @@ Witches inhabit the land! They are currently in development but, can already:
     * Mobs Redo git repository:  https://notabug.org/TenPlus1/mobs_redo
 
 ## Optional Mods:
-* For Witches Cottages: Sokomine's handle_schematics mod (GPLv3)
-    * git repository: https://github.com/Sokomine/handle_schematics
+* Protection to prevent Witches from placing cottages in protected areas! 
   
 * Any mobs from any mobs mod attacking Witches may be turned into a sheep!
 
@@ -72,10 +67,6 @@ Witches inhabit the land! They are currently in development but, can already:
 
 * sheep.lua code adapted from mobs_animals by TenPlus1 and authors credited in sheep.lua
   
-* Witch houses code adapted from Sokomine's basic_houses 
-  (https://github.com/Sokomine/basic_houses) mod under MIT license
-	with permission from author.
-
 * Sound files:
     witches_magic01.ogg  MATRIXXX_ December 28th, 2018 CC-BY 3.0
       https://freesound.org/people/MATRIXXX_/sounds/455205/

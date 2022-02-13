@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200816"
+witches.version = "20220212"
 print("This is Witches "..witches.version.."!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -63,16 +63,9 @@ dofile(path .. "/nodes.lua")
 dofile(path .. "/sheep.lua")
 dofile(path .. "/magic.lua")
 
-witches.cottages = false
-if not minetest.get_modpath("handle_schematics") then
-  print("optional handle_schematics not found!\n Witch cottages not available!")
-  dofile(path .. "/cottages.lua")
-  witches.cottages = true
-else
-  
-  dofile(path .. "/basic_houses.lua")
-  print("handle_schematics found! Witch cottages enabled!")
-end
+dofile(path .. "/cottages.lua")
+witches.cottages = true
+
 
 dofile(path .. "/witches.lua")
 
