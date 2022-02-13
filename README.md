@@ -13,11 +13,11 @@ Witches inhabit the land! They are currently in development but, can already:
   
 * Witches have magic!  They will defend themselves and each other against aggressive players and mobs!
   
-* If you are repeatedly helpful to a witch...
+* If you are repeatedly helpful to a witch something good is likely to happen!
   
 * New Witch cottage code with no additional mod requirements!
 
-* If Protection mod is available and enabled, Witches will no build in these areas! 
+* If protector (or similar) mod is available and enabled, Witches will no build in these areas! 
   
 * Some cottages will spawn over a dungeon if they are near the surface
 
@@ -39,7 +39,7 @@ Witches inhabit the land! They are currently in development but, can already:
     * Mobs Redo git repository:  https://notabug.org/TenPlus1/mobs_redo
 
 ## Optional Mods:
-* Protection to prevent Witches from placing cottages in protected areas! 
+* protector (or similar) - to prevent Witches from placing cottages in protected areas! 
   
 * Any mobs from any mobs mod attacking Witches may be turned into a sheep!
 

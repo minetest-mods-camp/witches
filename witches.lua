@@ -17,7 +17,7 @@ local spawning = {
       day_toggle = nil,
       on_spawn = function(self) 
         local pos = self.object:get_pos()
-        print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
+        witches.debug(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
       end,
   
   },
@@ -34,7 +34,7 @@ local spawning = {
     day_toggle = nil,
     on_spawn = function(self) 
       local pos = self.object:get_pos()
-      print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
+      witches.debug(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
       
     end
   
@@ -88,7 +88,7 @@ witches.witch_types = {
           
             local volume = witches.grounding(self)
             if volume then
-              print("volume passed: "..dump(volume))
+              witches.debug("volume passed: "..dump(volume))
             
               local pos = self.object:get_pos()
               pos.y = pos.y+3
@@ -296,7 +296,7 @@ witches.witch_template = {  --your average witch,
     --self.item_request.text =  witches.generate_name(witches.quest_dialogs, {"item_request"})
     --print(self.secret_name.." has spawned")
     --print("self: "..dump(self.follow))
-   -- print("self properties "..dump(self.object:get_properties()))
+    --print("self properties "..dump(self.object:get_properties()))
    --self.follow = {}
     if not self.follow or #self.follow < 1 or type(self.follow) == string then
       self.follow = {}

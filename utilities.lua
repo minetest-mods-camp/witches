@@ -44,7 +44,7 @@ local function quest_dialogs(self)
       S("Why must my task require the @1? ",self.item_request.item.desc),
       S("Is it so difficult to find the @1? ",self.item_request.item.desc),
       S("Wherefor about this land art the @1? ",self.item_request.item.desc),
-      S("Must there be but a few of the @1 about? ",self.item_request.item.desc),
+      S("Must not there be but a few of the @1 about? ",self.item_request.item.desc),
       S("Could I trouble you for some kind of @1? ",self.item_request.item.desc),
       S("The @1 would make my collection complete! ",self.item_request.item.desc),
       S("I sense the @1 are not far away...",self.item_request.item.desc),
@@ -234,11 +234,11 @@ end
 
 function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear )
   if not pname then
-      print("no player defined!")
+     witches.debug("no player defined!")
       return
   end
   if not self.drops then
-      print("no droplist defined in this mob!")
+     witches.debug("no droplist defined in this mob!")
       return
   end
   local list = {}
@@ -355,7 +355,7 @@ function witches.claim_witches_chest(self)
       -- if sn then print(sn) end
       local o = meta:get_string("owner")
       if o and sn and sn == o then
-        print("unbound chest: "..sn)
+       witches.debug("unbound chest: "..sn)
         meta:set_string("owner", self.secret_name)
         meta:set_string("infotext", self.secret_name.."'s sealed chest of ".. sn)
 
@@ -523,7 +523,7 @@ function witches.quests(self, clicker)
 
   if var1 == var2 then
     self.dev_mode = pname
-    print("dev mode active for: "..pname)
+   witches.debug("dev mode active for: "..pname)
   end
 
   --print("we are holding a "..dump(item:get_name()))

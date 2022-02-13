@@ -1,6 +1,6 @@
 default
 mobs
-handle_schematics?
+protector?
 fireflies?
 mobs_monster?
 doors?

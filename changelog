@@ -1,4 +1,5 @@
-    2022/02/12: Witches honor protected nodes ("protection" mod support)
+    2022/02/13: Debug output can be enabled from game Settings tab > All Settings > Mods > witches 
+    2022/02/12: Witches honor protected nodes ("protector" mod support)
     2020/08/10: Testing new cottage building code.
     2020/08/06: Fixed witches not registered when handle_schematics is not loaded! D'oh!
     2020/08/01: Witches have two new wands from Damon and Simone!

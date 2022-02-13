@@ -65,13 +65,13 @@ function witches.grounding(self,vol_vec,required_list,exception_list,replacement
   local protected_area = minetest.is_area_protected(ck_pos1, ck_pos2, "", 2)
 
   if #exceptions and #exceptions >= 1 then
-   print("exceptions count = "..#exceptions) 
+   witches.debug("exceptions count = "..#exceptions) 
    return
   elseif protected_area then
-    print("protected area found at "..mtpts(protected_area))
+    witches.debug("protected area found at "..mtpts(protected_area))
     return
   else
-     print("SUCCESS!".."pos1 = ".. mtpts(pos1).."pos2 = ".. mtpts(pos2))
+     witches.debug("SUCCESS!".."pos1 = ".. mtpts(pos1).."pos2 = ".. mtpts(pos2))
 
     local volume = {pos1,pos2}
     local ck_volume = {ck_pos1,ck_pos2}
@@ -366,10 +366,10 @@ function witches.generate_cottage(pos1,pos2,params)
 
 --local door_pos= p_door_pos
 
-  print("door: "..mts(door_pos))
+  witches.debug("door: "..mts(door_pos))
   for k,v in pairs(door_pos) do
 
-    print(mts(v))
+    witches.debug(mts(v))
     local f_pos1 = vector.new(v)
     --get the offsets
     f_pos1[v.fp[1] ] = f_pos1[v.fp[1] ] + v.fp[2]
@@ -418,7 +418,7 @@ function witches.generate_cottage(pos1,pos2,params)
   local window_pos = {w ={},n={},e={},s={}}
   local az = math.floor((area.z-2)/2)
   local ax = math.floor((area.x-2)/2)
-  print("az/ax= "..az.."  "..ax)
+  witches.debug("az/ax= "..az.."  "..ax)
   for i=1, az do
        local wz = {x = ffpos1.x, z = ffpos1.z+math.random(2,area.z-2), y = ffpos1.y+2, p= "z", fp = {"x", 1} }
            table.insert(window_pos.w,wz)
@@ -431,18 +431,18 @@ function witches.generate_cottage(pos1,pos2,params)
     local sx = {x = ffpos1.x+math.random(2,area.x-2), z = ffpos1.z, y = ffpos1.y+2, p= "x", fp = {"z", 1} }
     table.insert(window_pos.s,sx)
   end
-  print(mts(window_pos))
+  witches.debug(mts(window_pos))
 
 
   for k,v in pairs(door_pos) do
      --v is the door pos vector table
     for i=v[v.p]+1,v[v.p]-1,-1 do --start with lateral axis (p) pos on either side of door
-      print("doorpos "..v.p.." "..i)
+      witches.debug("doorpos "..v.p.." "..i)
       for j,_ in ipairs(window_pos[k]) do --we want the vector table value of each
-        print("windowpos "..mts(window_pos[k][j]).." vs "..i)
+        witches.debug("windowpos "..mts(window_pos[k][j]).." vs "..i)
         if window_pos[k][j] and i == window_pos[k][j][v.p] then
-          print("windowpos "..window_pos[k][j][v.p].." vs "..i)
-          print("removing window_pos[k][j][v.p] = ".. mtpts(window_pos[k][j]))
+          witches.debug("windowpos "..window_pos[k][j][v.p].." vs "..i)
+          witches.debug("removing window_pos[k][j][v.p] = ".. mtpts(window_pos[k][j]))
           --table.remove(window_pos[k],j)
           window_pos[k][j] = nil
         end
@@ -457,7 +457,7 @@ function witches.generate_cottage(pos1,pos2,params)
 
         for i=1,window_height do
 
-          print("window set: "..mtpts(v))
+          witches.debug("window set: "..mtpts(v))
           minetest.set_node({x= v.x, y=v.y-1+i, z=v.z},{
             name=window_node
           })
@@ -494,7 +494,7 @@ function witches.generate_cottage(pos1,pos2,params)
 
         if math.random() < .5 then 
           local ck = minetest.get_node(ck_pos1) 
-          print("ck: "..ck.name)
+          witches.debug("ck: "..ck.name)
           if ck.name ~= window_node then
             minetest.set_node(t_pos1,{
               name="default:torch_wall",
@@ -505,7 +505,7 @@ function witches.generate_cottage(pos1,pos2,params)
           end
         else
           local ck = minetest.get_node(ck_pos2) 
-          print("ck: "..ck.name)
+          witches.debug("ck: "..ck.name)
           if ck.name ~= window_node then
             minetest.set_node(t_pos2,{
               name="default:torch_wall",
@@ -529,8 +529,8 @@ function witches.generate_cottage(pos1,pos2,params)
           f_pos1[v.fp[1] ] = f_pos1[v.fp[1] ]+v.fp[2]
           f_pos1.y = f_pos1.y-1
 
-          print("window:"..mtpts(v))
-          print("furniture:"..mtpts(f_pos1))
+          witches.debug("window:"..mtpts(v))
+          witches.debug("furniture:"..mtpts(f_pos1))
           local dir1=vector.direction(f_pos1,v)
           local dir2=vector.direction(v,f_pos1)
           local f_facedir1 = minetest.dir_to_facedir(dir1)
@@ -555,8 +555,8 @@ function witches.generate_cottage(pos1,pos2,params)
               paramtype2 = "facedir",
               param2 = f_facedir2
             })
-            print("bed1:"..mtpts(f_pos1))
-            print("bed2:"..mtpts(f_pos2))
+            witches.debug("bed1:"..mtpts(f_pos1))
+            witches.debug("bed2:"..mtpts(f_pos2))
             minetest.set_node(f_pos2,{
               name=f_name,
               paramtype2 = "facedir",
@@ -793,7 +793,7 @@ local stovepipe_pos = {}
     end
 
   end
-  print("ladder l_pos: "..mts(l_pos))
+  witches.debug("ladder l_pos: "..mts(l_pos))
   --extend the stovepipe
   if furnace_pos and furnace_pos.x then
     --print("furnace pos: "..mtpts(furnace_pos))
@@ -809,7 +809,7 @@ local stovepipe_pos = {}
   end
 
   --drop a ladder from the center of the gable, avoiding any doors or windows
-  print("door: ".. mts(door_pos))
+  witches.debug("door: ".. mts(door_pos))
   if door_pos and l_pos then
     for _,d in pairs(door_pos) do
       for k,l in pairs(l_pos) do
@@ -824,10 +824,10 @@ local stovepipe_pos = {}
     for v,_ in pairs(window_pos) do
       for _,w in ipairs(window_pos[v]) do
         for k,l in pairs(l_pos) do
-          print("possible window before check: ".. mtpts(w))
-          print("possible ladder before check: ".. mtpts(l))
+          witches.debug("possible window before check: ".. mtpts(w))
+          witches.debug("possible ladder before check: ".. mtpts(l))
           if math.ceil(l.x) == w.x and  math.ceil(l.z) == w.z then
-            print("removing".. mtpts(l_pos[k]))
+            witches.debug("removing".. mtpts(l_pos[k]))
             table.remove(l_pos,k)
           end
         end
@@ -835,7 +835,7 @@ local stovepipe_pos = {}
     end
   end
 
-  print("possible ladder: ".. mts(l_pos))
+  witches.debug("possible ladder: ".. mts(l_pos))
   if l_pos and #l_pos >= 1 then
 
     local lpn =  math.random(#l_pos)
@@ -850,7 +850,7 @@ local stovepipe_pos = {}
 
     local dir1=vector.direction(fpos,lpc)
     local dir1_wm = minetest.dir_to_wallmounted(dir1)
-    print("ladder chosen: ".. mts(lpc))
+    witches.debug("ladder chosen: ".. mts(lpc))
     lpc[ lpc.fp[1] ] = lpc[ lpc.fp[1] ] + lpc.fp[2]
     --l_pos.y = l_pos.y-1
 
@@ -863,18 +863,18 @@ local stovepipe_pos = {}
 
 
     end
-    print("ladder: "..mtpts(lpc))
+    witches.debug("ladder: "..mtpts(lpc))
   else
     local loftpos1 = {x= sfpos1.x+2, y = sfpos1.y+1, z=sfpos1.z+1}
     local loftpos2 = {x= sfpos2.x-2, y = sfpos1.y+1, z=sfpos2.z-1}
     local loftarea = vector.subtract(loftpos2,loftpos1)
-    print(dump(loftpos1))
-    print(dump(loftpos2))
-    print(dump(loftarea))
+    witches.debug(dump(loftpos1))
+    witches.debug(dump(loftpos2))
+    witches.debug(dump(loftarea))
     for i=1, loftarea.z+1 do
       for j=1, loftarea.x+1 do
         local pos = {x= loftpos1.x-1 + j, y = loftpos1.y, z = loftpos1.z-1 + i}
-        print(mts(pos))
+        witches.debug(mts(pos))
         minetest.set_node(pos, {name = "air"})
       end
     end
