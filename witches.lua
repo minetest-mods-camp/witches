@@ -94,7 +94,7 @@ witches.witch_types = {
               pos.y = pos.y+3
               self.object:set_pos(pos)
               self.built_house = pos
-              witches.generate_cottage(volume[1],volume[2])
+              witches.generate_cottage(self.secret_name,volume[1],volume[2])
               
             end
           end
@@ -290,7 +290,11 @@ witches.witch_template = {  --your average witch,
       self.secret_title =  witches.generate_text(witches.words_desc, {"titles"})
     end
     if not self.secret_locale then
-      self.secret_locale = witches.generate_text(witches.name_parts_female, {"syllablesStart","syllablesEnd"})
+      if math.random(2) == 1 then
+        self.secret_locale = witches.generate_text(witches.name_parts_female, {"syllablesStart","syllablesEnd","syllablesTown"})
+      else
+        self.secret_locale = witches.generate_text(witches.name_parts_male, {"syllablesStart","syllablesEnd","syllablesTown"})
+      end
     end
 
     --self.item_request.text =  witches.generate_name(witches.quest_dialogs, {"item_request"})

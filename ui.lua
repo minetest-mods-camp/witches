@@ -10,13 +10,14 @@ witches.find_item_quest = {}
 witches.found_item_quest = {}
 --local item_request = witches.generate_name(witches.quest_dialogs, {"item_request"})
 
+
 function witches.find_item_quest.get_formspec(self,name)
     -- retrieve the thing
     --local quest_item = witches.looking_for(self)
     local text = "" 
     if self.item_request.text and type(self.item_request.text) == "table" then
         local intro = self.item_request.text.intro
-        local request = self.item_request.text.request     
+        local request = "\n"..self.item_request.text.request     
         text = S("@1 @2",intro,request)
     --print(text)
 

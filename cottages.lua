@@ -27,13 +27,16 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 	if dg and dg.dungeon and #dg.dungeon > 2 then
 		 for i=1,#dg.dungeon do
       if dg.dungeon[i].y >= dungeon_cellar.max_depth then
-			--print("dungeon found: "..minetest.pos_to_string(dg.dungeon[i]))
+			print("dungeon found: "..minetest.pos_to_string(dg.dungeon[i]))
 
 			table.insert(dungeon_list, dg.dungeon[i])
 			end
 		 end
 	end
+
+
 end)
+
 
 --local vol_vec = {x=5,y=5,z=5}
 function witches.grounding(self,vol_vec,required_list,exception_list,replacement_node)
@@ -102,10 +105,11 @@ local default_params = {
   orient_materials = true,
   door_bottom = "doors:door_wood_witch_a";
   door_top    = "doors:hidden";
-  root_nodes = {"witches:treeroots"}
+  root_nodes = {"witches:treeroots"};
+  builder = "none"
 }
 
-function witches.generate_cottage(pos1,pos2,params)
+function witches.generate_cottage(secret_name,pos1,pos2,params)
   local working_parameters = params or default_params -- if there is nothing then initialize with defs
   pos1 = vector.round(pos1)
   pos2 = vector.round(pos2)
@@ -120,7 +124,7 @@ function witches.generate_cottage(pos1,pos2,params)
   else wp = table.copy(default_params)
 
   end
-
+  
   local ps = wp.porch_size or math.random(2)
   local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
   local root_node = wp.root_nodes [math.random(#wp.root_nodes)]
@@ -520,7 +524,7 @@ function witches.generate_cottage(pos1,pos2,params)
   local furnace_pos = {} --gonna need this later!
   --place some furniture
   if window_pos then
-    local furniture = {"default:bookshelf","default:chest","beds:bed","default:furnace"}
+    local furniture = {"default:bookshelf","default:chest_locked","beds:bed","default:furnace"}
     local f_pos1 ={}
     for j in pairs(window_pos) do
       for k,v in ipairs(window_pos[j]) do
@@ -571,7 +575,32 @@ function witches.generate_cottage(pos1,pos2,params)
               param2 = f_facedir1
             })
             furnace_pos = vector.new(f_pos1)
+          elseif f_name == "default:chest_locked" then
+            
+            minetest.set_node(f_pos1,{
+              name=f_name,
+              paramtype2 = "facedir",
+              param2 = f_facedir1
+            })
 
+            minetest.registered_nodes[ f_name ].on_construct( f_pos1 );
+            local meta = minetest.get_meta(f_pos1);
+            local inv = meta:get_inventory();
+            meta:set_string("secret_type", "witches_chest")
+            meta:set_string("secret_name", secret_name)
+            meta:set_string("owner",secret_name)  
+            meta:set_string("infotext", "Sealed chest of "..secret_name)
+            if minetest.get_modpath("fireflies") then
+              inv:add_item( "main", {name = "fireflies:bug_net"})
+            end
+            inv:add_item( "main", {name = "default:meselamp"})
+            if math.random() < 0.50 then 
+              for i=1,math.random(3) do
+                inv:add_item( "main", {name = "default:diamond"})
+              end
+            end
+        
+      
           elseif f_name ~="beds:bed"  then
             minetest.set_node(f_pos1,{
               name=f_name,

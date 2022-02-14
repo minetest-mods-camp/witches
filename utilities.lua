@@ -11,45 +11,60 @@ witches.name_parts_male = {
   syllablesStart = "Aer, Al, Am, An, Ar, Arm, Arth, B, Bal, Bar, Be, Bel, Ber, Bok, Bor, Bran, Breg, Bren, Brod, Cam, Chal, Cham, Ch, Cuth, Dag, Daim, Dair, Del, Dr, Dur, Duv, Ear, Elen, Er, Erel, Erem, Fal, Ful, Gal, G, Get, Gil, Gor, Grin, Gun, H, Hal, Han, Har, Hath, Hett, Hur, Iss, Khel, K, Kor, Lel, Lor, M, Mal, Man, Mard, N, Ol, Radh, Rag, Relg, Rh, Run, Sam, Tarr, T, Tor, Tul, Tur, Ul, Ulf, Unr, Ur, Urth, Yar, Z, Zan, Zer",
   syllablesMiddle = "de, do, dra, du, duna, ga, go, hara, kaltho, la, latha, le, ma, nari, ra, re, rego, ro, rodda, romi, rui, sa, to, ya, zila",
   syllablesEnd = "bar, bers, blek, chak, chik, dan, dar, das, dig, dil, din, dir, dor, dur, fang, fast, gar, gas, gen, gorn, grim, gund, had, hek, hell, hir, hor, kan, kath, khad, kor, lach, lar, ldil, ldir, leg, len, lin, mas, mnir, ndil, ndur, neg, nik, ntir, rab, rach, rain, rak, ran, rand, rath, rek, rig, rim, rin, rion, sin, sta, stir, sus, tar, thad, thel, tir, von, vor, yon, zor",
+  syllablesTown = "mar, ton, veil,  Loch, del,  Pass,  Hillock,  shire, nia, ing",
 }
 
 witches.name_parts_female = {
   syllablesStart = "Ad, Aer, Ar, Bel, Bet, Beth, Ce'N, Cyr, Eilin, El, Em, Emel, G, Gl, Glor, Is, Isl, Iv, Lay, Lis, May, Ner, Pol, Por, Sal, Sil, Vel, Vor, X, Xan, Xer, Yv, Zub",
   syllablesMiddle = "bre, da, dhe, ga, lda, le, lra, mi, ra, ri, ria, re, se, ya",
   syllablesEnd = "ba, beth, da, kira, laith, lle, ma, mina, mira, na, nn, nne, nor, ra, rin, ssra, ta, th, tha, thra, tira, tta, vea, vena, we, wen, wyn",
+  syllablesTown = "maer, tine, veila,  Loch, dael,  Pass,  Hillock, shire, mia, aeng",
 }
 
 witches.words_desc = {
-  tool_adj = S("shiny, polished, favorite, beloved, cherished, sharpened"),
+  tool_adj = S("shiny, polished, favorite, beloved, cherished, sharpened, enhanced"),
   titles = S("artificer, librarian, logician, sorcerant, thaumaturgist, polymorphist, elementalist, hedge, herbologist, arcanologist, tutor, historian, mendicant, restorationist"),
 }
 
 
 local function quest_dialogs(self)
+  local thing = self.item_request.item.desc
+  local thing_l = string.lower(self.item_request.item.desc)
   local dialogs = {
     intro = {
       S("Hello, @1, I am @2, @3 of @4! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
       S("Just one minute, @1! @2, @3 of @4 seeks your assistance! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
       S("If you are indeed @1, perhaps you and I, @2, @3 of @4 can help each other! ", self.speaking_to,self.secret_name,self.secret_title,self.secret_locale),
+      S("Being a long way from @1, can be confusing. I'm known as @2 the @3! ", self.secret_locale,self.secret_name,self.secret_title),
+      S("You look as though you could be from @1, but I'm sure we have not yet met. I am @2 the @3! ", self.secret_locale,self.secret_name,self.secret_title),
+    },
+    having_met = {
+      S("Well, @1, I have yet to return to @2. Can you help me? ", self.speaking_to,self.secret_locale),
+      S("@1, do you have any intention of helping me? ", self.speaking_to),
+      S("There are some matters that still need my attention, @1. ", self.speaking_to),
+      S("I have been so busy in my search for materials, @1. ", self.speaking_to),
+      S("It's just that the @1 is so difficult to procure, @2! ", thing_l, self.speaking_to),
+      S("Great @1!, Where could that be found, @2?!? ", thing_l, self.speaking_to)
 
     },
     item_request = {
-      S("I've been looking all over for the @1! ",self.item_request.item.desc),
-      S("I seem to have misplaced the @1! ",self.item_request.item.desc),
-      S("Would you happen to have some number of @1? ",self.item_request.item.desc),
-      S("Would you kindly retrieve for me the @1? ",self.item_request.item.desc),
-      S("Might you please return with the @1? ",self.item_request.item.desc),
-      S("Do you know I seek only the @1? ",self.item_request.item.desc),
-      S("Have you but some number of @1? ",self.item_request.item.desc),
-      S("Why must my task require the @1? ",self.item_request.item.desc),
-      S("Is it so difficult to find the @1? ",self.item_request.item.desc),
-      S("Wherefor about this land art the @1? ",self.item_request.item.desc),
-      S("Must not there be but a few of the @1 about? ",self.item_request.item.desc),
-      S("Could I trouble you for some kind of @1? ",self.item_request.item.desc),
-      S("The @1 would make my collection complete! ",self.item_request.item.desc),
-      S("I sense the @1 are not far away...",self.item_request.item.desc),
-      S("Certainly the @1 is not as rare as a blood moon! ",self.item_request.item.desc),
-      S("You look like you know where to find the @1! ",self.item_request.item.desc)
+      S("A @1, just one will do! ", thing_l),
+      S("I've been looking all over for the @1! ",thing_l),
+      S("I seem to have misplaced the @1! ",thing_l),
+      S("Would you happen to have some number of @1? ",thing_l),
+      S("Would you kindly retrieve for me the @1? ",thing_l),
+      S("Might you please return with the @1? ",thing_l),
+      S("Do you know I seek only the @1? ",thing_l),
+      S("Have you but some number of @1? ",thing_l),
+      S("Why must my task require the @1? ",thing_l),
+      S("Is it so difficult to find the @1? ",thing_l),
+      S("Wherefor about this land art the @1? ",thing_l),
+      S("Must not there be but a few of the @1 about? ",thing_l),
+      S("Could I trouble you for some kind of @1? ",thing_l),
+      S("The @1 would make my collection complete! ",thing_l),
+      S("I sense the @1 are not far away...",thing_l),
+      S("Certainly the @1 is not as rare as a blood moon! ",thing_l),
+      S("You look like you know where to find the @1! ",thing_l)
     }
   }
   --print(dump(dialogs))
@@ -400,8 +415,29 @@ function witches.item_request(self,name)
     --we need text for the quest!
    -- print("generating")
     local dialog_list = quest_dialogs(self)
-    local dli_num = math.random(1,#dialog_list.intro)
-    local intro_text = dialog_list.intro[dli_num]
+    if not self.players then self.players = {} end
+    if not self.players[name] then
+      self.players[name] = {}
+    --if not self.players.met or #self.players.met < 1 or type(self.players.met) == string then
+    
+      --table.insert(self.players_met, self.secret_name)
+    end
+    local intro_text = ""
+
+    if not self.players[name].met  then
+      --print(dump(self.players[name]))
+      --print( "We don't know "..name.."!")
+      local dli_num = math.random(1,#dialog_list.intro)
+      intro_text = dialog_list.intro[dli_num]
+            
+      self.players[name] = {met = math.floor(os.time())}
+      
+    else
+      --print(dump(self.players.met))
+      --print( "We first met "..name.." ".. os.time() - self.players[name].met.." seconds ago")
+      local dli_num = math.random(1,#dialog_list.having_met)
+      intro_text = dialog_list.having_met[dli_num]
+    end
 
     --print(intro_text)
     local quest_item = self.item_request.item.desc
