@@ -17,7 +17,7 @@ local spawning = {
       day_toggle = nil,
       on_spawn = function(self) 
         local pos = self.object:get_pos()
-        print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
+        witches.debug(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
       end,
   
   },
@@ -34,7 +34,7 @@ local spawning = {
     day_toggle = nil,
     on_spawn = function(self) 
       local pos = self.object:get_pos()
-      print(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
+      witches.debug(self.secret_name.." spawned at ".. minetest.pos_to_string(vector.round(pos)))
       
     end
   
@@ -57,13 +57,14 @@ witches.witch_types = {
           local pos = self.object:get_pos()
           if pos then
             pos.y = pos.y+1
-            local pos1 = minetest.find_node_near(pos, 3, "air")
-            if pos1 then        
+            local pos1 = minetest.find_node_near(pos, 3, "air")        
+            if pos1 then
               minetest.set_node(pos1, {name = "fireflies:firefly"})
               --print("setting firefly"..minetest.pos_to_string(pos1))
             end
           end
         end
+
       end,  
 
       on_spawn_addendum = function(self)
@@ -82,6 +83,22 @@ witches.witch_types = {
       "default:blueberries", "default:torch", "default:stick",
       "flowers:mushroom_brown","flowers:mushroom_red"},
       do_custom_addendum = function(self)
+        if witches.cottages then
+          if not self.built_house and math.random() < 0.01 then
+          
+            local volume = witches.grounding(self)
+            if volume then
+              witches.debug("volume passed: "..dump(volume))
+            
+              local pos = self.object:get_pos()
+              pos.y = pos.y+3
+              self.object:set_pos(pos)
+              self.built_house = pos
+              witches.generate_cottage(self.secret_name,volume[1],volume[2])
+              
+            end
+          end
+        end
       end,  
       on_spawn_addendum = function(self) 
         witches.claim_witches_chest(self)
@@ -90,6 +107,7 @@ witches.witch_types = {
     spawning = spawning.cottage,
   }
 }
+
 witches.witch_template = {  --your average witch,
   description = "Basic Witch",
   lore = "This witch has a story yet to be...",
@@ -113,7 +131,7 @@ witches.witch_template = {  --your average witch,
     "witches_clothes.png"
   },
   --blood_texture = "witches_blood.png",
-  collisionbox = {-0.25, 0, -.25, 0.25, 2, 0.25},
+  collisionbox = {-0.2, 0, -.2, 0.2, 1.9, 0.2},
   drawtype = "front",
   makes_footstep_sound = true,
   sounds = {
@@ -272,13 +290,17 @@ witches.witch_template = {  --your average witch,
       self.secret_title =  witches.generate_text(witches.words_desc, {"titles"})
     end
     if not self.secret_locale then
-      self.secret_locale = witches.generate_text(witches.name_parts_female, {"syllablesStart","syllablesEnd"})
+      if math.random(2) == 1 then
+        self.secret_locale = witches.generate_text(witches.name_parts_female, {"syllablesStart","syllablesEnd","syllablesTown"})
+      else
+        self.secret_locale = witches.generate_text(witches.name_parts_male, {"syllablesStart","syllablesEnd","syllablesTown"})
+      end
     end
 
     --self.item_request.text =  witches.generate_name(witches.quest_dialogs, {"item_request"})
     --print(self.secret_name.." has spawned")
     --print("self: "..dump(self.follow))
-   -- print("self properties "..dump(self.object:get_properties()))
+    --print("self properties "..dump(self.object:get_properties()))
    --self.follow = {}
     if not self.follow or #self.follow < 1 or type(self.follow) == string then
       self.follow = {}

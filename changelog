@@ -1,3 +1,7 @@
+    2022/02/14: Dialog updates
+    2022/02/13: Debug output can be enabled from game Settings tab > All Settings > Mods > witches 
+    2022/02/12: Witches honor protected nodes ("protector" mod support)
+    2020/08/10: Testing new cottage building code.
     2020/08/06: Fixed witches not registered when handle_schematics is not loaded! D'oh!
     2020/08/01: Witches have two new wands from Damon and Simone!
     2020/07/31: Witches can turn aggressive mobs into sheep! Witches gain drench spell!

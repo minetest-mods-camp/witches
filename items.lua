@@ -54,7 +54,7 @@ minetest.register_entity("witches:witch_tool_wand_sp",witch_tool_wand_sp)
 
 
 minetest.register_tool("witches:witch_wand_btb", {
-  description = "Better Thank Bacon!",
+  description = "Better Than Bacon!",
   inventory_image = "witches_wand_better_than_bacon.png",
   tool_capabilities = {
     full_punch_interval = 1.2,

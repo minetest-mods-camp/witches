@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20200806"
+witches.version = "20220214"
 print("This is Witches "..witches.version.."!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -41,12 +41,20 @@ local function print_s(input)
 end
 
 local S = minetest.get_translator("witches")
+local settings = minetest.settings
+
+function witches.debug(input)
+  local witches_debug = settings:get_bool("witches_debug")
+  if witches_debug then
+    print_s(input)
+   end
+end
 
 local witches_version = witches.version
 
 if mobs.version then
   if tonumber(mobs.version) >= tonumber(20200516) then
-    print_s(S("Mobs Redo 20200516 or greater found!"))
+    print_s(S("Mobs Redo 20200516 or greater found! ("..mobs.version..")"))
   else
     print_s(S("You should find a more recent version of Mobs Redo!"))
     print_s(S("https://notabug.org/TenPlus1/mobs_redo"))
@@ -81,15 +89,9 @@ end
 
 dofile(path .. "/magic.lua")
 
-if not minetest.get_modpath("handle_schematics") then
-  print("optional handle_schematics not found!\n Witch cottages not available!")
-  --dofile(path .. "/cottages.lua")
+dofile(path .. "/cottages.lua")
+witches.cottages = true
 
-else
-
-  dofile(path .. "/basic_houses.lua")
-  print("handle_schematics found! Witch cottages enabled!")
-end
 
 dofile(path .. "/witches.lua")
 
@@ -111,7 +113,7 @@ function witches.generate(witch_types,witch_template)
       g_template[x] = g_type[x]
     end
 
-    print_s("Registering the "..g_template.description..": witches:witch_"..k)
+    witches.debug("Registering the "..g_template.description..": witches:witch_"..k)
     if g_template.lore then print_s("  "..g_template.lore) end
     --print_s("resulting template: " ..dump(g_template))
     mobs:register_mob("witches:witch_"..k, g_template)
