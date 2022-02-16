@@ -1,5 +1,4 @@
 witches.magic = {}
-local wsc = witches.sheep_colors
 
 local magic_texture = "bubble.png"
 local magic_animation = nil
@@ -136,20 +135,13 @@ end
 
 function witches.magic.polymorph(self, target, mob, duration)
   duration = duration or 0
-  local colors = {}
   local caster_pos = self.object:get_pos()
   minetest.sound_play(self.sounds.polymorph or "witches_magic02", {
 		pos = caster_pos,
 		gain = 1.0,
 		max_hear_distance = self.sounds and self.sounds.distance or 32
   }, true)
-  
-  for _, col in ipairs(wsc) do
-    table.insert(colors,col[1])
-  end
-  local r_sheep = "witches:sheep_"..colors[math.random(#colors)]
-  mob = mob or r_sheep
-  
+
   local ent = target:get_luaentity()
   local ent_pos = ent.object:get_pos()
 
@@ -167,9 +159,10 @@ function witches.magic.polymorph(self, target, mob, duration)
 
   witches.magic.effect_area01(vol_ent[1],vol_ent[2],200)
 
-  local new_obj = minetest.add_entity(ent_pos, mob)
-  --local new_ent = new_obj:get_luaentity()
-  --new_ent.old_mob_name = ent.name
+	mob = mob or witches.sheep[math.random(1, #witches.sheep)]
+	if mob then
+		local new_obj = minetest.add_entity(ent_pos, mob)
+	end
 
 end
 --volume is a vector!
@@ -190,9 +183,9 @@ function witches.magic.splash(self,target,volume,height,node)
   )
 
   local air_nodes = minetest.find_nodes_in_area(vol[1],vol[2], {"air"})
-  
+
   if air_nodes then
-    for i=1, #air_nodes do  
+    for i=1, #air_nodes do
 
       minetest.add_node(air_nodes[i], {name=node})
       witches.magic.effect_area01(vol[1],vol[2],100)
