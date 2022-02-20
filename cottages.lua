@@ -27,7 +27,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 	if dg and dg.dungeon and #dg.dungeon > 2 then
 		 for i=1,#dg.dungeon do
       if dg.dungeon[i].y >= dungeon_cellar.max_depth then
-			print("dungeon found: "..minetest.pos_to_string(dg.dungeon[i]))
+			witches.debug("dungeon found: "..minetest.pos_to_string(dg.dungeon[i]))
 
 			table.insert(dungeon_list, dg.dungeon[i])
 			end
@@ -128,6 +128,10 @@ function witches.generate_cottage(secret_name,pos1,pos2,params)
   local ps = wp.porch_size or math.random(2)
   local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
   local root_node = wp.root_nodes [math.random(#wp.root_nodes)]
+  if not minetest.registered_nodes[root_node] then
+    witches.debug("can't find root node: " ..root_node)
+    root_node = "default:tree"
+  end
   local window_node = wp.window_nodes[math.random(#wp.window_nodes)]
   local window_height = wp.window_height[math.random(#wp.window_height)]
   --start with basement
@@ -380,7 +384,11 @@ function witches.generate_cottage(secret_name,pos1,pos2,params)
 
     local dir=vector.direction(f_pos1,door_pos[k])
     local f_facedir = minetest.dir_to_facedir(dir)
-
+    if not witches.doors then 
+      witches.debug("doors repalced with air")
+      wp.door_bottom = "air"
+      wp.door_top = "air"
+    end
     minetest.set_node(v,{
       name=wp.door_bottom,
       paramtype2 = "facedir",
@@ -524,7 +532,14 @@ function witches.generate_cottage(secret_name,pos1,pos2,params)
   local furnace_pos = {} --gonna need this later!
   --place some furniture
   if window_pos then
-    local furniture = {"default:bookshelf","default:chest_locked","beds:bed","default:furnace"}
+    local bed = ""
+    if not beds then 
+      bed = "air"
+    else 
+      bed = "beds:bed"
+    end
+    local furniture = {"default:bookshelf","default:chest_locked",bed,"default:furnace"}
+    
     local f_pos1 ={}
     for j in pairs(window_pos) do
       for k,v in ipairs(window_pos[j]) do
@@ -647,8 +662,16 @@ local stovepipe_pos = {}
 --gable and roof
   --orientation
   local rfnum = math.random(#wp.roof_nodes)
-  local rfnodes = wp.roof_nodes[rfnum]
-  local rfslabs = wp.roof_slabs[rfnum]
+  local rf_nodes = wp.roof_nodes[rfnum]
+  if not minetest.registered_nodes[rf_nodes] then
+    witches.debug("can't find roof node: " ..rf_nodes)
+    rf_nodes = "default:wood"
+  end
+  local rf_slabs = wp.roof_slabs[rfnum]
+  if not minetest.registered_nodes[rf_slabs] then
+    witches.debug("can't find roof slab node: " ..rf_slabs)
+    rf_slabs = "default:wood"
+  end
   local gbnodes = wp.gable_nodes[rfnum]
   local orientations = {{"x","z"},{"z","x"}}
   local o = orientations[math.random(#orientations)]
@@ -670,7 +693,7 @@ local stovepipe_pos = {}
       for j=1, rfarea.x+1 do
         local pos = {x=rfpos1.x+j-1, y=rfpos2.y+1, z=rfpos1.z+i-1}
         minetest.set_node(pos,{
-          name=rfnodes,
+          name=rf_nodes,
           paramtype2="facedir",
           param2=0
         })
@@ -703,7 +726,7 @@ local stovepipe_pos = {}
       for j=1, rfarea.x+1 do
         local pos = {x=rfpos1.x+j-1, y=rfpos2.y+1, z=rfpos1.z+i-1}
         minetest.set_node(pos,{
-          name=rfnodes,
+          name=rf_nodes,
           paramtype2="facedir",
           param2=2
         })
@@ -717,7 +740,7 @@ local stovepipe_pos = {}
       for j=1, rfarea.x+1 do
         local pos = {x=rfpos1.x+j-1, y=rfpos2.y, z=rfpos1.z+(rfarea.z/2)}
         minetest.set_node(pos,{
-          name=rfslabs
+          name=rf_slabs
         })
        end
        -- p is positional axis along which it is made
@@ -753,7 +776,7 @@ local stovepipe_pos = {}
 
         local pos = {x=rfpos1.x+j-1, y=rfpos2.y+1, z=rfpos1.z+i-1}
         minetest.set_node(pos,{
-          name=rfnodes,
+          name=rf_nodes,
           paramtype2="facedir",
           param2=1
         })
@@ -784,7 +807,7 @@ local stovepipe_pos = {}
       for i=1,rfarea.z+1 do
         local pos = {x=rfpos1.x+j-1, y=rfpos2.y+1, z=rfpos1.z+i-1}
         minetest.set_node(pos,{
-          name=rfnodes,
+          name=rf_nodes,
           paramtype2="facedir",
           param2=3
         })
@@ -797,7 +820,7 @@ local stovepipe_pos = {}
       for i=1,rfarea.z+1 do
         local pos = {x=rfpos1.x+(rfarea.x/2), y=rfpos2.y, z=rfpos1.z+i-1}
         minetest.set_node(pos,{
-                                name=rfslabs
+                                name=rf_slabs
       })
       end
       local wpos1 = {x=rfpos1.x+(rfax), y=rfpos2.y-2, z=rfpos1.z+1, p="x", fp={"z",1}}

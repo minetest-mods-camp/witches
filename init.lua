@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20220214"
+witches.version = "20220219"
 print("This is Witches "..witches.version.."!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -64,6 +64,14 @@ else
   print_s(S("https://notabug.org/TenPlus1/mobs_redo"))
 end
 
+if not doors then
+  witches.debug("doors mod not found")
+  witches.doors = false
+else
+  witches.doors = true
+  witches.debug("doors mod found")
+end
+
 dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")
@@ -88,9 +96,15 @@ else
 end
 
 dofile(path .. "/magic.lua")
+local witches_cottages = settings:get_bool("witches_cottages")
 
-dofile(path .. "/cottages.lua")
-witches.cottages = true
+if witches_cottages then
+  witches.cottages = true
+  dofile(path .. "/cottages.lua")
+  print_s(S("Witch cottages will be generated"))
+else
+  print_s(S("Witch cottages will NOT be generated"))
+end
 
 
 dofile(path .. "/witches.lua")

@@ -4,4 +4,6 @@ protector?
 fireflies?
 mobs_monster?
 doors?
+flowers?
+stairs?
 

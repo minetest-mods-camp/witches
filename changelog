@@ -1,3 +1,4 @@
+    2022/02/19: Require only default and mobs now, additional checks, cottage generation now optional from game Settings tab > All Settings > Mods > witches
     2022/02/14: Dialog updates
     2022/02/13: Debug output can be enabled from game Settings tab > All Settings > Mods > witches 
     2022/02/12: Witches honor protected nodes ("protector" mod support)

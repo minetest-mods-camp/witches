@@ -403,6 +403,17 @@ if minetest.registered_tools["fireflies:bug_net"] then
   end
 end
 
+function witches.item_list_check(list)
+  witches.debug("checking list: "..minetest.serialize(list))
+  for i,v in ipairs(list) do
+    if not minetest.registered_items[v] then
+      witches.debug(i..". "..v.." not found and removing from list")
+      list[i] = nil
+    end
+  end
+  witches.debug("new list: "..minetest.serialize(list))
+  return list
+end
 
 function witches.item_request(self,name)
   self.speaking_to = name
@@ -505,7 +516,8 @@ function witches.found_item(self,clicker)
     --change the requested item
     if self.special_follow then
       self.follow = {}
-      table.insert(self.follow,self.special_follow[math.random(#self.special_follow)])
+      witches.item_list_check(self.special_follow)
+      self.follow = {self.special_follow[math.random(#self.special_follow)]}
     end
   return item
   end
@@ -517,27 +529,32 @@ function witches.looking_for(self)
   if not self.item_request then
     self.item_request = {}
   end
+
   if not self.item_request.item then
+
+    if not self.follow or #self.follow < 1 then
+      witches.item_list_check(self.special_follow)
+      witches.debug("looking for somethine but no self.follow so picking one of these: "..minetest.serialize(self.special_follow))
+      self.follow = {}
+      self.follow = {self.special_follow[math.random(#self.special_follow)]}
+      witches.debug(minetest.serialize(self.follow).." picked")
+    end
+
     if self.follow and #self.follow >= 1 then
       --print("testing: "..type(self.follow).." "..#self.follow.." "..dump(self.follow).." "..math.random(1,#self.follow))
+      witches.debug(self.secret_name.."'s self.follow"..minetest.serialize(self.follow))
       local item = self.follow[math.random(1,#self.follow)]
       --local stack = ItemStack({name = item})
-      --print("item: "..item)
+      witches.debug(self.secret_name.."'s chosen follow item: "..item)
+
       local find = {name = minetest.registered_items[item].name, desc = minetest.registered_items[item].description, icon = minetest.registered_items[item].inventory_image}
       --local meta = item:get_meta()
       --print_s(S(dump(desc)))
       --print(dump(find))
-
       self.item_request.item = find
       return self.item_request
-
-    else
-      if not self.follow or #self.follow < 1 then
-        table.insert(self.follow,self.special_follow[math.random(#self.special_follow)])
-      end
     end
-
-  else
+   else
     return self.item_request
   end
 end

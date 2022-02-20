@@ -1,9 +1,9 @@
 local S = minetest.get_translator("witches")
-if not doors then
-  print("doors mod not found!")
+if not witches.doors then
+  witches.debug("doors mod not found!")
   return
 else
-  print("doors active")
+  witches.debug(S("doors active"))
   doors.register("door_wood_witch", {
     tiles = {{ name = "doors_door_wood.png", backface_culling = true }},
     description = S("Wooden Door"),
@@ -104,7 +104,7 @@ end
 
 function witches.flower_patch(pos)
   if not pos then 
-    print("no pos for flowers!")
+    witches.debug("no pos for flowers!")
     return
   end
   local fpos = pos

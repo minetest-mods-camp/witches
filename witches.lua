@@ -302,16 +302,13 @@ witches.witch_template = {  --your average witch,
     --print("self: "..dump(self.follow))
     --print("self properties "..dump(self.object:get_properties()))
    --self.follow = {}
-    if not self.follow or #self.follow < 1 or type(self.follow) == string then
-      self.follow = {}
-      table.insert(self.follow,self.special_follow[math.random(#self.special_follow)])
-      
-    end
-     
+
+    witches.looking_for(self)
+   
     if  self.on_spawn_addendum then
       self.on_spawn_addendum(self)
     end
-    witches.looking_for(self)
+    
   end,
 
   spawning = spawning.generic,

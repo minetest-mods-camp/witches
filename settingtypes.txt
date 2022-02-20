@@ -2,6 +2,9 @@
 # debug mode
 witches_debug (enable debug) bool false
 
+#enable cottages
+witches_cottages (enable cottages) bool true
+
 #maximum number of houses per mapchunk
 witches_house_max_per_mapchunk (maximum number of houses per mapchunk) int 2 
 
