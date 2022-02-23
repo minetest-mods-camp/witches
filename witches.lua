@@ -10,7 +10,7 @@ local spawning = {
       min_light = 5,
       max_light = 15,
       interval = 30,
-      chance = 10,
+      chance = 1000,
       active_object_count = 2,
       min_height = 0,
       max_height = 200,
@@ -21,13 +21,14 @@ local spawning = {
       end,
   
   },
+
   generic = {
     nodes = {"group:wood","default:mossycobble","default:cobble"},
     neighbors = {"air","default:chest"},
     min_light = 5,
     max_light = 15,
     interval = 300,
-    chance = 10,
+    chance = 100,
     active_object_count = 1,
     min_height = 0,
     max_height = 200,
@@ -84,9 +85,28 @@ witches.witch_types = {
       "flowers:mushroom_brown","flowers:mushroom_red"},
       do_custom_addendum = function(self)
         if witches.cottages then
+          witches.claim_witches_chest(self)
+        end
+      end,  
+      on_spawn_addendum = function(self) 
+        witches.claim_witches_chest(self)
+      end
+    },  
+    spawning = spawning.cottage,
+  },
+
+  cottage_builder = {
+    description = "Eremitant Artifician",
+    lore = "The Eremitant have found homes for themselves, who would bother them?",
+    additional_properties = {
+      special_follow = {"default:diamond", "default:gold_lump", "default:apple",
+      "default:blueberries", "default:torch", "default:stick",
+      "flowers:mushroom_brown","flowers:mushroom_red"},
+      do_custom_addendum = function(self)
+        if witches.cottages then
           if not self.built_house and math.random() < 0.01 then
           
-            local volume = witches.grounding(self)
+            local volume = witches.grounding(self.object:get_pos())
             if volume then
               witches.debug("volume passed: "..dump(volume))
             
@@ -94,8 +114,9 @@ witches.witch_types = {
               pos.y = pos.y+3
               self.object:set_pos(pos)
               self.built_house = pos
-              witches.generate_cottage(self.secret_name,volume[1],volume[2])
-              
+              print("witch placing:"..minetest.serialize(volume[1]).."/n"..minetest.serialize(volume[2]))
+              witches.generate_cottage(volume[1],volume[2],nil,self.secret_name)
+          
             end
           end
         end
@@ -107,6 +128,7 @@ witches.witch_types = {
     spawning = spawning.cottage,
   }
 }
+
 
 witches.witch_template = {  --your average witch,
   description = "Basic Witch",

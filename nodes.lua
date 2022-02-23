@@ -79,6 +79,39 @@ witches.acacia_tree={
   fruit="default:apple"
 }
 
+witches.acacia_tree2={
+  axiom="FFFFFFccccA",
+  rules_a = "[B]//[B]//[B]//[B]",
+  rules_b = "&TTTT&TT^^G&&----GGGGGG++GGG++"   -- line up with the "canvas" edge
+        .."fffffRfGG++G++"               -- first layer, drawn in a zig-zag raster pattern
+        .."Gffffffff--G--"
+        .."ffffRfffG++G++"
+        .."fffffffff--G--"
+        .."fffffffff++G++"
+        .."ffRffffff--G--"
+        .."ffffffffG++G++"
+        .."GffffRfff--G--"
+        .."fffffffGG"
+        .."^^G&&----GGGGGGG++GGGGGG++"      -- re-align to second layer canvas edge
+        .."ffffGGG++G++"               -- second layer
+        .."GGfffff--G--"
+        .."ffRfffG++G++"
+        .."fffffff--G--"
+        .."ffffRfG++G++"
+        .."GGfffff--G--"
+        .."ffRfGGG",
+  rules_c = "/",
+  trunk="default:tree",
+  leaves="default:leaves",
+  angle=45,
+  iterations=5,
+  random_level=4,
+  trunk_type="single",
+  thin_branches=true,
+  fruit_chance=2,
+  fruit="default:apple"
+}
+
 witches.apple_tree={
   axiom="FFFFFAFFBF",
   rules_a="[&&&FFFFF&&FFFF][&&&++++FFFFF&&FFFF][&&&----FFFFF&&FFFF]",
@@ -86,8 +119,8 @@ witches.apple_tree={
   trunk="default:tree",
   leaves="default:leaves",
 	angle=30,
-	iterations=2,
-	random_level=0,
+	iterations=3,
+	random_level=1,
 	trunk_type="single",
 	thin_branches=true,
 	fruit_chance=10,
@@ -162,31 +195,3 @@ minetest.register_node("witches:treeroots", {
 	--sounds = default.node_sound_water_defaults(),
 })
 
-minetest.register_node("witches:treeroots_growing", {
-  description = S("Tree Roots"),
-	drawtype = "flowingliquid",
-	tiles = {{backface_culling = false, name= "default_tree.png"}},
-	
-	special_tiles = {{backface_culling = false, name= "default_tree.png"},{backface_culling = false, name= "default_tree.png"}},
-	--alpha = 220,
-	paramtype = "light",
-	paramtype2 = "flowingliquid",
-	walkable = true,
-	pointable = false,
-	diggable = true,
-	buildable_to = true,
-	is_ground_content = false,
-	drop = "",
-	drowning = 0,
-	liquidtype = "flowing",
-	liquid_alternative_flowing = "witches:treeroots_growing",
-	liquid_alternative_source = "witches:treeroots",
-	liquid_viscosity = 9,
-	liquid_renewable = false,
-	liquid_range = 1,
-	post_effect_color = {a = 200, r = 5, g = 5, b = 0},
-	groups = { liquid = 3, not_in_creative_inventory = 1,
-		cools_lava = 1,tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
-  --sounds = default.node_sound_water_defaults(),
-
-})

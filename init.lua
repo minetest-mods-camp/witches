@@ -5,7 +5,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20220219"
+witches.version = "20220222"
 print("This is Witches "..witches.version.."!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -109,7 +109,7 @@ end
 
 dofile(path .. "/witches.lua")
 
-print("Generating witches! version: "..witches.version)
+witches.debug("Generating witches! version: "..witches.version)
 
 
 
