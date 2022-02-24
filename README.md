@@ -9,7 +9,7 @@ The MIT License (MIT)
   
 Witches inhabit the land! They are currently in development but, can already:
 
-* Spawn near wood above ground.
+* Spawn near wood above ground and in their cottages.
   
 * Witches have magic!  They will defend themselves and each other against aggressive players and mobs!
   
@@ -17,9 +17,9 @@ Witches inhabit the land! They are currently in development but, can already:
   
 * New Witch cottage code with no additional mod requirements!
 
-* If protector (or similar) mod is available and enabled, Witches will no build in these areas! 
+* If protector (or similar) mod is available and enabled, Witches will not build in these areas! 
   
-* Some cottages will spawn over a dungeon if they are near the surface
+* Chance of cottage to spawn over a dungeon if they are near the surface.
 
 * Have a name and origin location which they will tell player.
 

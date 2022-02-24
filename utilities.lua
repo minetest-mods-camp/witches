@@ -399,7 +399,7 @@ function witches.claim_witches_chest(self)
                 witches.debug("unbound chest: " .. sn)
                 meta:set_string("owner", self.secret_name)
                 meta:set_string("infotext",
-                                self.secret_name .. "'s sealed chest of " .. sn)
+                                self.secret_name .. "'s sealed chest")
 
                 self.witches_chest = sn
                 self.witches_chest_owner = self.secret_name

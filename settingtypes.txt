@@ -14,6 +14,9 @@ witches_houses_wanted_per_mapchunk (average number of houses to mapchunks over t
 # chance (1 or more) of a witch house spawning over a dungeon 
 witches_dungeon_cellar_chance (chance as 1 in <positive integer>  of a witch house spawning over a dungeon) int 2
 
+# depth (1 or more) minimum depth of a dungeon to spawn a witch house over 
+witches_dungeon_cellar_depth_min (minimum depth of a dungeon to spawn a witch house over) int 2
+
 # depth (5 or more) maximum depth of a dungeon to spawn a witch house over 
 witches_dungeon_cellar_depth (maximum depth of a dungeon to spawn a witch house over) int 5
 

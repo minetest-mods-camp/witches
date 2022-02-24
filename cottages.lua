@@ -1,12 +1,16 @@
 -- this file is copyright (c) 2020 Francisco Athens licensed under the terms of the MIT license
-local witches_dungeon_cellar_chance = math.abs(tonumber(
-                                                   minetest.settings:get(
-                                                       "witches_dungeon_cellar_chance"))) or
-                                          2
-local witches_dungeon_cellar_depth = math.abs(tonumber(
-                                                  minetest.settings:get(
-                                                      "witches_dungeon_cellar_depth"))) or
-                                         5
+local dungeon_cellar_chance = tonumber(minetest.settings:get(
+                                           "witches_dungeon_cellar_chance")) or
+                                  2
+
+local dungeon_cellar_depth_min = tonumber(
+                                     minetest.settings:get(
+                                         "witches_dungeon_cellar_depth_min")) or
+                                     2
+
+local dungeon_cellar_depth_max = tonumber(
+                                     minetest.settings:get(
+                                         "witches_dungeon_cellar_depth")) or 5
 
 local function mts(table)
     local output = minetest.serialize(table)
@@ -34,10 +38,11 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
         witches.debug("dungeon registered of size " .. #dg.dungeon .. " at " ..
                           vector.to_string(cur_dg))
         -- check depth 
-        local mdd = witches_dungeon_cellar_depth or 5 -- max dungeon depth
-        local pos_ck = vector.new(vector.add(cur_dg, vector.new(0, mdd, 0))) -- how close does the dungeon need to be?
-        local pos_alt = vector.new(
-                            vector.add(pos_ck, vector.new(0, mdd + 20, 0))) -- ensure we are measuring above ground
+        local mindd = dungeon_cellar_depth_min or 2
+        local maxdd = dungeon_cellar_depth_max or 5 -- max dungeon depth
+        local pos_ck = vector.new(vector.add(cur_dg, vector.new(0, maxdd, 0))) -- how close does the dungeon need to be?
+        local pos_alt = vector.new(vector.add(pos_ck,
+                                              vector.new(0, maxdd + 20, 0))) -- ensure we are measuring above ground
         local air_check = minetest.find_nodes_in_area(pos_ck, pos_alt, "air")
         if air_check then
             -- print(#air_check.." nodes of air found!")
@@ -50,10 +55,11 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
         witches.debug("current: " .. vector.to_string(cur_dg))
         witches.debug("last: " .. vector.to_string(dungeons[#dungeons]))
         local distance = vector.distance(cur_dg, dungeons[#dungeons])
-        if distance > 50 and air_check and #air_check >= 20 then
+        if distance > 50 and air_check and #air_check >= 20 and #air_check - 20 >
+            mindd then
             -- print("Distance: "..math.round(distance).." new surface dungeon (" ..#dungeons..") found at" ..(vector.to_string(cur_dg)))
-            local surface = vector.new(vector.add(pos_ck, vector.new(0,
-                                                                     20 + mdd -
+            local surface = vector.new(vector.add(pos_ck, vector.new(0, 20 +
+                                                                         maxdd -
                                                                          #air_check,
                                                                      0))) -- dropping the cottage on the surface
 
@@ -61,7 +67,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 
             d_ladder_pos = cur_dg
 
-            if math.random(1, witches_dungeon_cellar_chance) == 1 then
+            if math.random(1, dungeon_cellar_chance) == 1 then
                 witches.place_cottage(surface)
             end
 
@@ -95,16 +101,17 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
             y = 1,
             z = math.random(5 - r_tweak, 9)
         }
-    pos = vector.round(pos)
-    -- drop checks below sea level, undecided if this is necessary...
-    -- if pos.y < 0 then return end
-    -- local yaw = self.object:get_yaw()
-    -- print(mts(self.object:get_yaw()))
 
     if not pos then
         print("error: grounding failed pos checks")
         return
     end
+
+    pos = vector.round(pos)
+    -- drop checks below sea level, undecided if this is necessary...
+    -- if pos.y < 0 then return end
+    -- local yaw = self.object:get_yaw()
+    -- print(mts(self.object:get_yaw()))
 
     local pos1 = {
         x = pos.x - (area.x / 2),
@@ -145,12 +152,9 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
         local ck_volume = {ck_pos1, ck_pos2}
 
         return volume, ck_volume
-
     end
-
 end
 
-local cottage_id = nil
 -- @cottage layout and materials template
 local default_params = {
     -- plan_size =  {x=9, y=7 ,z=9}, --general size not including roof
@@ -172,7 +176,7 @@ local default_params = {
     wall_nodes = {"default:tree", "default:pine_tree", "default:acacia_tree"},
     wall_nodes_ftype = {"wall_wdir"}, -- wall_dir, wall_fdir, wall_wdir
     wall_height = 3,
-    wall_height_add = 2, -- randomly added height variation
+    wall_height_add = 2, -- randomly added height variation to first floor
     window_nodes = {
         "default:fence_wood", "default:fence_pine_wood",
         "default:fence_acacia_wood", "default:fence_junglewood"
@@ -225,7 +229,6 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         {x = pos2.x, y = pos1.y, z = pos1.z}
     }
     local upper_corner_nodes = {
-
         {x = pos1.x, y = pos2.y, z = pos1.z},
         {x = pos1.x, y = pos2.y, z = pos2.z},
         {x = pos2.x, y = pos2.y, z = pos2.z},
@@ -245,7 +248,11 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     for h = 1, wp.foundation_depth do
         for i = 1, #ucn do
             local pos = {x = ucn[i].x, y = ucn[i].y - h + 1, z = ucn[i].z}
-            minetest.set_node(pos, {
+            -- minetest.set_node(pos, {name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]})
+            local pos_ck = vector.new(pos.x, pos.y - 10, pos.z)
+            local pillars = minetest.find_nodes_in_area(pos, pos_ck,
+                                                        {"group:liquid", "air"})
+            minetest.bulk_set_node(pillars, {
                 name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]
             })
         end
@@ -300,10 +307,14 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
     for h = 1, pcn_height do
         for i = 1, #pcn do
-            local pos = {x = pcn[i].x, y = pcn[i].y + 2 - h, z = pcn[i].z}
-            minetest.set_node(pos, {name = wall_node})
-            minetest.set_node({x = pos.x, y = pos.y - 1, z = pos.z},
-                              {name = root_node})
+            local pos = vector.new(pcn[i].x, pcn[i].y + 2 - h, pcn[i].z)
+            -- minetest.set_node(pos, {name = wall_node})
+            -- minetest.set_node({x = pos.x, y = pos.y - 1, z = pos.z}, {name = root_node})
+            local pos_ck = vector.new(pos.x, pos.y - 10, pos.z)
+            local pillars = minetest.find_nodes_in_area(pos, pos_ck,
+                                                        {"group:liquid", "air"})
+            minetest.bulk_set_node(pillars, {name = wall_node})
+
         end
     end
 
@@ -344,7 +355,11 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         -- print("spawning "..tree_var )
         root_pos.y = root_pos.y - 1
         minetest.spawn_tree(tree_pos, tree_var)
-        minetest.set_node(root_pos, {name = root_node})
+        -- minetest.set_node(root_pos, {name = root_node})
+        local pos_ck = vector.new(tree_pos.x, tree_pos.y - 10, tree_pos.z)
+        local roots = minetest.find_nodes_in_area(tree_pos, pos_ck,
+                                                  {"group:liquid", "air"})
+        minetest.bulk_set_node(roots, {name = root_node})
     end
 
     -- first floor!
@@ -750,7 +765,8 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                         minetest.set_node(f_pos1, {
                             name = f_name,
                             paramtype2 = "facedir",
-                            param2 = f_facedir1
+                            param2 = f_facedir1,
+                            protected = 1
                         })
 
                         minetest.registered_nodes[f_name].on_construct(f_pos1);
@@ -1240,11 +1256,3 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     return l_pos
 end
 
---[[  build the cottage in a defined area
-local function place_cottage(cottage_id, pos1,pos2)
-  if not cottage_id then
-    return
-  end
-
-end
-]] -- 
