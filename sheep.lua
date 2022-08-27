@@ -81,7 +81,7 @@ for _, col in ipairs(all_colours) do
 		on_spawn = function(self)
 			if not self.size then
 				local overall = variance(100,200)
-				self.size = {x = overall*variance(90,110), y = overall*variance(90,110), z = overall*variance(90,110)}
+				self.size = vector.new(overall*variance(90,110), overall*variance(90,110), overall*variance(90,110))
 			end
 
 			local self_properties = self.object:get_properties()

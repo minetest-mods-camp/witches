@@ -29,7 +29,7 @@ local spawning = {
         min_light = 5,
         max_light = 15,
         interval = 300,
-        chance = 100,
+        chance = 1000,
         active_object_count = 1,
         min_height = 0,
         max_height = 200,
@@ -112,8 +112,8 @@ witches.witch_types = {
             },
             do_custom_addendum = function(self)
                 if witches.cottages then
-                    if not self.built_house and math.random() < 0.01 then
-
+                    if not self.built_house and math.random() < 0.001 then
+                        witches.debug(self.secret_name.." grounding...")
                         local volume = witches.grounding(self.object:get_pos())
                         if volume then
                             witches.debug("volume passed: " .. dump(volume))
@@ -248,8 +248,7 @@ witches.witch_template = { -- your average witch,
                             witches.magic.teleport(self, objs[n],
                                                    math.random(3, 5),
                                                    math.random(1, 2))
-                            witches.magic.splash(self, objs[n],
-                                                 {x = 2, y = 2, z = 2},
+                            witches.magic.splash(self, objs[n], vector.new(2, 2, 2),
                                                  math.random(0, 1))
                             -- witches.magic.splash(self,target,volume,height,node)
                         else

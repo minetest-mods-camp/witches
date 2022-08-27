@@ -34,10 +34,10 @@ minetest.add_particlespawner({
   time=.1,
   minpos= pos1,
   maxpos= pos2,
-  minvel={x=0, y=0, z=0},
-  maxvel={x=0, y=1, z=0},
-  minacc={x=0, y=0, z=0},
-  maxacc={x=0, y=1, z=0},
+  minvel=vector.new(0, 0, 0),
+  maxvel=vector.new(0, 1, 0),
+  minacc=vector.new(0, 0, 0),
+  maxacc=vector.new(0, 1, 0),
   minexptime=.01,
   maxexptime=.5,
   minsize=1,
@@ -67,10 +67,10 @@ function witches.magic.effect_line01(pos1,pos2,density)
         time=.1,
         minpos= v_pos1,
         maxpos= v_pos2,
-        minvel={x=0, y=0, z=0},
-        maxvel={x=0, y=1, z=0},
-        minacc={x=0, y=0, z=0},
-        maxacc={x=0, y=1, z=0},
+        minvel= vector.new(0, 0, 0),
+        maxvel= vector.new(0, 1, 0),
+        minacc= vector.new(0, 0, 0),
+        maxacc= vector.new(0, 1, 0),
         minexptime=.01,
         maxexptime=.5,
         minsize=1,
@@ -120,7 +120,7 @@ function witches.magic.teleport(self,target,strength,height)
     target:set_pos(new_target_pos)
     witches.magic.effect_line01(caster_pos,new_target_pos,50)
 
-    local vol =  pos_to_vol(caster_pos,{x=2,y=2,z=2})
+    local vol =  pos_to_vol(caster_pos,vector.new(2,2,2))
 
     --print(minetest.pos_to_string(caster_pos))
     --print(minetest.pos_to_string(vol[1]))
@@ -151,7 +151,7 @@ function witches.magic.polymorph(self, target, mob, duration)
 
   witches.magic.effect_line01(caster_pos,ent_pos,50)
   ent.object:remove()
-  local vol_ent =  pos_to_vol(ent_pos,{x=2,y=2,z=2})
+  local vol_ent =  pos_to_vol(ent_pos,vector.new(2,2,2))
 
   --print(minetest.pos_to_string(caster_pos))
   --print(minetest.pos_to_string(vol[1]))
@@ -167,13 +167,13 @@ function witches.magic.polymorph(self, target, mob, duration)
 end
 --volume is a vector!
 function witches.magic.splash(self,target,volume,height,node)
-  volume = volume or {x=3,y=3,z=3}
+  volume = volume or vector.new(3,3,3)
   height = height or 0
   node = node or "default:water_flowing"
   local caster_pos = self.object:get_pos()
   local ent = target:get_luaentity()
   local ent_pos = ent.object:get_pos()
-  local ent_pos_yoff = vector.add(ent_pos,{x=0,y=height,z=0})
+  local ent_pos_yoff = vector.add(ent_pos,vector.new(0,height,0))
   local vol = pos_to_vol(ent_pos_yoff,volume)
   minetest.sound_play(self.sounds.drench or "witches_water", {
     pos = ent_pos,

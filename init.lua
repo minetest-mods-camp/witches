@@ -1,10 +1,10 @@
--- Witches is copyright 2020 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
+-- Witches is copyright 2022 Francisco Athens, Ramona Athens, Damon Athens and Simone Athens
 -- The MIT License (MIT)
 -- local mod_name = "witches"
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20220223"
+witches.version = "202200827"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string

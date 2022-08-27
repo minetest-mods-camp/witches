@@ -127,19 +127,19 @@ function witches.flower_patch(pos)
         -- print(r_flower)
         local check = minetest.get_node(pos)
         if string.find(check.name, "dirt") then
-            minetest.place_node({x = fpos.x, y = fpos.y + 1, z = fpos.z},
+            minetest.place_node(vector.new(fpos.x, fpos.y + 1, fpos.z),
                                 {name = r_flower})
             -- flowers.flower_spread(fpos, {name = r_flower}) 
             return r_flower
         elseif string.find(check.name, "sand") then
             if math.random() < 0.20 then
-                minetest.set_node({x = fpos.x, y = fpos.y + 1, z = fpos.z},
+                minetest.set_node(vector.new(fpos.x, fpos.y + 1, fpos.z),
                                   {name = "default:large_cactus_seedling"})
             elseif minetest.get_modpath("farming") then
-                minetest.set_node({x = fpos.x, y = fpos.y + 1, z = fpos.z},
+                minetest.set_node(vector.new(fpos.x, fpos.y + 1, fpos.z),
                                   {name = "farming:cotton_wild"})
             else
-                minetest.set_node({x = fpos.x, y = fpos.y + 1, z = fpos.z},
+                minetest.set_node(vector.new(fpos.x, fpos.y + 1, fpos.z),
                                   {name = "default:dry_shrub"})
             end
 
