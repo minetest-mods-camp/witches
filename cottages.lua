@@ -98,7 +98,7 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
     local area = vol_vec or vector.new(math.random(5 + r_tweak, 9), 1, math.random(5 - r_tweak, 9))
 
     if not pos then
-        print("error: grounding failed pos checks")
+        witches.debug("error: grounding failed pos checks")
         return
     end
 

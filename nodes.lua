@@ -28,7 +28,7 @@ if witches.vessels then
     minetest.register_alias("witches:shelf", "vessels:shelf")
     minetest.register_alias("witches:glass_bottle", "vessels:glass_bottle")
 else 
-    print("vessels mod not found! shelf not registered!")
+    witches.debug("vessels mod not found! shelf not registered!")
 end
 
 minetest.register_alias("witches:chest_locked", "default:chest_locked")
