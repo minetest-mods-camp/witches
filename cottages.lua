@@ -179,6 +179,13 @@ local default_params = {
     door_top = "doors:hidden",
     root_nodes = {"witches:jungleroots"},
     tree_types = {witches.acacia_tree, witches.acacia_tree2},
+    default_tree_types = {
+                            default.grow_new_apple_tree,
+                            default.grow_new_pine_tree,
+                            default.grow_bush,
+                            default.grow_pine_bush,
+                            default.grow_blueberry_bush
+                        },
     owner = "none"
 }
 
@@ -316,20 +323,37 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         vector.new(pcn[3].x + ps + mr(-1, 1), pos2.y - 1, pcn[3].z + ps + mr(-1, 1)),
         vector.new(pcn[4].x + ps + mr(-1, 1), pos2.y - 1, pcn[4].z - ps + mr(-1, 1))
      }
-    if wp.tree_types and #wp.tree_types >= 1 then
+    if wp.tree_types and #wp.tree_types >= 1 and math.random(2) == 1 then
         ---this check fails without "minetest" game, why!?
         local tree_pos = treecn[math.random(#treecn)]
+        local tree_pos2 = treecn[math.random(#treecn)]
+        
         local root_pos = vector.new(tree_pos)
         local tree_var = wp.tree_types[math.random(#wp.tree_types)]
 
         -- print("spawning "..tree_var )
         root_pos.y = root_pos.y - 1
-        minetest.spawn_tree(tree_pos, tree_var)
+        --minetest.spawn_tree(tree_pos, tree_var)
+          
+       local tree_growth = wp.default_tree_types[math.random(#wp.default_tree_types)]
+       tree_growth(tree_pos)
+       if  vector.equals(tree_pos, tree_pos2) then
+       else
+            tree_growth(tree_pos2)  
+       end
         -- minetest.set_node(root_pos, {name = root_node})
         local pos_ck = vector.new(tree_pos.x, tree_pos.y - 10, tree_pos.z)
         local roots = minetest.find_nodes_in_area(tree_pos, pos_ck,
                                                   {"group:liquid", "air"})
         minetest.bulk_set_node(roots, {name = root_node})
+
+        if vector.equals(tree_pos, tree_pos2) then
+        else
+            local pos_ck = vector.new(tree_pos2.x, tree_pos2.y - 10, tree_pos2.z)
+            local roots = minetest.find_nodes_in_area(tree_pos2, pos_ck,
+                                                    {"group:liquid", "air"})
+            minetest.bulk_set_node(roots, {name = root_node})
+        end
     end
 
     -- first floor!
@@ -673,7 +697,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             bed = "beds:bed"
         end
         local furniture = {
-            "default:bookshelf", "default:chest_locked", bed, "default:furnace"
+            "default:bookshelf", "witches:chest_locked", bed, "default:furnace"
         }
 
         local f_pos1 = {}
@@ -726,7 +750,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             param2 = f_facedir1
                         })
                         furnace_pos = vector.new(f_pos1)
-                    elseif f_name == "default:chest_locked" then
+                    elseif f_name == "witches:chest_locked" then
 
                         minetest.set_node(f_pos1, {
                             name = f_name,
@@ -745,16 +769,37 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             meta:set_string("owner", secret_name)
                             meta:set_string("infotext",
                                             "Sealed chest of " .. secret_name)
+                        else 
+                            meta:set_string("owner", vector.to_string(f_pos1))
+                            meta:set_string("secret_name", vector.to_string(f_pos1))
+                            meta:set_string("infotext",
+                            "This chest is magically sealed!")
+                            witches.debug("Unclaimed chest: "..vector.to_string(f_pos1))
+                            
+                            --minetest.add_entity(minetest.find_node_near(f_pos1, 3, "air"), "witches:witch_cottage")
+                            witches.debug("Attempting spawning cottage witch")
+                            if mobs:add_mob(minetest.find_node_near(f_pos1, 2, "air"),{
+                             name = "witches:witch_cottage",
+                             ignore_count = true 
+                            })
+                            then
+                                witches.debug("SUCCESS: spawning cottage witch")
+                            else
+                                witches.debug("FAILED: spawning cottage witch")
+                            end
+  
+ 
                         end
 
                         if minetest.get_modpath("fireflies") then
                             inv:add_item("main", {name = "fireflies:bug_net"})
                         end
                         inv:add_item("main", {name = "default:meselamp"})
-                        if math.random() < 0.50 then
-                            for i = 1, math.random(3) do
-                                inv:add_item("main", {name = "default:diamond"})
-                            end
+                        for i = 1, math.random(3) do
+                                inv:add_item("main", {name = "default:diamond", count=math.random(1,10)})
+                        end
+                        for i = 1, math.random(3) do
+                            inv:add_item("main", {name = "default:steel_ingot", count=math.random(1,10)})
                         end
 
                     elseif f_name ~= "beds:bed" then

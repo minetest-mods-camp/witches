@@ -374,10 +374,11 @@ function witches.award_witches_chest(self, player)
         local info = {self.secret_name, sname, self.witches_chest_pos, pname}
         local pos_string = minetest.pos_to_string(info[3])
         local reward_text = S(
-                                "You receive permission from @1 to access the magic chest of @2!\n(@3)",
-                                info[1], info[2], pos_string)
+                                "You receive permission from @1 to access their magic chest located at @2!",
+                                info[1], pos_string)
         local reward = {r_text = reward_text, r_item = "default:chest"}
-        meta:set_string("infotext", S("@1's chest of @2", info[1], info[2]))
+        --meta:set_string("infotext", S("@1's chest of @2", info[1], info[2]))
+        meta:set_string("infotext", S("@1's unlocked chest", info[1]))
         self.witches_chest_owner = pname
         return reward
     end
@@ -395,12 +396,13 @@ function witches.claim_witches_chest(self)
             local sn = meta:get_string("secret_name")
             -- if sn then print(sn) end
             local o = meta:get_string("owner")
-            if o and sn and sn == o then
+            if o and sn and sn == o  then
                 witches.debug("unbound chest: " .. sn)
-                meta:set_string("owner", self.secret_name)
+                meta:set_string("secret_name", self.secret_name)
+               -- meta:set_string("secret_name", self.secret_name)
                 meta:set_string("infotext",
                                 S("Sealed chest of @1",self.secret_name))
-                self.witches_chest = sn
+                self.witches_chest = self.secret_name
                 self.witches_chest_owner = self.secret_name
                 self.witches_chest_pos = meta_table[i]
             end
@@ -504,23 +506,24 @@ function witches.found_item(self, clicker)
 
         if not self.players then
             self.players = {}
-            -- print("no records")
+            witches.debug("no records")
         end
 
         if not self.players[pname] then
             self.players[pname] = {}
-            -- print("no records 2")
+            witches.debug("no records 2")
         end
-        -- print(dump(self.players))
+            witches.debug(dump(self.players))
         if not self.players[pname].favors then
-            self.players[pname] = {favors = 0}
+            --self.players[pname] = {met = self.players[pname].met , favors = 0}
+            self.players[pname].favors = 0
         end
 
         self.players[pname].favors = self.players[pname].favors + 1
         local reward = {}
-        -- print(self.secret_name.." has now received 2 favors"..self.players[pname].favors.." from " ..pname)
+            witches.debug(self.secret_name.." has now received "..self.players[pname].favors.." favors from " ..pname)
 
-        if self.players[pname].favors >= 3 and
+        if self.players[pname].favors >= 5 and
             math.fmod(18, self.players[pname].favors) == 0 then
             if self.witches_chest and self.witches_chest_owner ==
                 self.secret_name then
@@ -530,15 +533,16 @@ function witches.found_item(self, clicker)
 
             end
         else
+            if math.random(1,4) == 1 then
             reward = witches.gift(self, pname)
-
-            -- print(reward_text)
+            witches.debug(reward)
+            end
         end
         if reward and reward.r_text then
             self.players[pname].reward_text = reward.r_text
         end
         if reward and reward.r_item then
-            -- print("reward: "..reward.r_item)
+            witches.debug("reward: "..reward.r_item)
             self.players[pname].reward_item = reward.r_item
         end
 

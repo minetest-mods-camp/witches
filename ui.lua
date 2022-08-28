@@ -53,7 +53,7 @@ function witches.found_item_quest.get_formspec(self,name)
   local text = S("Thank you @1, for finding @2!",name,quest_item.desc)
   --print(dump(self.players[name].reward_text))
   if self.players[name].reward_text then
-    text = text.."\n("..self.players[name].reward_text .. "!)"
+    text = text.."\n("..self.players[name].reward_text..")"
   end
   if self.players[name].reward_item then
     display_item = self.players[name].reward_item

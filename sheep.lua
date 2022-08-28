@@ -101,7 +101,7 @@ for _, col in ipairs(all_colours) do
 
 				self.object:set_properties({
 					textures = {"witches_sheep.png^(witches_sheep_wool.png^[colorize:" .. col[3]..")"},
-					mesh = "mobs_sheep.b3d",
+					mesh = "witches_sheep.b3d",
 				})
 			end
 		end,
@@ -117,7 +117,7 @@ for _, col in ipairs(all_colours) do
 
 					self.object:set_properties({
 						textures = {"witches_sheep.png^(witches_sheep_wool.png^[colorize:" .. col[3]..")"},
-						mesh = "mobs_sheep.b3d",
+						mesh = "witches_sheep.b3d",
 					})
 				end
 

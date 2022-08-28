@@ -24,6 +24,8 @@ else
     })
 end
 
+minetest.register_alias("witches:chest_locked", "default:chest_locked")
+
 minetest.register_node("witches:tree", {
     tiles = {
         "default_tree_top.png", "default_tree_top.png", "default_tree.png",

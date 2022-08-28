@@ -6,11 +6,11 @@ local hair_colors = witches.hair_colors
 local spawning = {
     cottage = {
         nodes = {"group:wood", "default:mossycobble", "default:cobble"},
-        neighbors = {"air", "default:locked_chest", "doors:wood_witch_a"},
+        neighbors = {"air", "witches:chest_locked", "doors:wood_witch_a"},
         min_light = 5,
         max_light = 15,
-        interval = 30,
-        chance = 1000,
+        interval = 100,
+        chance = 500,
         active_object_count = 2,
         min_height = 0,
         max_height = 200,
@@ -208,7 +208,11 @@ witches.witch_template = { -- your average witch,
         {name = "default:pick_steel", chance = 1000, min = 0, max = 1},
         {name = "default:shovel_steel", chance = 1000, min = 0, max = 1},
         {name = "default:axe_steel", chance = 1000, min = 0, max = 1},
-        {name = "default:axe_stone", chance = 5, min = 0, max = 1}
+        {name = "default:pick_stone", chance = 5, min = 0, max = 1},
+        {name = "default:shovel_stone", chance = 5, min = 0, max = 1},
+        {name = "default:axe_stone", chance = 5, min = 0, max = 1},
+        {name = "default:torch", chance = 5, min = 5, max = 20},
+        {name = "mobs:shears", chance = 100, min = 0, max = 1}
     },
 
     follow = {},
