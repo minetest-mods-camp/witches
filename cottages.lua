@@ -847,7 +847,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             param2 = f_facedir1
                         })
                         if mr(1,2) == 1 then
-                            print("placing bottle!")
+                            witches.debug("placing bottle!")
                             local v_pos1 = vector.new(f_pos1.x,f_pos1.y+1,f_pos1.z)
                             minetest.set_node(v_pos1, {
                                 name = bottle,
