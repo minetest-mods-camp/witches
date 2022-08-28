@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "202200827"
+witches.version = "20220828"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -66,6 +66,14 @@ if not doors then
 else
     witches.doors = true
     witches.debug("doors mod found")
+end
+
+if not minetest.get_modpath("vessels") then
+    witches.debug("vessels mod not found")
+    witches.vessels = false
+else
+    witches.vessels = true
+    witches.debug("vessels mod found")
 end
 
 dofile(path .. "/utilities.lua")
