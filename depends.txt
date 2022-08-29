@@ -6,4 +6,6 @@ mobs_monster?
 doors?
 flowers?
 stairs?
+bucket?
+vessels?
 

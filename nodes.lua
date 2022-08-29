@@ -1,4 +1,5 @@
 local S = minetest.get_translator("witches")
+local function print_s(input) print(witches.strip_escapes(input)) end
 if not witches.doors then
     witches.debug("doors mod not found!")
     return
@@ -24,11 +25,25 @@ else
     })
 end
 
-if witches.vessels then
+if not minetest.get_modpath("beds") then
+    
+    print_s(S("bed mod not found! Bed not registered!"))
+end
+
+if not minetest.get_modpath("bucket") then
+    minetest.register_alias("witches:bucket","default:coal")
+    print_s(S("bucket mod not found! Bucket not registered!"))
+else
+    minetest.register_alias("witches:bucket","bucket_water")
+end
+
+if not minetest.get_modpath("vessels") then
+    minetest.register_alias("witches:shelf", "air")
+    minetest.register_alias("witches:glass_bottle", "air")
+    print_s(S("vessels mod not found! Shelf and glass bottle not registered!"))
+else
     minetest.register_alias("witches:shelf", "vessels:shelf")
     minetest.register_alias("witches:glass_bottle", "vessels:glass_bottle")
-else 
-    witches.debug("vessels mod not found! shelf not registered!")
 end
 
 minetest.register_alias("witches:chest_locked", "default:chest_locked")
@@ -55,7 +70,7 @@ minetest.register_node("witches:tree", {
 })
 
 local flowers_types = {}
-if flowers.datas then
+if minetest.get_modpath("flowers") and flowers.datas then
     for i, v in pairs(flowers.datas) do flowers_types[i] = "flowers:" .. v[1] end
 end
 

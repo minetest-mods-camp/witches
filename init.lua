@@ -100,9 +100,9 @@ else
 end
 
 dofile(path .. "/magic.lua")
-local witches_cottages = settings:get_bool("witches_cottages")
 
-if witches_cottages then
+witches.cottages = settings:get_bool("witches_cottages") 
+if witches.cottages then
     witches.cottages = true
     dofile(path .. "/cottages.lua")
     print_s(S("Witch cottages will be generated"))
