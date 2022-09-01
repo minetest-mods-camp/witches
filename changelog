@@ -1,4 +1,5 @@
     
+    2022/09/01: Fix debug crashing on older MT (at least from 5.4)
     2022/08/28: More Cottage variations and furniture, cleanup of node workarounds, fixes to witch spawning in cottages 
     2022/08/27: Clean up deprecated vector tables, quest and chest fixes
     2022/02/23: Fixes and formatting
