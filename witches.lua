@@ -5,14 +5,14 @@ local hair_colors = witches.hair_colors
 
 local spawning = {
     cottage = {
-        nodes = {"group:wood", "default:mossycobble", "default:cobble"},
-        neighbors = {"air", "witches:chest_locked", "doors:wood_witch_a"},
+        nodes = {"witches:chest_locked", "doors:wood_witch_a"},
+        neighbors = {"air", },
         min_light = 5,
         max_light = 15,
-        interval = 100,
-        chance = 500,
+        interval = 30,
+        chance = 1000,
         active_object_count = 2,
-        min_height = 0,
+        min_height = -10,
         max_height = 200,
         day_toggle = nil,
         on_spawn = function(self)
@@ -24,14 +24,14 @@ local spawning = {
     },
 
     generic = {
-        nodes = {"group:wood", "default:mossycobble", "default:cobble"},
-        neighbors = {"air", "default:chest"},
+        nodes = {"group:wood", "default:mossycobble", },
+        neighbors = {"air"},
         min_light = 5,
         max_light = 15,
-        interval = 300,
+        interval = 30,
         chance = 1000,
         active_object_count = 1,
-        min_height = 0,
+        min_height = -10,
         max_height = 200,
         day_toggle = nil,
         on_spawn = function(self)
@@ -103,7 +103,7 @@ witches.witch_types = {
 
     cottage_builder = {
         description = "Eremitant Artifician",
-        lore = "The Eremitant have found homes for themselves, who would bother them?",
+        lore = "The Eremitant Artificians scout the land for dungeons upon which their cottages may be built",
         additional_properties = {
             special_follow = {
                 "default:diamond", "default:gold_lump", "default:apple",

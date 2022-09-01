@@ -161,10 +161,17 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
             if not drop_chance then drop_chance = 1000 end
             if not max_drops then max_drops = 1 end
             local rares = {}
+            local drop_num = 1
+            
             for k, v in pairs(self.drops) do
                 -- print_s(dump(v.name).." and "..dump(v.chance))
                 if v.chance >= drop_chance then
                     table.insert(rares, v.name)
+                end
+                if v.max and v.min and v.max > 1 then
+                    ----NEED TO FIX THIS :P
+                     drop_num =  math.random(v.min,v.max)
+                     max_drops = drop_num
                 end
             end
             if #rares > 0 then
@@ -187,8 +194,9 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
           })
           --]]
                     local item_wear = math.random(8000, 10000)
-                    local stack = ItemStack({name = v, wear = item_wear})
+                    local stack = ItemStack({name = v, wear = item_wear })
                     local org_desc = minetest.registered_items[v].description
+                    stack:set_count(drop_num)
                     local meta = stack:get_meta()
                     -- boost the stats!
                     local capabilities = stack:get_tool_capabilities()
@@ -243,14 +251,16 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                     })
                     local reward_text = {}
                     local reward = {}
+
                     for i, _ in pairs(inv:get_lists()) do
                         -- print(i.." = "..dump(v))
                         if i == "main" and stack and inv:room_for_item(i, stack) then
                             reward_text =
-                                S("You are rewarded with @1",
-                                  meta:get_string("description"))
+                                S("You are rewarded with @1 @2",
+                                  drop_num, meta:get_string("description"))
                             -- print("generated text: "..reward_text)
                             local reward_item = stack:get_name()
+                            stack:set_count(drop_num)
                             -- print("generated:"..stack:get_name())
                             reward = {
                                 r_text = reward_text,
@@ -261,13 +271,13 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                         end
                     end
                     reward_text = S(
-                                      "You are rewarded with @1, but you cannot carry it",
-                                      meta:get_string("description"))
+                                      "You are rewarded with @1 @2, but you cannot carry it",
+                                      drop_num, meta:get_string("description"))
                     -- print("generated text: "..reward_text)
                     local reward_item = stack:get_name()
                     -- print("generated:"..stack:get_name())
                     reward = {r_text = reward_text, r_item = reward_item}
-                    minetest.add_item(pos, stack)
+                    minetest.add_item(pos, stack )
                     -- print("generated text: "..reward_text)
                     return reward
                 end

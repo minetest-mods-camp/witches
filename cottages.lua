@@ -35,8 +35,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 
     if dg and dg.dungeon and #dg.dungeon > 1 then
         local cur_dg = vector.new(dg.dungeon[#dg.dungeon])
-        witches.debug("dungeon registered of size " .. #dg.dungeon .. " at " ..
-                          vector.to_string(cur_dg))
+        witches.debug("dungeon registered of size " .. #dg.dungeon .. " at " ..minetest.pos_to_string(cur_dg))
         -- check depth 
         local mindd = dungeon_cellar_depth_min or 2
         local maxdd = dungeon_cellar_depth_max or 5 -- max dungeon depth
@@ -52,12 +51,12 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
             table.insert(dungeons, vector.new(cur_dg))
             -- print(#dungeons)
         end
-        witches.debug("current: " .. vector.to_string(cur_dg))
-        witches.debug("last: " .. vector.to_string(dungeons[#dungeons]))
+        witches.debug("current: " .. minetest.pos_to_string(cur_dg))
+        witches.debug("last: " .. minetest.pos_to_string(dungeons[#dungeons]))
         local distance = vector.distance(cur_dg, dungeons[#dungeons])
         if distance > 50 and air_check and #air_check >= 20 and #air_check - 20 >
             mindd then
-            -- print("Distance: "..math.round(distance).." new surface dungeon (" ..#dungeons..") found at" ..(vector.to_string(cur_dg)))
+            -- print("Distance: "..math.round(distance).." new surface dungeon (" ..#dungeons..") found at" ..(minetest.pos_to_string(cur_dg)))
             local surface = vector.new(vector.add(pos_ck, vector.new(0, 20 +
                                                                          maxdd -
                                                                          #air_check,
@@ -130,7 +129,7 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
 
     if #exceptions and #exceptions >= 1 then
         
-        witches.debug("exceptions count = " .. #exceptions.." at "..vector.to_string(pos))
+        witches.debug("exceptions count = " .. #exceptions.." at "..minetest.pos_to_string(pos))
         return
     elseif protected_area then
         witches.debug("protected area found at " .. mtpts(protected_area))
@@ -201,7 +200,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     pos1 = vector.round(pos1)
     pos2 = vector.round(pos2)
     local wp = working_parameters
-    local witch_spawn_pos ={}
+    local witch_spawn_pos = {}
 
     if params then -- get defaults for any missing params
         -- print("default params: "..minetest.serialize(default_params))
@@ -802,12 +801,12 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             meta:set_string("infotext",
                                             "Sealed chest of " .. secret_name)
                         else 
-                            meta:set_string("owner", vector.to_string(f_pos1))
-                            meta:set_string("secret_name", vector.to_string(f_pos1))
+                            meta:set_string("owner", minetest.pos_to_string(f_pos1))
+                            meta:set_string("secret_name", minetest.pos_to_string(f_pos1))
                             meta:set_string("infotext",
                             "This chest is magically sealed!")
-                            witches.debug("Unclaimed chest: "..vector.to_string(f_pos1))
-                            witch_spawn_pos = f_pos1
+                            witches.debug("Unclaimed chest: "..minetest.pos_to_string(f_pos1))
+                            witch_spawn_pos = vector.new(f_pos1)
                         end    
  
                         if minetest.get_modpath("fireflies") then
@@ -829,7 +828,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                         minetest.set_node(f_pos1, {
                             name = f_name,
                             paramtype2 = "facedir",
-                            param2 = f_facedir1
+                            param2 =  f_facedir1
                         })
                         if mr(1,2) == 1 then
                             witches.debug("placing bottle!")
@@ -1251,20 +1250,19 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local cottage_va = VoxelArea:new{MinEdge = c_area1, MaxEdge = c_area2}
     -- print(mts(VoxelArea))
 
-    witches.debug("Attempting spawning cottage witch")
-      --minetest.add_entity(minetest.find_node_near(f_pos1, 3, "air"), "witches:witch_cottage")
-    if witch_spawn_pos and mobs:add_mob(minetest.find_node_near(witch_spawn_pos, 3, "air"),{
-    name = "witches:witch_cottage",
-    ignore_count = true 
-    }) 
-    then
-        witches.debug("SUCCESS: spawning cottage witch")
-    else
-        witches.debug("FAILED: spawning cottage witch"..vector.to_string(witch_spawn_pos))
-        
+    if witch_spawn_pos and mobs:add_mob(witch_spawn_pos,{
+        name = "witches:witch_cottage",
+        ignore_count = true 
+        }) 
+        then
+            witches.debug("SUCCESS: spawning cottage witch")     
+        else
+            witches.debug("FAILED: spawning cottage witch"..minetest.pos_to_string(witch_spawn_pos))
+            
     end
 
     return l_pos
+    --return witches_spawn_pos
   
 
 end
