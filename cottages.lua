@@ -36,7 +36,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
     if dg and dg.dungeon and #dg.dungeon > 1 then
         local cur_dg = vector.new(dg.dungeon[#dg.dungeon])
         witches.debug("dungeon registered of size " .. #dg.dungeon .. " at " ..minetest.pos_to_string(cur_dg))
-        -- check depth 
+        -- check depth
         local mindd = dungeon_cellar_depth_min or 2
         local maxdd = dungeon_cellar_depth_max or 5 -- max dungeon depth
         local pos_ck = vector.new(vector.add(cur_dg, vector.new(0, maxdd, 0))) -- how close does the dungeon need to be?
@@ -128,7 +128,7 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
     local protected_area = minetest.is_area_protected(ck_pos1, ck_pos2, "", 2)
 
     if #exceptions and #exceptions >= 1 then
-        
+
         witches.debug("exceptions count = " .. #exceptions.." at "..minetest.pos_to_string(pos))
         return
     elseif protected_area then
@@ -257,7 +257,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             -- minetest.set_node(pos, {name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]})
             local pos_ck = vector.new(pos.x, pos.y - 10, pos.z)
             local pillars = minetest.find_nodes_in_area(pos, pos_ck,
-                                                        {"group:liquid", "air"})
+                                                        {"group:liquid", "air","default:snow"})
             minetest.bulk_set_node(pillars, {
                 name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]
             })
@@ -319,15 +319,14 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                 -- minetest.set_node(vector.new(pos.x, pos.y - 1, pos.z), {name = root_node})
                 local pos_ck = vector.new(pos.x, pos.y - 10, pos.z)
                 local pillars = minetest.find_nodes_in_area(pos, pos_ck,
-                                                            {"group:liquid", "air"})
+                                                            {"group:liquid", "air","default:snow"})
                 minetest.bulk_set_node(pillars, {name = wall_node})
 
             end
         end
     end
     --chance of porch bushes
-    
-        
+
     for i = 1, #pcn do
         if mr(1,2) == 1 then
             local pos = vector.new(pcn[i].x, pcn[i].y + 1, pcn[i].z)
@@ -338,8 +337,6 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             bush_growth(pos)
         end
     end
-       
-
 
     local treecn = {
 
@@ -352,31 +349,30 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         ---this check fails without "minetest" game, why!?
         local tree_pos = treecn[math.random(#treecn)]
         local tree_pos2 = treecn[math.random(#treecn)]
-        
         local root_pos = vector.new(tree_pos)
         local tree_var = wp.tree_types[math.random(#wp.tree_types)]
 
         -- print("spawning "..tree_var )
         root_pos.y = root_pos.y - 1
         --minetest.spawn_tree(tree_pos, tree_var)
-          
+
        local tree_growth = wp.default_tree_types[math.random(#wp.default_tree_types)]
        tree_growth(tree_pos)
        if  vector.equals(tree_pos, tree_pos2) then
        else
-            tree_growth(tree_pos2)  
+            tree_growth(tree_pos2)
        end
         -- minetest.set_node(root_pos, {name = root_node})
         local pos_ck = vector.new(tree_pos.x, tree_pos.y - 10, tree_pos.z)
         local roots = minetest.find_nodes_in_area(tree_pos, pos_ck,
-                                                  {"group:liquid", "air"})
+                                                  {"group:liquid", "air","default:snow"})
         minetest.bulk_set_node(roots, {name = root_node})
 
         if vector.equals(tree_pos, tree_pos2) then
         else
             local pos_ck = vector.new(tree_pos2.x, tree_pos2.y - 10, tree_pos2.z)
             local roots = minetest.find_nodes_in_area(tree_pos2, pos_ck,
-                                                    {"group:liquid", "air"})
+                                                    {"group:liquid", "air","default:snow"})
             minetest.bulk_set_node(roots, {name = root_node})
         end
     end
@@ -473,7 +469,24 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         table.insert(wall_plan,
                      {pos = pos, dir = dir, facedir = facedir, walldir = 13})
     end
+-- drop foundation walls
+    local fpl = table.copy(wall_plan)
+    
+        for i = 1, #fpl do
+            fpl[i].pos.y = fpl[i].pos.y - 2          
+            -- minetest.set_node(pos, {name = wall_node})
+            -- minetest.set_node(vector.new(pos.x, pos.y - 1, pos.z), {name = root_node})
+            local fpl_ck = vector.new(fpl[i].pos.x, fpl[i].pos.y - math.random(1,dungeon_cellar_depth_max), fpl[i].pos.z)
+            local fdepth = minetest.find_nodes_in_area(fpl[i].pos,fpl_ck,  {"group:liquid", "air","default:snow"})
+            
+            minetest.bulk_set_node(fdepth, {
+                name = window_node,
+                paramtype2 = "facedir",
+                param2 = fpl[i].pos.walldir
+            })
+        end
 
+--- now raise walls...
     for h = 1, wp.wall_height do
         for i = 1, #wall_plan do
             minetest.set_node(wall_plan[i].pos, {
@@ -800,15 +813,15 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             meta:set_string("owner", secret_name)
                             meta:set_string("infotext",
                                             "Sealed chest of " .. secret_name)
-                        else 
+                        else
                             meta:set_string("owner", minetest.pos_to_string(f_pos1))
                             meta:set_string("secret_name", minetest.pos_to_string(f_pos1))
                             meta:set_string("infotext",
                             "This chest is magically sealed!")
                             witches.debug("Unclaimed chest: "..minetest.pos_to_string(f_pos1))
                             witch_spawn_pos = vector.new(f_pos1)
-                        end    
- 
+                        end
+
                         if minetest.get_modpath("fireflies") then
                             inv:add_item("main", {name = "fireflies:bug_net"})
                         end
@@ -823,7 +836,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             inv:add_item("main", {name = "witches:bucket", count=1})
                         end
 
-                        
+
                     elseif f_name ~= bed then
                         minetest.set_node(f_pos1, {
                             name = f_name,
@@ -839,7 +852,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                                 param2 = f_facedir1
                             })
                         end
-                        
+
 
                     end
 
@@ -907,7 +920,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local rfaz = math.floor(rfarea.z / 2)
     local rfax = math.floor(rfarea.x / 2)
     if math.random() < 0.5 then
-
+        local step_var = mr(1,3)
         local midpoint = (rfarea.z + 1) / 2
         local gmp = rfarea.z - 1
         for i = 1, midpoint do
@@ -1249,21 +1262,21 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local cottage_area = {c_area1, c_area2}
     local cottage_va = VoxelArea:new{MinEdge = c_area1, MaxEdge = c_area2}
     -- print(mts(VoxelArea))
-
+--[[
     if witch_spawn_pos and mobs:add_mob(witch_spawn_pos,{
         name = "witches:witch_cottage",
-        ignore_count = true 
-        }) 
+        ignore_count = true
+        })
         then
-            witches.debug("SUCCESS: spawning cottage witch")     
+            witches.debug("SUCCESS: spawning cottage witch")
         else
             witches.debug("FAILED: spawning cottage witch"..minetest.pos_to_string(witch_spawn_pos))
-            
-    end
 
+    end
+--]]
     return l_pos
     --return witches_spawn_pos
-  
+
 
 end
 
