@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20220901"
+witches.version = "20220905"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -40,9 +40,10 @@ local function print_s(input) print(witches.strip_escapes(input)) end
 local S = minetest.get_translator("witches")
 local settings = minetest.settings
 
-function witches.debug(input)
+function witches.debug(input, debug_category)
+    debug_category = debug_category or ""
     local witches_debug = settings:get_bool("witches_debug")
-    if witches_debug then print_s(input) end
+    if witches_debug then print_s(debug_category.." "..input) end
 end
 
 local witches_version = witches.version

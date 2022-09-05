@@ -288,11 +288,11 @@ end
 
 function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear)
     if not pname then
-        witches.debug("no player defined!")
+        witches.debug("no player defined!","witches.gift")
         return
     end
     if not self.drops then
-        witches.debug("no droplist defined in this mob!")
+        witches.debug("no droplist defined in this mob!","witches.gift")
         return
     end
     local list = {}
@@ -407,7 +407,7 @@ function witches.claim_witches_chest(self)
             -- if sn then print(sn) end
             local o = meta:get_string("owner")
             if o and sn and sn == o  then
-                witches.debug("unbound chest: " .. sn)
+                witches.debug("unbound chest found by: " .. self.secret_name,"witches.claim_witches_chest")
                 meta:set_string("secret_name", self.secret_name)
                -- meta:set_string("secret_name", self.secret_name)
                 meta:set_string("infotext",
@@ -450,11 +450,11 @@ function witches.item_list_check(list)
     witches.debug("checking list: " .. minetest.serialize(list))
     for i, v in ipairs(list) do
         if not minetest.registered_items[v] then
-            witches.debug(i .. ". " .. v .. " not found and removing from list")
+            witches.debug(i .. ". " .. v .. " not found and removing from list","witches.item_list_check")
             list[i] = nil
         end
     end
-    witches.debug("new list: " .. minetest.serialize(list))
+    witches.debug("new list: " .. minetest.serialize(list),"witches.item_list_check")
     return list
 end
 
@@ -516,14 +516,14 @@ function witches.found_item(self, clicker)
 
         if not self.players then
             self.players = {}
-            witches.debug("no records")
+            witches.debug("no records","witches.found_item")
         end
 
         if not self.players[pname] then
             self.players[pname] = {}
-            witches.debug("no records 2")
+            witches.debug("no records 2","witches.found_item")
         end
-            witches.debug(dump(self.players))
+            witches.debug(dump(self.players),"witches.found_item")
         if not self.players[pname].favors then
             --self.players[pname] = {met = self.players[pname].met , favors = 0}
             self.players[pname].favors = 0
@@ -531,7 +531,7 @@ function witches.found_item(self, clicker)
 
         self.players[pname].favors = self.players[pname].favors + 1
         local reward = {}
-            witches.debug(self.secret_name.." has now received "..self.players[pname].favors.." favors from " ..pname)
+            witches.debug(self.secret_name.." has now received "..self.players[pname].favors.." favors from " ..pname,"witches.found_item")
 
         if self.players[pname].favors >= 5 and
             math.fmod(18, self.players[pname].favors) == 0 then
@@ -545,14 +545,14 @@ function witches.found_item(self, clicker)
         else
             if math.random(1,4) == 1 then
             reward = witches.gift(self, pname)
-            witches.debug(reward)
+            witches.debug(reward,"witches.found_item")
             end
         end
         if reward and reward.r_text then
             self.players[pname].reward_text = reward.r_text
         end
         if reward and reward.r_item then
-            witches.debug("reward: "..reward.r_item)
+            witches.debug("reward: "..reward.r_item,"witches.found_item")
             self.players[pname].reward_item = reward.r_item
         end
 
@@ -583,21 +583,21 @@ function witches.looking_for(self)
             witches.item_list_check(self.special_follow)
             witches.debug(
                 "looking for somethine but no self.follow so picking one of these: " ..
-                    minetest.serialize(self.special_follow))
+                    minetest.serialize(self.special_follow),"witches.looking_for")
             self.follow = {}
             self.follow = {
                 self.special_follow[math.random(#self.special_follow)]
             }
-            witches.debug(minetest.serialize(self.follow) .. " picked")
+            witches.debug(minetest.serialize(self.follow) .. " picked","witches.looking_for")
         end
 
         if self.follow and #self.follow >= 1 then
             -- print("testing: "..type(self.follow).." "..#self.follow.." "..dump(self.follow).." "..math.random(1,#self.follow))
             witches.debug(self.secret_name .. "'s self.follow" ..
-                              minetest.serialize(self.follow))
+                              minetest.serialize(self.follow),"witches.looking_for")
             local item = self.follow[math.random(1, #self.follow)]
             -- local stack = ItemStack({name = item})
-            witches.debug(self.secret_name .. "'s chosen follow item: " .. item)
+            witches.debug(self.secret_name .. "'s chosen follow item: " .. item,"witches.looking_for")
 
             local find = {
                 name = minetest.registered_items[item].name,
@@ -632,7 +632,7 @@ function witches.quests(self, clicker)
 
     if var1 == var2 then
         self.dev_mode = pname
-        witches.debug("dev mode active for: " .. pname)
+        witches.debug("dev mode active for: " .. pname,"witches.quests")
     end
 
     -- print("we are holding a "..dump(item:get_name()))

@@ -35,7 +35,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 
     if dg and dg.dungeon and #dg.dungeon > 1 then
         local cur_dg = vector.new(dg.dungeon[#dg.dungeon])
-        witches.debug("dungeon registered of size " .. #dg.dungeon .. " at " ..minetest.pos_to_string(cur_dg))
+        witches.debug("dungeon registered of size " .. #dg.dungeon .. " at " ..mtpts(cur_dg),"Dungeon Finder:")
         -- check depth
         local mindd = dungeon_cellar_depth_min or 2
         local maxdd = dungeon_cellar_depth_max or 5 -- max dungeon depth
@@ -47,12 +47,12 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
             -- print(#air_check.." nodes of air found!")
         end
         if #dungeons < 1 then
-            witches.debug("no last dungeon to compare!!")
+            witches.debug("no last dungeon to compare!!","Dungeon Finder:")
             table.insert(dungeons, vector.new(cur_dg))
             -- print(#dungeons)
         end
-        witches.debug("current: " .. minetest.pos_to_string(cur_dg))
-        witches.debug("last: " .. minetest.pos_to_string(dungeons[#dungeons]))
+        witches.debug("current: " .. mtpts(cur_dg),"Dungeon Finder:")
+        witches.debug("last: " .. mtpts(dungeons[#dungeons]),"Dungeon Finder:")
         local distance = vector.distance(cur_dg, dungeons[#dungeons])
         if distance > 50 and air_check and #air_check >= 20 and #air_check - 20 >
             mindd then
@@ -62,12 +62,12 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
                                                                          #air_check,
                                                                      0))) -- dropping the cottage on the surface
 
-            witches.debug("new surface dungeons found: " .. #dungeons)
+            witches.debug("new surface dungeons found: " .. #dungeons,"Dungeon Finder:")
 
             d_ladder_pos = cur_dg
 
             if math.random(1, dungeon_cellar_chance) == 1 then
-                witches.place_cottage(surface)
+                 witches.place_cottage(surface)
             end
 
             table.insert(dungeons, vector.new(cur_dg))
@@ -83,7 +83,7 @@ function witches.place_cottage(pos)
     if volume then
         volume[1].y = volume[1].y + 1
         volume[2].y = volume[2].y + 1
-        witches.debug("witches.place_cottage - volume passed: " .. dump(volume))
+        witches.debug("witches.place_cottage - volume passed: " .. mts(volume),"witches.place_cottage")
 
         return witches.generate_cottage(volume[1], volume[2])
     end
@@ -97,7 +97,7 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
     local area = vol_vec or vector.new(math.random(5 + r_tweak, 9), 1, math.random(5 - r_tweak, 9))
 
     if not pos then
-        witches.debug("error: grounding failed pos checks")
+        witches.debug("error: grounding failed pos checks","witches.place_cottage")
         return
     end
 
@@ -129,15 +129,15 @@ function witches.grounding(pos, vol_vec, required_list, exception_list,
 
     if #exceptions and #exceptions >= 1 then
 
-        witches.debug("exceptions count = " .. #exceptions.." at "..minetest.pos_to_string(pos))
+        witches.debug("exceptions count = " .. #exceptions.." at ".. mtpts(pos),"witches.place_cottage")
         return
     elseif protected_area then
-        witches.debug("protected area found at " .. mtpts(protected_area))
+        witches.debug("protected area found at " .. mts(protected_area),"witches.place_cottage")
         return
     else
         witches.debug(
             "witches.grounding - SUCCESS!" .. "pos1 = " .. mtpts(pos1) ..
-                "pos2 = " .. mtpts(pos2))
+                "pos2 = " .. mtpts(pos2),"witches.place_cottage")
 
         local volume = {pos1, pos2}
         local ck_volume = {ck_pos1, ck_pos2}
@@ -182,8 +182,7 @@ local default_params = {
         default.grow_new_apple_tree,
         default.grow_new_pine_tree,
         default.grow_bush,
-        default.grow_pine_bush,
-        default.grow_blueberry_bush
+        default.grow_pine_bush
     },
     default_bush_types = {
         default.grow_bush,
@@ -220,7 +219,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
     local root_node = wp.root_nodes[math.random(#wp.root_nodes)]
     if not minetest.registered_nodes[root_node] then
-        witches.debug("can't find root node: " .. root_node)
+        witches.debug("can't find root node: " .. root_node,"generate_cottage")
         root_node = "default:tree"
     end
     local window_node = wp.window_nodes[math.random(#wp.window_nodes)]
@@ -345,36 +344,22 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         vector.new(pcn[3].x + ps + mr(-1, 1), pos2.y - 1, pcn[3].z + ps + mr(-1, 1)),
         vector.new(pcn[4].x + ps + mr(-1, 1), pos2.y - 1, pcn[4].z - ps + mr(-1, 1))
      }
-    if wp.tree_types and #wp.tree_types >= 1 and math.random(2) == 1 then
+    witches.debug(mts(treecn),"trees")
+    if wp.default_tree_types and #wp.default_tree_types >= 1 and math.random(2) == 1 then
         ---this check fails without "minetest" game, why!?
-        local tree_pos = treecn[math.random(#treecn)]
-        local tree_pos2 = treecn[math.random(#treecn)]
-        local root_pos = vector.new(tree_pos)
-        local tree_var = wp.tree_types[math.random(#wp.tree_types)]
 
-        -- print("spawning "..tree_var )
-        root_pos.y = root_pos.y - 1
-        --minetest.spawn_tree(tree_pos, tree_var)
+        for i = 1, #treecn and mr(0,2) do
+            local tree_pos = vector.new(treecn[i])
+            local tree_growth = wp.default_tree_types[math.random(#wp.default_tree_types)]
+            witches.debug(mts(tree_pos),"tree pos")
 
-       local tree_growth = wp.default_tree_types[math.random(#wp.default_tree_types)]
-       tree_growth(tree_pos)
-       if  vector.equals(tree_pos, tree_pos2) then
-       else
-            tree_growth(tree_pos2)
-       end
-        -- minetest.set_node(root_pos, {name = root_node})
-        local pos_ck = vector.new(tree_pos.x, tree_pos.y - 10, tree_pos.z)
-        local roots = minetest.find_nodes_in_area(tree_pos, pos_ck,
-                                                  {"group:liquid", "air","default:snow"})
-        minetest.bulk_set_node(roots, {name = root_node})
-
-        if vector.equals(tree_pos, tree_pos2) then
-        else
-            local pos_ck = vector.new(tree_pos2.x, tree_pos2.y - 10, tree_pos2.z)
-            local roots = minetest.find_nodes_in_area(tree_pos2, pos_ck,
-                                                    {"group:liquid", "air","default:snow"})
+            tree_growth(tree_pos)
+            local pos_ck = vector.new(tree_pos.x, tree_pos.y - 10, tree_pos.z)
+            local roots = minetest.find_nodes_in_area(tree_pos, pos_ck,
+                                                        {"group:liquid", "air","default:snow"})
             minetest.bulk_set_node(roots, {name = root_node})
         end
+
     end
 
     -- first floor!
@@ -476,9 +461,9 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             fpl[i].pos.y = fpl[i].pos.y - 2          
             -- minetest.set_node(pos, {name = wall_node})
             -- minetest.set_node(vector.new(pos.x, pos.y - 1, pos.z), {name = root_node})
-            local fpl_ck = vector.new(fpl[i].pos.x, fpl[i].pos.y - math.random(1,dungeon_cellar_depth_max), fpl[i].pos.z)
+            local fpl_ck = vector.new(fpl[i].pos.x, fpl[i].pos.y - math.random(1,dungeon_cellar_depth_max/2), fpl[i].pos.z)
             local fdepth = minetest.find_nodes_in_area(fpl[i].pos,fpl_ck,  {"group:liquid", "air","default:snow"})
-            
+
             minetest.bulk_set_node(fdepth, {
                 name = window_node,
                 paramtype2 = "facedir",
@@ -547,10 +532,10 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
     -- local door_pos= p_door_pos
 
-    witches.debug("door: " .. mts(door_pos))
+    witches.debug("door: " .. mts(door_pos),"generate_cottage")
     for k, v in pairs(door_pos) do
 
-        witches.debug(mts(v))
+        witches.debug(mtpts(v))
         local f_pos1 = vector.new(v)
         -- get the offsets
         f_pos1[v.fp[1]] = f_pos1[v.fp[1]] + v.fp[2]
@@ -558,7 +543,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         local dir = vector.direction(f_pos1, door_pos[k])
         local f_facedir = minetest.dir_to_facedir(dir)
         if not witches.doors then
-            witches.debug("doors repalced with air")
+            witches.debug("doors replaced with air","generate_cottage")
             wp.door_bottom = "air"
             wp.door_top = "air"
         end
@@ -596,14 +581,79 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             -- paramtype2 = "facedir",
             param2 = t_wm
         })
+    --stairs to the door
+        local stair_inc = function(pos)
+            pos[v.fp[1]] = pos[v.fp[1]] + (v.fp[2])
+            pos.y = pos.y - 1
+            return pos
+        end
+
+        local s_pos1 = v
+        --move out 1 node
+        s_pos1[v.fp[1]] = s_pos1[v.fp[1]] + 2*(v.fp[2])
+        --drop 1 node
+        s_pos1.y = s_pos1.y - 1
+        local stair_node = wp.roof_nodes[1]
+        --move a test pos out
+        local st_pos1 = vector.new(s_pos1)
+        st_pos1 = stair_inc(st_pos1)
+        
+        minetest.set_node(s_pos1, {
+            name=stair_node,
+            paramtype2 = "facedir",
+            param2 = f_facedir
+        }) 
+       
+        local is_air = function(pos)
+            --print("checking for air"..mtpts(pos))
+            local node =  minetest.get_node(pos)
+             
+            if node.name == "air" or node.name == "default:snow" then
+                --print("found air or snow! "..mts(pos))
+                return pos
+            else
+               -- print(node.name)
+            end
+        end
+            
+       local stair_rep = function(pos)
+            
+                minetest.set_node(pos, {
+                    name=stair_node,
+                    paramtype2 = "facedir",
+                    param2 = f_facedir
+                })
+
+                local s_under = vector.new(pos)
+                s_under.y = s_under.y - 1
+ 
+                minetest.set_node(s_under, {
+                    name=wp.window_nodes[1],
+                    paramtype2 = "facedir",
+                    param2 = f_facedir
+                })
+        end
+
+        s_pos1 = stair_inc(s_pos1)
+        st_pos1 = stair_inc(st_pos1)
+    -- print("checking for stairs: "..mts(s_pos1).." "..mts(st_pos1))
+
+        local loop_count=1
+        while is_air(s_pos1) do
+            loop_count = loop_count + 1
+            -- print("placing stair")
+             stair_rep(s_pos1)
+             s_pos1 = stair_inc(s_pos1)
+             st_pos1 = stair_inc(st_pos1)  
+        end
 
     end
-    -- set windows
 
+    -- set windows
     local window_pos = {w = {}, n = {}, e = {}, s = {}}
     local az = math.floor((area.z - 2) / 2)
     local ax = math.floor((area.x - 2) / 2)
-    witches.debug("az/ax= " .. az .. "  " .. ax)
+    --witches.debug("az/ax= " .. az .. "  " .. ax)
     for i = 1, az do
         local wz = {
             x = ffpos1.x,
@@ -640,21 +690,20 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         }
         table.insert(window_pos.s, sx)
     end
-    witches.debug(mts(window_pos))
+    --witches.debug(mts(window_pos))
 
     for k, v in pairs(door_pos) do
         -- v is the door pos vector table
-        for i = v[v.p] + 1, v[v.p] - 1, -1 do -- start with lateral axis (p) pos on either side of door
-            witches.debug("doorpos " .. v.p .. " " .. i)
+        for i = v[v.p] + 2, v[v.p] - 2, -1 do -- start with lateral axis (p) pos on either side of door
+            --witches.debug("doorpos " .. v.p .. " " .. i)
             for j, _ in ipairs(window_pos[k]) do -- we want the vector table value of each
-                witches.debug("windowpos " .. mts(window_pos[k][j]) .. " vs " ..
-                                  i)
+                --witches.debug("windowpos " .. mts(window_pos[k][j]) .. " vs " .. i)
                 if window_pos[k][j] and i == window_pos[k][j][v.p] then
-                    witches.debug("windowpos " .. window_pos[k][j][v.p] ..
-                                      " vs " .. i)
-                    witches.debug("removing window_pos[k][j][v.p] = " ..
-                                      mtpts(window_pos[k][j]))
-                    -- table.remove(window_pos[k],j)
+                    
+                   -- print("windowpos " .. window_pos[k][j][v.p] .. " vs " .. i)
+                   -- print("removing window_pos[k][j][v.p] = " .. mtpts(window_pos[k][j]))
+                    --table.remove(window_pos[k],j)
+                    window_pos[k][j][v.p] = nil
                     window_pos[k][j] = nil
                 end
             end
@@ -662,13 +711,178 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
     end
 
+    
+    local furnace_pos = {} -- gonna need this later!
+    local stovepipe_pos = {}
+    local furnace_front = {}
+    -- place some furniture
+    --bed requires some special attention :P
+    if window_pos then
+        local bed = ""
+        if not beds then
+            bed = "air"
+        else
+            bed = "beds:bed"
+        end
+
+        local furniture = {
+            bed,
+            "default:furnace",
+            "witches:chest_locked",
+            "default:bookshelf",
+            "witches:shelf"
+        }
+
+        local f_pos1 = {}
+        for j in pairs(window_pos) do
+            for k, v in ipairs(window_pos[j]) do
+                if furniture and #furniture >= 1 then
+                    f_pos1 = vector.new(v)
+                    f_pos1[v.fp[1]] = f_pos1[v.fp[1]] + v.fp[2]
+                    f_pos1.y = f_pos1.y - 1
+
+                    witches.debug("window:" .. mtpts(v),"generate_cottage")
+                    witches.debug("furniture:" .. mtpts(f_pos1),"generate_cottage")
+                    local dir1 = vector.direction(f_pos1, v)
+                    local dir2 = vector.direction(v, f_pos1)
+                    local f_facedir1 = minetest.dir_to_facedir(dir1)
+                    local f_facedir2 = minetest.dir_to_facedir(dir2)
+                    local f_num = math.random(#furniture)
+                    local f_name = furniture[f_num]
+                    
+                    witches.debug("furniture "..f_name.." to be placed: "..mtpts(f_pos1),"generate_cottage")
+                    if f_name == "beds:bed" then
+                        local f_pos2 = vector.new(f_pos1)
+                        if math.random() < 0.001 then
+                            f_pos2[v.fp[1]] = f_pos2[v.fp[1]] + v.fp[2]
+                        else
+                            f_pos2[v.p] = f_pos2[v.p] + v.fp[2] -- bed along wall_nodes
+                            dir1 = vector.direction(f_pos2, f_pos1)
+                            dir2 = vector.direction(f_pos1, f_pos2)
+                            f_facedir1 = minetest.dir_to_facedir(dir1)
+                            f_facedir2 = minetest.dir_to_facedir(dir2)
+                        end
+
+                        minetest.set_node(f_pos1, {
+                            name = f_name,
+                            paramtype2 = "facedir",
+                            param2 = f_facedir2
+                        })
+                        witches.debug("bed1:" .. mtpts(f_pos1),"generate_cottage")
+                        witches.debug("bed2:" .. mtpts(f_pos2),"generate_cottage")
+                        minetest.set_node(f_pos2, {
+                            name = f_name,
+                            paramtype2 = "facedir",
+                            param2 = f_facedir1
+                        })
+
+                    elseif f_name == "default:furnace" then
+                        furnace_front = f_pos1
+                        f_pos1[v.fp[1]] = f_pos1[v.fp[1]] - v.fp[2]
+                        --and set stovepipe pos
+                        stovepipe_pos = vector.new(f_pos1)
+                        -- use fp to get outside
+                        stovepipe_pos[v.fp[1]] = f_pos1[v.fp[1]] - v.fp[2]
+                        minetest.set_node(f_pos1, {
+                            name = f_name,
+                            paramtype2 = "facedir",
+                            param2 = f_facedir1
+                        })
+                        furnace_pos = vector.new(f_pos1)
+                        --remove window above furnace
+                        for i=1, window_height do
+                            f_pos1.y = f_pos1.y+1
+                            minetest.set_node(f_pos1, {
+                                name = "stairs:stair_stone",
+                                paramtype2 = "facedir",
+                                param2 = f_facedir1
+                            })
+                        end
+                       
+                        
+                       -- print("before "..mtpts(f_pos1).." "..mts(window_pos))
+                        window_pos[j][k][v] = nil
+                        window_pos[j][k] = nil
+                       -- print("after "..mts(window_pos))
+                    elseif f_name == "witches:chest_locked" then
+
+                        minetest.set_node(f_pos1, {
+                            name = f_name,
+                            paramtype2 = "facedir",
+                            param2 = f_facedir1,
+                            protected = 1
+                        })
+
+                        minetest.registered_nodes[f_name].on_construct(f_pos1);
+                        local meta = minetest.get_meta(f_pos1);
+                        local inv = meta:get_inventory();
+                        meta:set_string("secret_type", "witches_chest")
+
+                        if secret_name then
+                            meta:set_string("secret_name", secret_name)
+                            meta:set_string("owner", secret_name)
+                            meta:set_string("infotext",
+                                            "Sealed chest of " .. secret_name)
+                        else
+                            meta:set_string("owner", mtpts(f_pos1))
+                            meta:set_string("secret_name", mtpts(f_pos1))
+                            meta:set_string("infotext",
+                            "This chest is magically sealed!")
+                            witches.debug("Unclaimed chest placed: "..mtpts(f_pos1),"generate_cottage")
+                            witch_spawn_pos = vector.new(f_pos1)
+                        end
+
+                        if minetest.get_modpath("fireflies") then
+                            inv:add_item("main", {name = "fireflies:bug_net"})
+                        end
+                        inv:add_item("main", {name = "default:meselamp"})
+                        for i = 1, math.random(3) do
+                                inv:add_item("main", {name = "default:diamond", count=math.random(1,10)})
+                        end
+                        for i = 1, math.random(3) do
+                            inv:add_item("main", {name = "default:steel_ingot", count=math.random(1,10)})
+                        end
+                        for i = 1, math.random(3) do
+                            inv:add_item("main", {name = "witches:bucket", count=1})
+                        end
+                        local snode_pos = vector.new(f_pos1.x,f_pos1.y+1, f_pos1.z)
+                        minetest.set_node(snode_pos, {
+                            name = "witches:spawn_node",
+                            protected = 1
+                        })
+
+                    elseif f_name ~= bed then
+                        minetest.set_node(f_pos1, {
+                            name = f_name,
+                            paramtype2 = "facedir",
+                            param2 =  f_facedir1
+                        })
+                --[[         if mr(1,2) == 1 then
+                            --witches.debug("placing bottle!")
+                            local v_pos1 = vector.new(f_pos1.x,f_pos1.y+1,f_pos1.z)
+                            minetest.set_node(v_pos1, {
+                                name = "witches:glass_bottle",
+                                paramtype2 = "facedir",
+                                param2 = f_facedir1
+                            })
+                        end ]]
+
+
+                    end
+
+                    table.remove(furniture, f_num)
+                end
+            end
+        end
+    end
+    --place windows
     if window_pos then
         for k, _ in pairs(window_pos) do
             for _, v in pairs(window_pos[k]) do
 
                 for i = 1, window_height do
 
-                    witches.debug("window set: " .. mtpts(v))
+                    witches.debug("window set: " .. mtpts(v),"generate_cottage")
                     minetest.set_node(vector.new(v.x, v.y - 1 + i, v.z),
                                       {name = window_node})
 
@@ -702,7 +916,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
                 if math.random() < .5 then
                     local ck = minetest.get_node(ck_pos1)
-                    witches.debug("ck: " .. ck.name)
+                    --witches.debug("ck: " .. ck.name)
                     if ck.name ~= window_node then
                         minetest.set_node(t_pos1, {
                             name = "default:torch_wall",
@@ -713,7 +927,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                     end
                 else
                     local ck = minetest.get_node(ck_pos2)
-                    witches.debug("ck: " .. ck.name)
+                    --witches.debug("ck: " .. ck.name)
                     if ck.name ~= window_node then
                         minetest.set_node(t_pos2, {
                             name = "default:torch_wall",
@@ -725,143 +939,6 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             end
         end
     end
-    local furnace_pos = {} -- gonna need this later!
-    -- place some furniture
-    --bed requires some special attention :P
-    if window_pos then
-        local bed = ""
-        if not beds then
-            bed = "air"
-        else
-            bed = "beds:bed"
-        end
-
-        local furniture = {
-            bed,
-            "default:bookshelf",
-            "witches:chest_locked",
-            "default:furnace",
-            "witches:shelf"
-        }
-
-        local f_pos1 = {}
-        for j in pairs(window_pos) do
-            for k, v in ipairs(window_pos[j]) do
-                if furniture and #furniture >= 1 then
-                    f_pos1 = vector.new(v)
-                    f_pos1[v.fp[1]] = f_pos1[v.fp[1]] + v.fp[2]
-                    f_pos1.y = f_pos1.y - 1
-
-                    witches.debug("window:" .. mtpts(v))
-                    witches.debug("furniture:" .. mtpts(f_pos1))
-                    local dir1 = vector.direction(f_pos1, v)
-                    local dir2 = vector.direction(v, f_pos1)
-                    local f_facedir1 = minetest.dir_to_facedir(dir1)
-                    local f_facedir2 = minetest.dir_to_facedir(dir2)
-                    local f_num = math.random(#furniture)
-                    local f_name = furniture[f_num]
-
-                    if f_name == "beds:bed" then
-                        local f_pos2 = vector.new(f_pos1)
-                        if math.random() < 0.001 then
-                            f_pos2[v.fp[1]] = f_pos2[v.fp[1]] + v.fp[2]
-                        else
-                            f_pos2[v.p] = f_pos2[v.p] + v.fp[2] -- bed along wall_nodes
-                            dir1 = vector.direction(f_pos2, f_pos1)
-                            dir2 = vector.direction(f_pos1, f_pos2)
-                            f_facedir1 = minetest.dir_to_facedir(dir1)
-                            f_facedir2 = minetest.dir_to_facedir(dir2)
-                        end
-
-                        minetest.set_node(f_pos1, {
-                            name = f_name,
-                            paramtype2 = "facedir",
-                            param2 = f_facedir2
-                        })
-                        witches.debug("bed1:" .. mtpts(f_pos1))
-                        witches.debug("bed2:" .. mtpts(f_pos2))
-                        minetest.set_node(f_pos2, {
-                            name = f_name,
-                            paramtype2 = "facedir",
-                            param2 = f_facedir1
-                        })
-
-                    elseif f_name == "default:furnace" then
-                        f_pos1[v.fp[1]] = f_pos1[v.fp[1]] - v.fp[2]
-                        minetest.set_node(f_pos1, {
-                            name = f_name,
-                            paramtype2 = "facedir",
-                            param2 = f_facedir1
-                        })
-                        furnace_pos = vector.new(f_pos1)
-                    elseif f_name == "witches:chest_locked" then
-
-                        minetest.set_node(f_pos1, {
-                            name = f_name,
-                            paramtype2 = "facedir",
-                            param2 = f_facedir1,
-                            protected = 1
-                        })
-
-                        minetest.registered_nodes[f_name].on_construct(f_pos1);
-                        local meta = minetest.get_meta(f_pos1);
-                        local inv = meta:get_inventory();
-                        meta:set_string("secret_type", "witches_chest")
-
-                        if secret_name then
-                            meta:set_string("secret_name", secret_name)
-                            meta:set_string("owner", secret_name)
-                            meta:set_string("infotext",
-                                            "Sealed chest of " .. secret_name)
-                        else
-                            meta:set_string("owner", minetest.pos_to_string(f_pos1))
-                            meta:set_string("secret_name", minetest.pos_to_string(f_pos1))
-                            meta:set_string("infotext",
-                            "This chest is magically sealed!")
-                            witches.debug("Unclaimed chest: "..minetest.pos_to_string(f_pos1))
-                            witch_spawn_pos = vector.new(f_pos1)
-                        end
-
-                        if minetest.get_modpath("fireflies") then
-                            inv:add_item("main", {name = "fireflies:bug_net"})
-                        end
-                        inv:add_item("main", {name = "default:meselamp"})
-                        for i = 1, math.random(3) do
-                                inv:add_item("main", {name = "default:diamond", count=math.random(1,10)})
-                        end
-                        for i = 1, math.random(3) do
-                            inv:add_item("main", {name = "default:steel_ingot", count=math.random(1,10)})
-                        end
-                        for i = 1, math.random(3) do
-                            inv:add_item("main", {name = "witches:bucket", count=1})
-                        end
-
-
-                    elseif f_name ~= bed then
-                        minetest.set_node(f_pos1, {
-                            name = f_name,
-                            paramtype2 = "facedir",
-                            param2 =  f_facedir1
-                        })
-                        if mr(1,2) == 1 then
-                            witches.debug("placing bottle!")
-                            local v_pos1 = vector.new(f_pos1.x,f_pos1.y+1,f_pos1.z)
-                            minetest.set_node(v_pos1, {
-                                name = "witches:glass_bottle",
-                                paramtype2 = "facedir",
-                                param2 = f_facedir1
-                            })
-                        end
-
-
-                    end
-
-                    table.remove(furniture, f_num)
-                end
-            end
-        end
-    end
-
     -- second_floor!
     local sfnodes = wp.second_floor_nodes[math.random(#wp.second_floor_nodes)]
 
@@ -881,32 +958,22 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
         end
     end
-    --
-    --[[
-  for h=1, wp.wall_height-1 do
-    for i=1, #ucn do
-      local pos = {x=ucn[i].x, y=ucn[i].y+h+1+wp.wall_height,z=ucn[i].z}
-      minetest.set_node(pos,{name=wp.foundation_nodes[math.random(#wp.foundation_nodes)]})
-    end
-  end
---]]
-    local stovepipe_pos = {}
+
+    
     -- gable and roof
     -- orientation
     local rfnum = math.random(#wp.roof_nodes)
     local rf_nodes = wp.roof_nodes[rfnum]
     if not minetest.registered_nodes[rf_nodes] then
-        witches.debug("can't find roof node: " .. rf_nodes)
+        witches.debug("can't find roof node: " .. rf_nodes,"generate_cottage")
         rf_nodes = "default:wood"
     end
     local rf_slabs = wp.roof_slabs[rfnum]
     if not minetest.registered_nodes[rf_slabs] then
-        witches.debug("can't find roof slab node: " .. rf_slabs)
+        witches.debug("can't find roof slab node: " .. rf_slabs,"generate_cottage")
         rf_slabs = "default:wood"
     end
     local gbnodes = wp.gable_nodes[rfnum]
-    local orientations = {{"x", "z"}, {"z", "x"}}
-    local o = orientations[math.random(#orientations)]
     local gbpos1 = vector.new(sfpos1.x, sfpos2.y + 1, sfpos1.z)
     local gbpos2 = vector.new(sfpos2.x, sfpos2.y + 1, sfpos2.z) -- this is going to change while building
     local rfpos1 =
@@ -920,7 +987,6 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local rfaz = math.floor(rfarea.z / 2)
     local rfax = math.floor(rfarea.x / 2)
     if math.random() < 0.5 then
-        local step_var = mr(1,3)
         local midpoint = (rfarea.z + 1) / 2
         local gmp = rfarea.z - 1
         for i = 1, midpoint do
@@ -1140,21 +1206,22 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         end
 
     end
-    witches.debug("ladder l_pos: " .. mts(l_pos))
+    witches.debug("ladder l_pos: " .. mts(l_pos),"generate_cottage")
     -- extend the stovepipe
     if furnace_pos and furnace_pos.x then
-        -- print("furnace pos: "..mtpts(furnace_pos))
-        local stovepipe = (rfpos2.y - furnace_pos.y) + 1
+       -- print("furnace pos: "..mts(furnace_pos))
+        local stovepipe = (rfpos2.y - furnace_pos.y + 2) 
         -- print(rfpos2.y.." "..furnace_pos.y.." "..stovepipe)
-        stovepipe_pos = vector.new(furnace_pos)
+       -- print("stovepipe_pos: "..mts(stovepipe_pos))
+       -- print("stovepipe pos: "..mts(stovepipe_pos))
         for i = 1, stovepipe do
-            stovepipe_pos.y = stovepipe_pos.y + 1
             minetest.set_node(stovepipe_pos, {name = "default:cobble"})
+            stovepipe_pos.y = stovepipe_pos.y + 1
         end
     end
 
     -- drop a ladder from the center of the gable, avoiding any doors or windows
-    witches.debug("door: " .. mts(door_pos))
+    witches.debug("door: " .. mts(door_pos),"generate_cottage")
     if door_pos and l_pos then
         for _, d in pairs(door_pos) do
             for k, l in pairs(l_pos) do
@@ -1169,8 +1236,8 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         for v, _ in pairs(window_pos) do
             for _, w in ipairs(window_pos[v]) do
                 for k, l in pairs(l_pos) do
-                    witches.debug("possible window before check: " .. mtpts(w))
-                    witches.debug("possible ladder before check: " .. mtpts(l))
+                    witches.debug("possible window before check: " .. mtpts(w),"generate_cottage")
+                    witches.debug("possible ladder before check: " .. mtpts(l),"generate_cottage")
                     if math.ceil(l.x) == w.x and math.ceil(l.z) == w.z then
                         witches.debug("removing" .. mtpts(l_pos[k]))
                         table.remove(l_pos, k)
@@ -1179,8 +1246,16 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             end
         end
     end
-
-    witches.debug("possible ladder: " .. mts(l_pos))
+    
+    if furnace_front and l_pos then
+        local ff = furnace_front
+        for k, l in pairs(l_pos) do
+            if l.x == ff.x and l.z == ff.z then
+                table.remove(l_pos, k)
+            end
+        end
+    end
+    witches.debug("possible ladder: " ..  mts(l_pos),"generate_cottage")
     if l_pos and #l_pos >= 1 then
 
         local lpn = math.random(#l_pos)
@@ -1202,53 +1277,38 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
         local dir1 = vector.direction(fpos, lpc)
         local dir1_wm = minetest.dir_to_wallmounted(dir1)
-        witches.debug("ladder chosen: " .. mts(lpc))
+        witches.debug("ladder chosen: " ..  mts(lpc),"generate_cottage")
         lpc[lpc.fp[1]] = lpc[lpc.fp[1]] + lpc.fp[2]
         -- l_pos.y = l_pos.y-1
+        local td_pos = vector.new(lpc)
+        td_pos.y=furnace_pos.y
 
         for i = 1, ladder_length do
             lpc.y = lpc.y - 1
             minetest.set_node(lpc,
-                              {name = "default:ladder_wood", param2 = dir1_wm})
-
+                              {name = "default:ladder_wood", param2=dir1_wm})
         end
-        witches.debug("ladder: " .. mtpts(lpc))
+        minetest.set_node(td_pos,{name="air"})
+        if witches.doors then
+             minetest.set_node(td_pos,{name="doors:trapdoor", param2=dir1_wm})
+        end
+        witches.debug("ladder: " .. mts(lpc))
     else
         local loftpos1 = vector.new(sfpos1.x + 2, sfpos1.y + 1, sfpos1.z + 1)
         local loftpos2 = vector.new(sfpos2.x - 2, sfpos1.y + 1, sfpos2.z - 1)
         local loftarea = vector.subtract(loftpos2, loftpos1)
-        witches.debug(dump(loftpos1))
-        witches.debug(dump(loftpos2))
-        witches.debug(dump(loftarea))
+        witches.debug(mtpts(loftpos1),"generate_cottage")
+        witches.debug(mtpts(loftpos2),"generate_cottage")
+        witches.debug(dump(loftarea),"generate_cottage")
         for i = 1, loftarea.z + 1 do
             for j = 1, loftarea.x + 1 do
                 local pos = vector.new(loftpos1.x - 1 + j, loftpos1.y, loftpos1.z - 1 + i)
-                witches.debug(mts(pos))
+                witches.debug(mtpts(pos),"generate_cottage")
                 minetest.set_node(pos, {name = "air"})
             end
         end
 
     end
-
-    --[[
-  for i=1, sfarea.z+1 do
-    for j=1, sfarea.x+1 do
-
-          local pos = {x=sfpos1.x+j-1, y=sfpos1.y+1, z=sfpos1.z+i-1}
-          minetest.set_node(pos,{
-            name=wp.second_floor_nodes[math.random(#wp.second_floor_nodes)]
-          })
-
-    end
-  end
-
-  for h=1, wp.wall_height-1 do
-    for i=1, #ucn do
-      local pos = {x=ucn[i].x, y=ucn[i].y+h+1+wp.wall_height,z=ucn[i].z}
-      minetest.set_node(pos,{name=wp.foundation_nodes[math.random(#wp.foundation_nodes)]})
-    end
-  end
---]]
 
     local c_area1 = vector.new(ppos1)
     local c_area2 = vector.new(ppos2)
@@ -1262,21 +1322,9 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local cottage_area = {c_area1, c_area2}
     local cottage_va = VoxelArea:new{MinEdge = c_area1, MaxEdge = c_area2}
     -- print(mts(VoxelArea))
---[[
-    if witch_spawn_pos and mobs:add_mob(witch_spawn_pos,{
-        name = "witches:witch_cottage",
-        ignore_count = true
-        })
-        then
-            witches.debug("SUCCESS: spawning cottage witch")
-        else
-            witches.debug("FAILED: spawning cottage witch"..minetest.pos_to_string(witch_spawn_pos))
 
-    end
---]]
-    return l_pos
-    --return witches_spawn_pos
-
+    return witch_spawn_pos
+    --return l_pos
 
 end
 

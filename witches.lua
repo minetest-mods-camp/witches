@@ -1,3 +1,14 @@
+
+local function mts(table)
+    local output = minetest.serialize(table)
+    return output
+end
+
+local function mtpts(table)
+    local output = minetest.pos_to_string(table)
+    return output
+end
+
 local variance = witches.variance
 local rnd_color = witches.rnd_color
 local rnd_colors = witches.rnd_colors
@@ -5,24 +16,32 @@ local hair_colors = witches.hair_colors
 
 local spawning = {
     cottage = {
-        nodes = {"witches:chest_locked", "doors:wood_witch_a"},
-        neighbors = {"air", },
-        min_light = 5,
-        max_light = 15,
-        interval = 30,
-        chance = 1000,
-        active_object_count = 2,
+        --nodes = {"group:wood","group:choppy","default:cobble"},
+        --neighbors = {"witches:chest_locked", "doors:wood_witch_a"},
+        nodes = {"witches:spawn_node"},
+        neighbors = {"witches:chest_locked"},
+        min_light = 0,
+        max_light = 25,
+        interval = 5,
+        chance = 1, -- 1:1 chance
+        --on_map_load = true, -- on map generation
+        active_object_count = 1,
         min_height = -10,
         max_height = 200,
         day_toggle = nil,
         on_spawn = function(self)
             local pos = self.object:get_pos()
             witches.debug(self.secret_name .. " spawned at " ..
-                              minetest.pos_to_string(vector.round(pos)))
+            minetest.pos_to_string(vector.round(pos)),"Witch Spawning")
+            local wsn = minetest.find_node_near(pos,4,{name="witches:spawn_node"},true)
+            if wsn then minetest.remove_node(wsn)
+                witches.debug(self.secret_name.." found the spawn node:"..mtpts(wsn))
+            else
+                witches.debug(self.secret_name.." could not find the spawn node:"..mtpts(pos))
+            end
         end
 
     },
-
     generic = {
         nodes = {"group:wood", "default:mossycobble", },
         neighbors = {"air"},
@@ -37,7 +56,7 @@ local spawning = {
         on_spawn = function(self)
             local pos = self.object:get_pos()
             witches.debug(self.secret_name .. " spawned at " ..
-                              minetest.pos_to_string(vector.round(pos)))
+                              minetest.pos_to_string(vector.round(pos)),"Witch Spawning")
 
         end
 
@@ -113,10 +132,10 @@ witches.witch_types = {
             do_custom_addendum = function(self)
                 if witches.cottages then
                     if not self.built_house and math.random() < 0.001 then
-                        witches.debug(self.secret_name.." grounding...")
+                        witches.debug(self.secret_name.." grounding...","Witch Spawning")
                         local volume = witches.grounding(self.object:get_pos())
                         if volume then
-                            witches.debug("volume passed: " .. dump(volume))
+                            witches.debug("volume passed: " .. dump(volume),"Witch Spawning")
 
                             local pos = self.object:get_pos()
                             pos.y = pos.y + 3
@@ -136,7 +155,7 @@ witches.witch_types = {
                 witches.claim_witches_chest(self)
             end
         },
-        spawning = spawning.cottage
+        spawning = spawning.generic
     }
 }
 
