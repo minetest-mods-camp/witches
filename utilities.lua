@@ -169,6 +169,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                     table.insert(rares, v.name)
                 end
                 if v.max and v.min and v.max > 1 then
+                    witches.debug(dump(v.min).." "..dump(v.max), "witches.special_gifts min max check ")
                     ----NEED TO FIX THIS :P
                      drop_num =  math.random(v.min,v.max)
                      max_drops = drop_num
@@ -180,6 +181,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drops)
                 pos.y = pos.y + 0.5
                 -- witches.mixitup(pos)
                 if #rares > max_drops then
+                    witches.debug(dump(max_drops).." "..dump(rares), "witches.special_gifts max drops and rares check ")
                     rares = rares[math.random(max_drops, #rares)]
                     if type(rares) ~= table then
                         rares = {rares}
