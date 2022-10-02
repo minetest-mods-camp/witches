@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20220905"
+witches.version = "20221002"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -43,7 +43,7 @@ local settings = minetest.settings
 function witches.debug(input, debug_category)
     debug_category = debug_category or ""
     local witches_debug = settings:get_bool("witches_debug")
-    if witches_debug then print_s(debug_category.." "..input) end
+    if witches_debug then print_s(debug_category .. " " .. input) end
 end
 
 local witches_version = witches.version
@@ -102,7 +102,7 @@ end
 
 dofile(path .. "/magic.lua")
 
-witches.cottages = settings:get_bool("witches_cottages") 
+witches.cottages = settings:get_bool("witches_cottages")
 if witches.cottages then
     witches.cottages = true
     dofile(path .. "/cottages.lua")
