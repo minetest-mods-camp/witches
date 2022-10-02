@@ -534,20 +534,22 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     }
 
     local door_pos = {}
-    local test = 4
-    for k, v in pairs(p_door_pos) do
-        if test >= 1 and math.random(test) == 1 then
-            door_pos[k] = v
-            test = 0
-        else
-            test = test - 1
-        end
+    local door_frame = {}
+    witches.debug("possible door pos: " .. dump(p_door_pos), "generate_cottage")
 
-    end
+    local p_door_pos_i = {}
+
+    for k, _ in pairs(p_door_pos) do table.insert(p_door_pos_i, k) end
+
+    witches.debug("possible door list: " .. dump(p_door_pos_i),
+                  "generate_cottage")
+
+    p_door_pos_i = p_door_pos_i[math.random(1, #p_door_pos_i)]
+    door_pos[p_door_pos_i] = p_door_pos[p_door_pos_i]
 
     -- local door_pos= p_door_pos
 
-    witches.debug("door: " .. mts(door_pos), "generate_cottage")
+    witches.debug("door pos: " .. dump(door_pos), "generate_cottage")
     for k, v in pairs(door_pos) do
 
         witches.debug(mtpts(v))
@@ -596,6 +598,11 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             -- paramtype2 = "facedir",
             param2 = t_wm
         })
+
+        door_frame[k] = {vector.new(v), vector.new(v), vector.new(v)}
+        door_frame[k][2][v.p] = door_frame[k][2][v.p] - 1
+        door_frame[k][3][v.p] = door_frame[k][3][v.p] + 1
+
         -- stairs to the door
         local stair_inc = function(pos)
             pos[v.fp[1]] = pos[v.fp[1]] + (v.fp[2])
@@ -730,25 +737,24 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         }
         table.insert(window_pos.s, sx)
     end
-    -- witches.debug(mts(window_pos))
 
-    for k, v in pairs(door_pos) do
-        -- v is the door pos vector table
-        for i = v[v.p] + 2, v[v.p] - 2, -1 do -- start with lateral axis (p) pos on either side of door
-            -- witches.debug("doorpos " .. v.p .. " " .. i)
-            for j, _ in ipairs(window_pos[k]) do -- we want the vector table value of each
-                -- witches.debug("windowpos " .. mts(window_pos[k][j]) .. " vs " .. i)
-                if window_pos[k][j] and i == window_pos[k][j][v.p] then
-
-                    -- print("windowpos " .. window_pos[k][j][v.p] .. " vs " .. i)
-                    -- print("removing window_pos[k][j][v.p] = " .. mtpts(window_pos[k][j]))
-                    -- table.remove(window_pos[k],j)
-                    window_pos[k][j][v.p] = nil
-                    window_pos[k][j] = nil
+    witches.debug(dump(window_pos), "window vectors")
+    witches.debug(dump(door_frame), "door frame vectors")
+    for k, _ in pairs(door_frame) do
+        for v, _ in ipairs(door_frame[k]) do
+            -- print(" k = "..dump(k))
+            -- print(" v = "..dump(v))
+            for i = #window_pos[k], 1, -1 do
+                if window_pos[k][i].x == door_frame[k][v].x and
+                    window_pos[k][i].z == door_frame[k][v].z then
+                    witches.debug(dump(window_pos[k][i]) .. "\n" ..
+                                      dump(door_frame[k][v]),
+                                  "--match found: \n")
+                    table.remove(window_pos[k], i)
+                    witches.debug(dump(window_pos[k]), " --remaining window pos")
                 end
             end
         end
-
     end
 
     local furnace_pos = {} -- gonna need this later!
@@ -1281,10 +1287,13 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     -- drop a ladder from the center of the gable, avoiding any doors or windows
     witches.debug("door: " .. mts(door_pos), "generate_cottage")
     if door_pos and l_pos then
-        for _, d in pairs(door_pos) do
-            for k, l in pairs(l_pos) do
-                if l.x == d.x and l.z == d.z then
-                    table.remove(l_pos, k)
+        for k, _ in pairs(door_pos) do
+            for d, _ in ipairs(door_pos[k]) do
+                for l = #l_pos, 1, -1 do
+                    if l_pos[l].x == door_pos[k][d].x and l_pos[l].z ==
+                        door_pos[k][d].z then
+                        table.remove(l_pos, l)
+                    end
                 end
             end
         end

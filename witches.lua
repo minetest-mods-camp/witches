@@ -1,4 +1,3 @@
-
 local function mts(table)
     local output = minetest.serialize(table)
     return output
@@ -16,15 +15,15 @@ local hair_colors = witches.hair_colors
 
 local spawning = {
     cottage = {
-        --nodes = {"group:wood","group:choppy","default:cobble"},
-        --neighbors = {"witches:chest_locked", "doors:wood_witch_a"},
+        -- nodes = {"group:wood","group:choppy","default:cobble"},
+        -- neighbors = {"witches:chest_locked", "doors:wood_witch_a"},
         nodes = {"witches:spawn_node"},
         neighbors = {"witches:chest_locked"},
         min_light = 0,
         max_light = 25,
         interval = 5,
         chance = 1, -- 1:1 chance
-        --on_map_load = true, -- on map generation
+        -- on_map_load = true, -- on map generation
         active_object_count = 1,
         min_height = -10,
         max_height = 200,
@@ -32,18 +31,25 @@ local spawning = {
         on_spawn = function(self)
             local pos = self.object:get_pos()
             witches.debug(self.secret_name .. " spawned at " ..
-            minetest.pos_to_string(vector.round(pos)),"Witch Spawning")
-            local wsn = minetest.find_node_near(pos,4,{name="witches:spawn_node"},true)
-            if wsn then minetest.remove_node(wsn)
-                witches.debug(self.secret_name.." found the spawn node:"..mtpts(wsn))
+                              minetest.pos_to_string(vector.round(pos)),
+                          "Witch Spawning")
+            local wsn = minetest.find_node_near(pos, 4,
+                                                {name = "witches:spawn_node"},
+                                                true)
+            if wsn then
+                minetest.remove_node(wsn)
+                witches.debug(self.secret_name .. " found the spawn node:" ..
+                                  mtpts(wsn))
             else
-                witches.debug(self.secret_name.." could not find the spawn node:"..mtpts(pos))
+                witches.debug(self.secret_name ..
+                                  " could not find the spawn node:" ..
+                                  mtpts(pos))
             end
         end
 
     },
     generic = {
-        nodes = {"group:wood", "default:mossycobble", },
+        nodes = {"group:wood", "default:mossycobble"},
         neighbors = {"air"},
         min_light = 5,
         max_light = 15,
@@ -56,7 +62,8 @@ local spawning = {
         on_spawn = function(self)
             local pos = self.object:get_pos()
             witches.debug(self.secret_name .. " spawned at " ..
-                              minetest.pos_to_string(vector.round(pos)),"Witch Spawning")
+                              minetest.pos_to_string(vector.round(pos)),
+                          "Witch Spawning")
 
         end
 
@@ -70,9 +77,14 @@ witches.witch_types = {
 
         additional_properties = {
             special_follow = {
-                "default:diamond", "default:gold_lump", "default:apple",
-                "default:blueberries", "default:torch", "default:stick",
-                "flowers:mushroom_brown", "flowers:mushroom_red"
+                {name = "default:diamond", min = 1, max = 10},
+                {name = "default:gold_lump", min = 1, max = 10},
+                {name = "default:apple", min = 1, max = 10},
+                {name = "default:blueberries", min = 1, max = 10},
+                {name = "default:torch", min = 1, max = 10},
+                {name = "default:stick", min = 1, max = 10},
+                {name = "flowers:mushroom_brown", min = 1, max = 10},
+                {name = "flowers:mushroom_red", min = 1, max = 10}
             },
 
             do_custom_addendum = function(self)
@@ -93,8 +105,8 @@ witches.witch_types = {
 
             on_spawn_addendum = function(self)
                 -- print(dump(self.drops).."and"..dump(minetest.registered_tools))
-                witches.firefly_mod(self)
 
+                witches.firefly_mod(self)
             end
         }
     },
@@ -104,9 +116,27 @@ witches.witch_types = {
         lore = "The Eremitant have found homes for themselves, who would bother them?",
         additional_properties = {
             special_follow = {
-                "default:diamond", "default:gold_lump", "default:apple",
-                "default:blueberries", "default:torch", "default:stick",
-                "flowers:mushroom_brown", "flowers:mushroom_red"
+                {name = "default:diamond", min = 1, max = 10},
+                {name = "default:gold_lump", min = 1, max = 10},
+                {name = "default:apple", min = 1, max = 10},
+                {name = "default:blueberries", min = 1, max = 10},
+                {name = "default:torch", min = 1, max = 10},
+                {name = "default:stick", min = 1, max = 10},
+                {name = "flowers:mushroom_brown", min = 1, max = 10},
+                {name = "flowers:mushroom_red", min = 1, max = 10}
+            },
+            special_drops = {
+                {name = "default:pick_steel", chance = 1024, min = 1, max = 1},
+                {name = "default:shovel_steel", chance = 1024, min = 1, max = 1},
+                {name = "default:axe_steel", chance = 1024, min = 1, max = 1},
+                {name = "default:pick_diamond", chance = 2048, min = 1, max = 1},
+                {
+                    name = "default:shovel_diamond",
+                    chance = 2048,
+                    min = 1,
+                    max = 1
+                },
+                {name = "default:axe_diamond", chance = 2048, min = 1, max = 1}
             },
             do_custom_addendum = function(self)
                 if witches.cottages then
@@ -125,17 +155,24 @@ witches.witch_types = {
         lore = "The Eremitant Artificians scout the land for dungeons upon which their cottages may be built",
         additional_properties = {
             special_follow = {
-                "default:diamond", "default:gold_lump", "default:apple",
-                "default:blueberries", "default:torch", "default:stick",
-                "flowers:mushroom_brown", "flowers:mushroom_red"
+                {name = "default:diamond", min = 1, max = 10},
+                {name = "default:gold_lump", min = 1, max = 10},
+                {name = "default:apple", min = 1, max = 10},
+                {name = "default:blueberries", min = 1, max = 10},
+                {name = "default:torch", min = 1, max = 10},
+                {name = "default:stick", min = 1, max = 10},
+                {name = "flowers:mushroom_brown", min = 1, max = 10},
+                {name = "flowers:mushroom_red", min = 1, max = 10}
             },
             do_custom_addendum = function(self)
                 if witches.cottages then
                     if not self.built_house and math.random() < 0.001 then
-                        witches.debug(self.secret_name.." grounding...","Witch Spawning")
+                        witches.debug(self.secret_name .. " grounding...",
+                                      "Witch Spawning")
                         local volume = witches.grounding(self.object:get_pos())
                         if volume then
-                            witches.debug("volume passed: " .. dump(volume),"Witch Spawning")
+                            witches.debug("volume passed: " .. dump(volume),
+                                          "Witch Spawning")
 
                             local pos = self.object:get_pos()
                             pos.y = pos.y + 3
@@ -224,22 +261,33 @@ witches.witch_template = { -- your average witch,
         punch_end = 219
     },
     drops = {
-        {name = "default:pick_steel", chance = 1000, min = 0, max = 1},
-        {name = "default:shovel_steel", chance = 1000, min = 0, max = 1},
-        {name = "default:axe_steel", chance = 1000, min = 0, max = 1},
-        {name = "default:pick_stone", chance = 5, min = 0, max = 1},
-        {name = "default:shovel_stone", chance = 5, min = 0, max = 1},
-        {name = "default:axe_stone", chance = 5, min = 0, max = 1},
-        {name = "default:torch", chance = 5, min = 5, max = 20},
-        {name = "mobs:shears", chance = 100, min = 0, max = 1}
+        {name = "default:torch", chance = 4, min = 5, max = 20},
+        {name = "default:steel_ingot", chance = 4, min = 2, max = 5},
+        {name = "default:pick_stone", chance = 16, min = 1, max = 1},
+        {name = "default:shovel_stone", chance = 16, min = 1, max = 1},
+        {name = "default:axe_stone", chance = 16, min = 1, max = 1},
+        {name = "mobs:shears", chance = 32, min = 1, max = 1}
     },
-
+    -- follow should be left empty as it is filled from a function
     follow = {},
     additional_properties = {
         special_follow = {
-            "default:diamond", "default:gold_lump", "default:apple",
-            "default:blueberries", "default:torch", "default:stick",
-            "flowers:mushroom_brown", "flowers:mushroom_red"
+            {name = "default:diamond", min = 1, max = 10},
+            {name = "default:gold_lump", min = 1, max = 10},
+            {name = "default:apple", min = 1, max = 10},
+            {name = "default:blueberries", min = 1, max = 10},
+            {name = "default:torch", min = 1, max = 10},
+            {name = "default:stick", min = 1, max = 10},
+            {name = "flowers:mushroom_brown", min = 1, max = 10},
+            {name = "flowers:mushroom_red", min = 1, max = 10}
+        },
+        special_drops = {
+            {name = "default:pick_steel", chance = 1024, min = 1, max = 1},
+            {name = "default:shovel_steel", chance = 1024, min = 1, max = 1},
+            {name = "default:axe_steel", chance = 1024, min = 1, max = 1},
+            {name = "default:pick_diamond", chance = 2048, min = 1, max = 1},
+            {name = "default:shovel_diamond", chance = 2048, min = 1, max = 1},
+            {name = "default:axe_diamond", chance = 2048, min = 1, max = 1}
         }
     },
 
@@ -271,7 +319,8 @@ witches.witch_template = { -- your average witch,
                             witches.magic.teleport(self, objs[n],
                                                    math.random(3, 5),
                                                    math.random(1, 2))
-                            witches.magic.splash(self, objs[n], vector.new(2, 2, 2),
+                            witches.magic.splash(self, objs[n],
+                                                 vector.new(2, 2, 2),
                                                  math.random(0, 1))
                             -- witches.magic.splash(self,target,volume,height,node)
                         else

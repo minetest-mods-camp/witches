@@ -1,4 +1,5 @@
     
+    2022/10/02: Quests can now require higher counts of items to complete, more cottage fixing
     2022/09/30: add a debug check for annoying bug
     2022/09/04: More cottage code cleanup and re-add witch spawner (sometimes it works!?)
     2022/09/01: Fix debug crashing on older MT (at least from 5.4)
