@@ -26,6 +26,10 @@ function witches.find_item_quest.get_formspec(self, name)
     -- local quest_item = witches.looking_for(self)
     local text = ""
     local item = self.item_request.item
+    if not item.name then
+         item.name = "item name missing!"
+         print("ERROR: item name not found:"..dump(item))
+    end
     if self.item_request.text and type(self.item_request.text) == "table" then
         local intro = self.item_request.text.intro
         local request = "\n" .. self.item_request.text.request
@@ -40,7 +44,12 @@ function witches.find_item_quest.get_formspec(self, name)
         text = text .. "\nhair: " .. self.hair_style .. ",hat: " ..
                    self.hat_style
     end
-  
+
+    if not text then
+         text = "quest text not parsed!"
+         print("ERROR: quest text not found")
+    end
+
     local formspec = {
         "formspec_version[3]",
         "size[6,3.5,true]",
@@ -53,6 +62,21 @@ function witches.find_item_quest.get_formspec(self, name)
         "label[2.5,2.25;", item.count,"]"
 
     }
+
+    if not formspec then
+        print("ERROR: NO FORMSPEC!")
+        return
+    end
+    if type(formspec) ~= "table" then
+        print("ERROR: FORMSPEC is not table!")
+        return
+    end
+    for i,v in ipairs(formspec) do
+        if not v then
+            print("ERROR: FORMSPEC index "..i.." value is NIL!")
+            return
+        end
+    end
 
     return table.concat(formspec, "")
 
@@ -79,6 +103,22 @@ function witches.found_item_ask.get_formspec(context, name)
         "label[1.1,2.8;", qi.count, "]", "item_image_button[3,2.5;1,1;",
         display_item, ";give_no;]", "label[3.1,2.8;0]"
     }
+    
+    if not formspec then
+        print("ERROR: NO FORMSPEC!")
+        return
+    end
+    if type(formspec) ~= "table" then
+        print("ERROR: FORMSPEC is not table!")
+        return
+    end
+    for i,v in ipairs(formspec) do
+        if not v then
+            print("ERROR: FORMSPEC index "..i.." value is NIL!")
+            return
+        end
+    end
+
     return table.concat(formspec, "")
 end
 
@@ -104,6 +144,21 @@ function witches.found_item_quest.get_formspec(self, name)
       "item_image[2,2.25;1,1;" .. display_item .. "]"
     }
 
+    if not formspec then
+        print("ERROR: NO FORMSPEC!")
+        return
+    end
+    if type(formspec) ~= "table" then
+        print("ERROR: FORMSPEC is not table!")
+        return
+    end
+    for i,v in ipairs(formspec) do
+        if not v then
+            print("ERROR: FORMSPEC index "..i.." value is NIL!")
+            return
+        end
+    end
+    
     return table.concat(formspec, "")
 end
 

@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20221004"
+witches.version = "20221005"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
