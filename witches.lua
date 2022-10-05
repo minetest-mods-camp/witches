@@ -8,6 +8,18 @@ local function mtpts(table)
     return output
 end
 
+local function mr(min, max)
+    local v = 1
+    if min then
+        if max then
+             v = math.random(min,max)
+        else
+             v = math.random(min)
+        end
+    end
+    return v
+end
+
 local variance = witches.variance
 local rnd_color = witches.rnd_color
 local rnd_colors = witches.rnd_colors
@@ -21,7 +33,7 @@ local spawning = {
         neighbors = {"witches:chest_locked"},
         min_light = 0,
         max_light = 25,
-        interval = 5,
+        interval = 20,
         chance = 1, -- 1:1 chance
         -- on_map_load = true, -- on map generation
         active_object_count = 1,
@@ -88,10 +100,11 @@ witches.witch_types = {
             },
 
             do_custom_addendum = function(self)
-                if math.random() < .0001 and
+                if mr(30000) == 1 and
                     minetest.registered_nodes["fireflies:firefly"] then
                     local pos = self.object:get_pos()
                     if pos then
+                        if minetest.is_protected(pos, "") then return end
                         pos.y = pos.y + 1
                         local pos1 = minetest.find_node_near(pos, 3, "air")
                         if pos1 then
@@ -166,7 +179,7 @@ witches.witch_types = {
             },
             do_custom_addendum = function(self)
                 if witches.cottages then
-                    if not self.built_house and math.random() < 0.001 then
+                    if not self.built_house and mr(10000) == 1 then
                         witches.debug(self.secret_name .. " grounding...",
                                       "Witch Spawning")
                         local volume = witches.grounding(self.object:get_pos())
@@ -178,9 +191,10 @@ witches.witch_types = {
                             pos.y = pos.y + 3
                             self.object:set_pos(pos)
                             self.built_house = pos
-                            print("witch placing:" ..
+                            --[[ print("witch placing:" ..
                                       minetest.serialize(volume[1]) .. "/n" ..
                                       minetest.serialize(volume[2]))
+                            --]]
                             witches.generate_cottage(volume[1], volume[2], nil,
                                                      self.secret_name)
 
@@ -304,33 +318,33 @@ witches.witch_template = { -- your average witch,
                     if self.attack:is_player() then
 
                         -- witches.magic.banish_underground(self,objs[n],10) 
-                        witches.magic.teleport(self, objs[n], math.random(3, 8),
-                                               math.random(2, 4))
+                        witches.magic.teleport(self, objs[n], mr(3, 8),
+                                               mr(2, 4))
 
                     else
-                        if math.random() < 0.2 then
+                        if mr(5) == 1 then
 
                             witches.magic.teleport(self, objs[n],
-                                                   math.random(3, 5),
-                                                   math.random(2, 4))
+                                                   mr(3, 5),
+                                                   mr(2, 4))
                             witches.magic.polymorph(self, objs[n])
 
-                        elseif math.random() < .5 then
+                        elseif mr(2) == 1 then
                             witches.magic.teleport(self, objs[n],
-                                                   math.random(3, 5),
-                                                   math.random(1, 2))
+                                                   mr(3, 5),
+                                                   mr(1, 2))
                             witches.magic.splash(self, objs[n],
                                                  vector.new(2, 2, 2),
-                                                 math.random(0, 1))
+                                                 mr(0, 1))
                             -- witches.magic.splash(self,target,volume,height,node)
                         else
 
                             witches.magic.teleport(self, objs[n],
-                                                   math.random(3, 8),
-                                                   math.random(2, 4))
+                                                   mr(3, 8),
+                                                   mr(2, 4))
 
                         end
-                        -- witches.magic.teleport(self,objs[n],math.random(3,8),math.random(2,4))
+                        -- witches.magic.teleport(self,objs[n],mr(3,8),mr(2,4))
                     end
                 end
             end
@@ -344,7 +358,7 @@ witches.witch_template = { -- your average witch,
         -- self.walk_velocity = 2
         -- self.run_velocity = 3
         -- then set modifiers for each individual
-        if not self.speed_mod then self.speed_mod = math.random(-1, 1) end
+        if not self.speed_mod then self.speed_mod = mr(-1, 1) end
         -- print("speed mod: "..self.speed_mod)
         -- rng for testing variants
         if not self.size then
@@ -355,7 +369,7 @@ witches.witch_template = { -- your average witch,
             }
         end
 
-        if not self.skin then self.skin = math.random(1, 5) end
+        if not self.skin then self.skin = mr(1, 5) end
 
         if not self.color_mod then self.color_mod = rnd_color(rnd_colors) end
 
@@ -394,7 +408,7 @@ witches.witch_template = { -- your average witch,
                                                       {"titles"})
         end
         if not self.secret_locale then
-            if math.random(2) == 1 then
+            if mr(2) == 1 then
                 self.secret_locale = witches.generate_text(
                                          witches.name_parts_female, {
                         "syllablesStart", "syllablesEnd", "syllablesTown"
@@ -423,11 +437,11 @@ witches.witch_template = { -- your average witch,
 
     after_activate = function(self)
         -- maddest hatter <|%\D
-        self.hair_style = math.random(1, #witches.witch_hair_styles)
-        self.hat_style = math.random(1, #witches.witch_hat_styles)
+        self.hair_style = mr(1, #witches.witch_hair_styles)
+        self.hat_style = mr(1, #witches.witch_hat_styles)
         witches.attach_hair(self, "witches:witch_hair_" .. self.hair_style)
         witches.attach_hat(self, "witches:witch_hat_" .. self.hat_style)
-        if math.random() < 0.5 then
+        if mr(2) == 1 then
             witches.attach_tool(self, "witches:witch_tool_wand_btb")
         else
             witches.attach_tool(self, "witches:witch_tool_wand_sp")

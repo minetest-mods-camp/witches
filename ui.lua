@@ -40,22 +40,20 @@ function witches.find_item_quest.get_formspec(self, name)
         text = text .. "\nhair: " .. self.hair_style .. ",hat: " ..
                    self.hat_style
     end
-
-    --[[    meta = minetest.get_meta(self.pos)
-    local inv = meta:get_inventory()
-    inv:set_size("main", 1*1)
-    --]]
-    
+  
     local formspec = {
-        "formspec_version[3]", "size[6,3.5,true]", "position[0.5,0.5]",
-        "anchor[0.5,0.5]", "style_type[label;font=bold;font_size=+4]",
-        "textarea[0.25,0.25;5.50,2.0;;;", minetest.formspec_escape(text), "]",
-        "item_image[2.5,2;1,1;", item.name, "]", "label[2.5,2.25;", item.count,
-        "]"
+        "formspec_version[3]",
+        "size[6,3.5,true]",
+         "position[0.5,0.5]",
+        "anchor[0.5,0.5]",
+         "style_type[label;font=bold;font_size=+4]",
+        "textarea[0.25,0.25;5.50,2.0;;;",
+         minetest.formspec_escape(text), "]",
+        "item_image[2.5,2.25;1,1;", item.name,"]",
+        "label[2.5,2.25;", item.count,"]"
 
     }
-    -- 
-    -- table.concat is faster than string concatenation - `..`
+
     return table.concat(formspec, "")
 
 end
@@ -75,11 +73,11 @@ function witches.found_item_ask.get_formspec(context, name)
         "anchor[0.5,0.5]",
         "style_type[item_image_button;border=true;font=bold;font_size=+4;bgcolor_hovered=black]",
         "style_type[label;font=bold;font_size=+4]", 
-        "textarea[0.1,0.5;5,2;;;", minetest.formspec_escape(text), "]",
+        "textarea[0.1,0.25;5,2;;;", minetest.formspec_escape(text), "]",
          --"item_image[2,2;1,1;",display_item,"]",
-        "item_image_button[1,2;1,1;", display_item, ";give_yes;]",
-        "label[1.1,2.3;", qi.count, "]", "item_image_button[3,2;1,1;",
-        display_item, ";give_no;]", "label[3.1,2.3;0]"
+        "item_image_button[1,2.5;1,1;", display_item, ";give_yes;]",
+        "label[1.1,2.8;", qi.count, "]", "item_image_button[3,2.5;1,1;",
+        display_item, ";give_no;]", "label[3.1,2.8;0]"
     }
     return table.concat(formspec, "")
 end
@@ -100,10 +98,10 @@ function witches.found_item_quest.get_formspec(self, name)
         display_item = qi.name
     end
     local formspec = {
-      "formspec_version[3]", "size[6,4,true]", "position[0.5,0.5]",
+      "formspec_version[3]", "size[5,3.5,true]", "position[0.5,0.5]",
       "anchor[0.5,0.5]", 
-      "textarea[0.25,0.25;5.5,2;;;", minetest.formspec_escape(text), "]",
-      "item_image[2.5,2;1,1;" .. display_item .. "]"
+      "textarea[0.15,0.15;4.7,2;;;", minetest.formspec_escape(text), "]",
+      "item_image[2,2.25;1,1;" .. display_item .. "]"
     }
 
     return table.concat(formspec, "")

@@ -2,6 +2,18 @@
 -- The MIT License (MIT)
 local function print_s(input) print(witches.strip_escapes(input)) end
 
+local function mr(min, max)
+    local v = 1
+    if min then
+        if max then
+             v = math.random(min,max)
+        else
+             v = math.random(min)
+        end
+    end
+    return v
+end
+
 local S = minetest.get_translator("witches")
 
 -- name parts taken from https://github.com/LukeMS/lua-namegen/blob/master/data/creatures.cfg
@@ -101,11 +113,11 @@ function witches.generate_text(name_parts, rules, separator)
         end
         -- print_s(dump(name_arrays.k))
         r_parts[k] = k
-        r_parts[k] = name_arrays.k[math.random(1, #name_arrays.k)]
+        r_parts[k] = name_arrays.k[mr(1, #name_arrays.k)]
     end
-    -- local r_parts.k = name_arrays.k[math.random(1,#name_arrays.k)] did not work
+    -- local r_parts.k = name_arrays.k[mr(1,#name_arrays.k)] did not work
     -- print_s(name_a)
-    if r_parts.list_opt and math.random() <= 0.5 then r_parts.list_opt = "" end
+    if r_parts.list_opt and mr(2) == 1  then r_parts.list_opt = "" end
     -- print_s(r_parts.list_a..r_parts.list_b..r_parts.list_opt)
     if rules then
         -- print_s(dump(rules))
@@ -143,7 +155,7 @@ local rnd_colors = witches.rnd_colors
 
 function witches.rnd_color(colors)
     colors = colors or rnd_colors
-    local color = colors[math.random(1, #colors)]
+    local color = colors[mr(1, #colors)]
     return color
 end
 
@@ -154,7 +166,7 @@ end
 
 -- for rng of small floats
 function witches.variance(min, max)
-    local target = math.random(min, max) / 100
+    local target = mr(min, max) / 100
     -- print(target)
     return target
 end
@@ -197,7 +209,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
         if not self.players[pname].gifts[v.name] then
 
             witches.debug(dump(self.special_drops[k]))
-            local count = math.random(v.min, v.max)
+            local count = mr(v.min, v.max)
             if count < 1 then
                 return print(
                            "drop num of special drops should be at least 1 as they don't occur on mob death")
@@ -212,7 +224,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
             max_hear_distance = self.sounds.distance or 10
             })
             --]]
-            local item_wear = math.random(8000, 10000)
+            local item_wear = mr(8000, 10000)
             local stack = ItemStack({name = v.name, wear = item_wear})
             local org_desc = minetest.registered_items[v.name].description
             stack:set_count(count)
@@ -237,7 +249,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
                             for i, t in pairs(b.times) do
                                 if t > 0.3 then
                                     -- print("original time:".. t )
-                                    local t_rnd = math.random(1, 3) / 10
+                                    local t_rnd = mr(1, 3) / 10
                                     t = t - t_rnd
                                     -- print("boosted time:".. t )
                                 end
@@ -248,7 +260,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
                 elseif x == "damage_groups" then
                     for a, b in pairs(y) do
                         -- print(dump(a.." = "..capabilities.damage_groups[a]))
-                        capabilities.damage_groups[a] = b + math.random(1, 2)
+                        capabilities.damage_groups[a] = b + mr(1, 2)
                         -- print(dump(capabilities.damage_groups[a]))
                     end
                 end
@@ -329,7 +341,7 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
 
     witches.debug("reward list: " .. dump(list), "witches.gift")
 
-    local item_ix = math.random(#list)
+    local item_ix = mr(#list)
 
     local item_name = list[item_ix].name
 
@@ -338,18 +350,18 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
 
     witches.debug("reward list: " .. dump(list), "witches.gift")
 
-    item_count = math.random(min, max)
+    item_count = mr(min, max)
 
     if item_count < 1 then
         return witches.debug("reward count 0" .. dump(list), "witches.gift")
     end
 
-    item_wear = item_wear or math.random(8000, 10000)
+    item_wear = item_wear or mr(8000, 10000)
 
     local stack = ItemStack({
         name = item_name,
         count = item_count,
-        item_wear = item_wear or math.random(8000, 10000)
+        item_wear = item_wear or mr(8000, 10000)
     })
 
     local org_desc = minetest.registered_items[item_name].description
@@ -487,7 +499,7 @@ function witches.firefly_mod(self)
 end
 
 function witches.item_list_check(list)
-    witches.debug("checking list: " .. dump(list))
+    witches.debug("full list " .. dump(list),"witches.item_list_check")
     for i, v in ipairs(list) do
         if not minetest.registered_items[v.name] then
             witches.debug(i .. ". " .. v.name ..
@@ -524,7 +536,7 @@ function witches.item_request(self, name)
         if not self.players[name].met then
             -- print(dump(self.players[name]))
             -- print( "We don't know "..name.."!")
-            local dli_num = math.random(1, #dialog_list.intro)
+            local dli_num = mr(1, #dialog_list.intro)
             intro_text = dialog_list.intro[dli_num]
 
             self.players[name] = {met = math.floor(os.time())}
@@ -532,13 +544,13 @@ function witches.item_request(self, name)
         else
             -- print(dump(self.players.met))
             -- print( "We first met "..name.." ".. os.time() - self.players[name].met.." seconds ago")
-            local dli_num = math.random(1, #dialog_list.having_met)
+            local dli_num = mr(1, #dialog_list.having_met)
             intro_text = dialog_list.having_met[dli_num]
         end
 
         -- print(intro_text)
         local quest_item = self.item_request.item.desc
-        local dlr_num = math.random(1, #dialog_list.item_request)
+        local dlr_num = mr(1, #dialog_list.item_request)
         local request_text = dialog_list.item_request[dlr_num]
         -- print(request_text)
         self.item_request.text = {intro = intro_text, request = request_text}
@@ -605,7 +617,7 @@ function witches.take_item(self, clicker)
 
             end
         else
-            if math.random(1, 4) == 1 then
+            if mr(1, 4) == 1 then
                 reward = witches.gift(self, pname)
                 witches.debug(dump(reward), "witches.found_item")
             end
@@ -630,8 +642,8 @@ function witches.take_item(self, clicker)
             witches.looking_for(self)
             --[[
              witches.item_list_check(self.special_follow)
-            local ssf_idx = math.random(#self.special_follow)
-            local ssf_amt = math.random(self.special_follow[ssf_idx].min,self.special_follow[ssf_idx].max)
+            local ssf_idx = mr(#self.special_follow)
+            local ssf_amt = mr(self.special_follow[ssf_idx].min,self.special_follow[ssf_idx].max)
             self.follow = {
                 name = self.special_follow[ssf_idx].name
             }
@@ -656,8 +668,8 @@ function witches.looking_for(self)
                 "looking for something but no self.follow so picking one of these: " ..
                     dump(self.special_follow), "witches.looking_for")
             self.follow = {}
-            local ssf_idx = math.random(#self.special_follow)
-            local ssf_qty = math.random(self.special_follow[ssf_idx].min,
+            local ssf_idx = mr(#self.special_follow)
+            local ssf_qty = mr(self.special_follow[ssf_idx].min,
                                         self.special_follow[ssf_idx].max)
 
             self.follow = {self.special_follow[ssf_idx].name}
@@ -667,11 +679,11 @@ function witches.looking_for(self)
 
         if self.follow and #self.follow >= 1 then
             if not self.follow_qty then self.follow_qty = 1 end
-            -- print("testing: "..type(self.follow).." "..#self.follow.." "..dump(self.follow).." "..math.random(1,#self.follow))
+            -- print("testing: "..type(self.follow).." "..#self.follow.." "..dump(self.follow).." "..mr(1,#self.follow))
             witches.debug(self.secret_name .. "'s self.follow" ..
                               dump(self.follow) .. " " .. self.follow_qty,
                           "witches.looking_for")
-            local item = self.follow[math.random(1, #self.follow)]
+            local item = self.follow[mr(1, #self.follow)]
             -- local stack = ItemStack({name = item})
             witches.debug(self.secret_name .. "'s chosen follow item: " .. item,
                           "witches.looking_for")

@@ -22,7 +22,20 @@ local function mtpts(table)
     return output
 end
 
+local function mr(min, max)
+    local v = 1
+    if min then
+        if max then
+             v = math.random(min,max)
+        else
+             v = math.random(min)
+        end
+    end
+    return v
+end
+
 -- lets see if any dungeons are near
+
 minetest.set_gen_notify("dungeon")
 
 -- when we are notified check if dungeon is near surface
@@ -68,7 +81,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 
             d_ladder_pos = cur_dg
 
-            if math.random(1, dungeon_cellar_chance) == 1 then
+            if mr(1, dungeon_cellar_chance) == 1 then
                 witches.place_cottage(surface)
             end
 
@@ -96,10 +109,10 @@ end
 function witches.grounding(pos, vol_vec, required_list, exception_list,
                            replacement_node)
 
-    local r_tweak = math.random(-1, 1)
+    local r_tweak = mr(-1, 1)
     local area = vol_vec or
-                     vector.new(math.random(5 + r_tweak, 9), 1,
-                                math.random(5 - r_tweak, 9))
+                     vector.new(mr(5 + r_tweak, 9), 1,
+                                mr(5 - r_tweak, 9))
 
     if not pos then
         witches.debug("error: grounding failed pos checks",
@@ -218,15 +231,15 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
     -- print(minetest.serialize(wp))
 
-    local ps = wp.porch_size or math.random(2)
-    local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
-    local root_node = wp.root_nodes[math.random(#wp.root_nodes)]
+    local ps = wp.porch_size or mr(2)
+    local wall_node = wp.wall_nodes[mr(#wp.wall_nodes)]
+    local root_node = wp.root_nodes[mr(#wp.root_nodes)]
     if not minetest.registered_nodes[root_node] then
         witches.debug("can't find root node: " .. root_node, "generate_cottage")
         root_node = "default:tree"
     end
-    local window_node = wp.window_nodes[math.random(#wp.window_nodes)]
-    local window_height = wp.window_height[math.random(#wp.window_height)]
+    local window_node = wp.window_nodes[mr(#wp.window_nodes)]
+    local window_height = wp.window_height[mr(#wp.window_height)]
     -- start with basement
     -- local od = vector.subtract(pos2,pos1)
 
@@ -244,7 +257,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         for i = 1, #ucn do
             local pos = vector.new(ucn[i].x, ucn[i].y - h + 1, ucn[i].z)
             minetest.set_node(pos, {
-                name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]
+                name = wp.foundation_nodes[mr(#wp.foundation_nodes)]
             })
         end
     end
@@ -252,13 +265,13 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     for h = 1, wp.foundation_depth do
         for i = 1, #ucn do
             local pos = vector.new(ucn[i].x, ucn[i].y - h + 1, ucn[i].z)
-            -- minetest.set_node(pos, {name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]})
+            -- minetest.set_node(pos, {name = wp.foundation_nodes[mr(#wp.foundation_nodes)]})
             local pos_ck = vector.new(pos.x, pos.y - 10, pos.z)
             local pillars = minetest.find_nodes_in_area(pos, pos_ck, {
                 "group:liquid", "air", "default:snow"
             })
             minetest.bulk_set_node(pillars, {
-                name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]
+                name = wp.foundation_nodes[mr(#wp.foundation_nodes)]
             })
         end
     end
@@ -278,7 +291,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     end
 
     -- porch
-    local prnodes = wp.porch_nodes[math.random(#wp.porch_nodes)]
+    local prnodes = wp.porch_nodes[mr(#wp.porch_nodes)]
 
     local ppos1 = vector.new(pos1.x - ps, pos2.y, pos1.z - ps)
     local ppos2 = vector.new(pos2.x + ps, pos2.y, pos2.z + ps)
@@ -305,10 +318,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     }
     local pcn_height = wp.foundation_depth + 1
 
-    local function mr(min, max)
-        local v = math.random(min, max)
-        return v
-    end
+
 
     -- chance of porch pillars
     if mr(1, 5) == 1 then
@@ -329,12 +339,12 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     -- chance of porch bushes
 
     for i = 1, #pcn do
-        if mr(1, 2) == 1 then
+        if mr(1, 5) == 1 then
             local pos = vector.new(pcn[i].x, pcn[i].y + 1, pcn[i].z)
             -- minetest.set_node(pos, {name = wall_node})
             -- minetest.set_node(vector.new(pos.x, pos.y - 1, pos.z), {name = root_node})
 
-            local bush_growth = wp.default_bush_types[math.random(
+            local bush_growth = wp.default_bush_types[mr(
                                     #wp.default_bush_types)]
             bush_growth(pos)
         end
@@ -352,13 +362,13 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                    pcn[4].z - ps + mr(-1, 1))
     }
     witches.debug(mts(treecn), "trees")
-    if wp.default_tree_types and #wp.default_tree_types >= 1 and math.random(2) ==
+    if wp.default_tree_types and #wp.default_tree_types >= 1 and mr(5) ==
         1 then
         ---this check fails without "minetest" game, why!?
 
         for i = 1, #treecn and mr(0, 2) do
             local tree_pos = vector.new(treecn[i])
-            local tree_growth = wp.default_tree_types[math.random(
+            local tree_growth = wp.default_tree_types[mr(
                                     #wp.default_tree_types)]
             witches.debug(mts(tree_pos), "tree pos")
 
@@ -373,7 +383,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     end
 
     -- first floor!
-    local ffnodes = wp.first_floor_nodes[math.random(#wp.first_floor_nodes)]
+    local ffnodes = wp.first_floor_nodes[mr(#wp.first_floor_nodes)]
     local ffpos1 = vector.new(pos1.x, pos2.y, pos1.z)
     local ffpos2 = vector.new(pos2.x, pos2.y, pos2.z)
     local area = vector.subtract(pos2, pos1)
@@ -390,9 +400,9 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
         end
     end
-    wp.wall_height = wp.wall_height + math.random(0, wp.wall_height_add)
-    -- local wall_node = wp.wall_nodes[math.random(#wp.wall_nodes)]
-    if math.random() < 0.9 then
+    wp.wall_height = wp.wall_height + mr(0, wp.wall_height_add)
+    -- local wall_node = wp.wall_nodes[mr(#wp.wall_nodes)]
+    if mr() < 0.9 then
         -- wall corners wood
         for h = 1, wp.wall_height do
             for i = 1, #ucn do
@@ -419,7 +429,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
             for i = 1, #ucn do
                 local pos = vector.new(ucn[i].x, ucn[i].y + h, ucn[i].z)
                 minetest.set_node(pos, {
-                    name = wp.foundation_nodes[math.random(#wp.foundation_nodes)]
+                    name = wp.foundation_nodes[mr(#wp.foundation_nodes)]
                 })
             end
         end
@@ -472,7 +482,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         -- minetest.set_node(pos, {name = wall_node})
         -- minetest.set_node(vector.new(pos.x, pos.y - 1, pos.z), {name = root_node})
         local fpl_ck = vector.new(fpl[i].pos.x, fpl[i].pos.y -
-                                      math.random(1,
+                                      mr(1,
                                                   dungeon_cellar_depth_max / 2),
                                   fpl[i].pos.z)
         local fdepth = minetest.find_nodes_in_area(fpl[i].pos, fpl_ck, {
@@ -505,13 +515,13 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local p_door_pos = {
         w = {
             x = ffpos1.x,
-            z = ffpos1.z + math.random(2, area.z - 2),
+            z = ffpos1.z + mr(2, area.z - 2),
             y = ffpos1.y + 1,
             p = "z",
             fp = {"x", -1}
         },
         n = {
-            x = ffpos1.x + math.random(2, area.x - 2),
+            x = ffpos1.x + mr(2, area.x - 2),
             z = ffpos2.z,
             y = ffpos1.y + 1,
             p = "x",
@@ -519,13 +529,13 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         },
         e = {
             x = ffpos2.x,
-            z = ffpos1.z + math.random(2, area.z - 2),
+            z = ffpos1.z + mr(2, area.z - 2),
             y = ffpos1.y + 1,
             p = "z",
             fp = {"x", 1}
         },
         s = {
-            x = ffpos1.x + math.random(2, area.x - 2),
+            x = ffpos1.x + mr(2, area.x - 2),
             z = ffpos1.z,
             y = ffpos1.y + 1,
             p = "x",
@@ -544,7 +554,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     witches.debug("possible door list: " .. dump(p_door_pos_i),
                   "generate_cottage")
 
-    p_door_pos_i = p_door_pos_i[math.random(1, #p_door_pos_i)]
+    p_door_pos_i = p_door_pos_i[mr(1, #p_door_pos_i)]
     door_pos[p_door_pos_i] = p_door_pos[p_door_pos_i]
 
     -- local door_pos= p_door_pos
@@ -552,7 +562,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     witches.debug("door pos: " .. dump(door_pos), "generate_cottage")
     for k, v in pairs(door_pos) do
 
-        witches.debug(mtpts(v))
+        witches.debug(" "..mtpts(v))
         local f_pos1 = vector.new(v)
         -- get the offsets
         f_pos1[v.fp[1]] = f_pos1[v.fp[1]] + v.fp[2]
@@ -684,7 +694,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                 for i in ipairs(cloud_area) do
                     if not minetest.is_protected(s_pos1, "") and mr(1, 2) == 1 then
 
-                        print(dump(cloud_area[i]))
+                        -- print(dump(cloud_area[i]))
 
                         minetest.set_node(cloud_area[i],
                                           {name = "default:leaves"})
@@ -704,7 +714,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     for i = 1, az do
         local wz = {
             x = ffpos1.x,
-            z = ffpos1.z + math.random(2, area.z - 2),
+            z = ffpos1.z + mr(2, area.z - 2),
             y = ffpos1.y + 2,
             p = "z",
             fp = {"x", 1}
@@ -712,7 +722,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         table.insert(window_pos.w, wz)
         local ez = {
             x = ffpos2.x,
-            z = ffpos1.z + math.random(2, area.z - 2),
+            z = ffpos1.z + mr(2, area.z - 2),
             y = ffpos1.y + 2,
             p = "z",
             fp = {"x", -1}
@@ -721,7 +731,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     end
     for i = 1, ax do
         local nx = {
-            x = ffpos1.x + math.random(2, area.x - 2),
+            x = ffpos1.x + mr(2, area.x - 2),
             z = ffpos2.z,
             y = ffpos1.y + 2,
             p = "x",
@@ -729,7 +739,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         }
         table.insert(window_pos.n, nx)
         local sx = {
-            x = ffpos1.x + math.random(2, area.x - 2),
+            x = ffpos1.x + mr(2, area.x - 2),
             z = ffpos1.z,
             y = ffpos1.y + 2,
             p = "x",
@@ -790,7 +800,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                     local dir2 = vector.direction(v, f_pos1)
                     local f_facedir1 = minetest.dir_to_facedir(dir1)
                     local f_facedir2 = minetest.dir_to_facedir(dir2)
-                    local f_num = math.random(#furniture)
+                    local f_num = mr(#furniture)
                     local f_name = furniture[f_num]
 
                     witches.debug(
@@ -798,7 +808,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             mtpts(f_pos1), "generate_cottage")
                     if f_name == "beds:bed" then
                         local f_pos2 = vector.new(f_pos1)
-                        if math.random() < 0.001 then
+                        if mr(100) == 1 then
                             f_pos2[v.fp[1]] = f_pos2[v.fp[1]] + v.fp[2]
                         else
                             f_pos2[v.p] = f_pos2[v.p] + v.fp[2] -- bed along wall_nodes
@@ -884,19 +894,19 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             inv:add_item("main", {name = "fireflies:bug_net"})
                         end
                         inv:add_item("main", {name = "default:meselamp"})
-                        for i = 1, math.random(3) do
+                        for i = 1, mr(3) do
                             inv:add_item("main", {
                                 name = "default:diamond",
-                                count = math.random(1, 10)
+                                count = mr(1, 10)
                             })
                         end
-                        for i = 1, math.random(3) do
+                        for i = 1, mr(3) do
                             inv:add_item("main", {
                                 name = "default:steel_ingot",
-                                count = math.random(1, 10)
+                                count = mr(1, 10)
                             })
                         end
-                        for i = 1, math.random(3) do
+                        for i = 1, mr(3) do
                             inv:add_item("main",
                                          {name = "witches:bucket", count = 1})
                         end
@@ -969,7 +979,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                 local ck_pos2 = vector.new(v)
                 ck_pos2[v.p] = ck_pos1[v.p] + 1
 
-                if math.random() < .5 then
+                if mr(5) == 1 then
                     local ck = minetest.get_node(ck_pos1)
                     -- witches.debug("ck: " .. ck.name)
                     if ck.name ~= window_node then
@@ -995,7 +1005,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         end
     end
     -- second_floor!
-    local sfnodes = wp.second_floor_nodes[math.random(#wp.second_floor_nodes)]
+    local sfnodes = wp.second_floor_nodes[mr(#wp.second_floor_nodes)]
 
     local sfpos1 = vector.new(ffpos1.x, ffpos2.y + wp.wall_height, ffpos1.z)
     local sfpos2 = vector.new(ffpos2.x, ffpos2.y + wp.wall_height, ffpos2.z)
@@ -1017,7 +1027,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
 
     -- gable and roof
     -- orientation
-    local rfnum = math.random(#wp.roof_nodes)
+    local rfnum = mr(#wp.roof_nodes)
     local rf_nodes = wp.roof_nodes[rfnum]
     if not minetest.registered_nodes[rf_nodes] then
         witches.debug("can't find roof node: " .. rf_nodes, "generate_cottage")
@@ -1040,7 +1050,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     local l_pos = {}
     local rfaz = math.floor(rfarea.z / 2)
     local rfax = math.floor(rfarea.x / 2)
-    if math.random() < 0.5 then
+    if mr(5) == 1 then
         local midpoint = (rfarea.z + 1) / 2
         local gmp = rfarea.z - 1
         for i = 1, midpoint do
@@ -1327,7 +1337,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
     witches.debug("possible ladder: " .. mts(l_pos), "generate_cottage")
     if l_pos and #l_pos >= 1 then
 
-        local lpn = math.random(#l_pos)
+        local lpn = mr(#l_pos)
         local lpc = l_pos[lpn]
         local ladder_length = nil
         -- for a dungeon beneath cottage, extend ladder below cottage
