@@ -42,8 +42,8 @@ for _, col in ipairs(all_colours) do
 		textures = {
 			{"witches_sheep.png^(witches_sheep_wool.png^[colorize:" .. col[3]..")"},
 		},
-		--gotten_texture = {"mobs_sheep_shaved.png"},
-		--gotten_mesh = "mobs_sheep_shaved.b3d",
+		gotten_texture = {"witches_sheep.png"},
+		gotten_mesh = "witches_sheep.b3d",
 		makes_footstep_sound = true,
 		sounds = {
 			random = "witches_sheep",
@@ -211,8 +211,8 @@ for _, col in ipairs(all_colours) do
 			if mobs:capture_mob(self, clicker, 0, 5, 60, false, nil) then return end
 		end
 	})
-
-mobs:register_egg("witches:sheep_"..col[1], S("@1 Sheep", col[2]), "wool_"..col[1]..".png")
+	
+mobs:register_egg("witches:sheep_"..col[1], S("@1 Sheep", col[2]), "wool_"..col[1]..".png",1)
 
 end
 

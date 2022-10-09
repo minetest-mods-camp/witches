@@ -2,16 +2,8 @@
 -- The MIT License (MIT)
 local function print_s(input) print(witches.strip_escapes(input)) end
 
-local function mr(min, max)
-    local v = 1
-    if min then
-        if max then
-             v = math.random(min,max)
-        else
-             v = math.random(min)
-        end
-    end
-    return v
+local function mr(...)
+    return witches.mr(...)
 end
 
 local S = minetest.get_translator("witches")
@@ -208,14 +200,14 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
 
         if not self.players[pname].gifts[v.name] then
 
-            witches.debug(dump(self.special_drops[k]))
+            witches.debug(dump(self.special_drops[k]),"witches.special_gifts")
             local count = mr(v.min, v.max)
             if count < 1 then
                 return print(
                            "drop num of special drops should be at least 1 as they don't occur on mob death")
             end
             self.players[pname].gifts[v.name] = 1
-            -- print("given gifts: "..dump(self.players[pname].gifts))
+             witches.debug("given gifts: "..dump(self.players[pname].gifts),"witches.special_gifts")
             max_drop = max_drop - 1
             --[[
             minetest.sound_play("goblins_goblin_cackle", {
@@ -301,9 +293,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
             minetest.add_item(pos, stack)
             -- print("generated text: "..reward_text)
 
-            -- table.remove(self.special_drops,k)
-
-            return reward
+                 return reward
         end
         if k >= #self.players[pname].gifts then
             local reward = witches.gift(self, pname)
@@ -312,6 +302,7 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
     end
 
 end
+
 -- @witches.gift called by witches.found_item(self, clicker)
 function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
                       item_count)
@@ -323,6 +314,14 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
         witches.debug("no droplist defined in this mob!", "witches.gift")
         return
     end
+
+    if not self.players[pname].gifts then
+        -- self.players[pname] = {met = self.players[pname].met , favors = 0}
+        self.players[pname].gifts = {}
+    end
+
+    -- print(v.name)
+
     local list = {}
     local reward_text = {}
     local reward_item = {}
@@ -355,6 +354,13 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
     if item_count < 1 then
         return witches.debug("reward count 0" .. dump(list), "witches.gift")
     end
+
+    if not self.players[pname].gifts[item_name] then
+        self.players[pname].gifts[item_name] = item_count
+    else 
+        self.players[pname].gifts[item_name] = self.players[pname].gifts[item_name] + item_count
+    end
+    witches.debug(dump(self.players[pname].gifts),"witches.gift")
 
     item_wear = item_wear or mr(8000, 10000)
 
@@ -482,7 +488,7 @@ function witches.firefly_mod(self)
         end
 
         if check < 1 then
-            table.insert(self.drops, 1, {
+            table.insert(self.drops, {
                 name = "fireflies:bug_net",
                 chance = 1000,
                 min = 0,

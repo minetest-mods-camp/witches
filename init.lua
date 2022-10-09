@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20221005"
+witches.version = "20221008"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -40,10 +40,32 @@ local function print_s(input) print(witches.strip_escapes(input)) end
 local S = minetest.get_translator("witches")
 local settings = minetest.settings
 
+
 function witches.debug(input, debug_category)
     debug_category = debug_category or ""
-    local witches_debug = settings:get_bool("witches_debug")
-    if witches_debug then print_s(debug_category .. " " .. input) end
+    local witches_debug = settings:get_bool("witches_debug",true)
+    local witches_debug_filter = witches.strip_escapes(settings:get_string("witches_debug_filter","none"))
+    if witches_debug then 
+        if witches_debug_filter == "none" then
+        print_s(debug_category .. " " .. input)
+
+        elseif witches_debug_filter == debug_category then
+        print_s(debug_category .. " " .. input)
+        end
+    end
+    
+end
+
+function witches.mr(min, max)
+    local v = 1
+    if min then
+        if max then
+             v = math.random(min,max)
+        else
+             v = math.random(min)
+        end
+    end
+    return v
 end
 
 local witches_version = witches.version
@@ -76,7 +98,7 @@ else
     witches.vessels = true
     witches.debug("vessels mod found")
 end
-
+dofile(path .. "/content.lua")
 dofile(path .. "/utilities.lua")
 dofile(path .. "/ui.lua")
 dofile(path .. "/items.lua")

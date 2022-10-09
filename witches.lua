@@ -8,16 +8,8 @@ local function mtpts(table)
     return output
 end
 
-local function mr(min, max)
-    local v = 1
-    if min then
-        if max then
-             v = math.random(min,max)
-        else
-             v = math.random(min)
-        end
-    end
-    return v
+local function mr(...)
+     return witches.mr(...)
 end
 
 local variance = witches.variance
@@ -82,23 +74,15 @@ local spawning = {
     }
 }
 
+
 witches.witch_types = {
     generic = {
         description = "Wanderling",
         lore = "The Wanderlings roam the land, for what do they seek?",
 
         additional_properties = {
-            special_follow = {
-                {name = "default:diamond", min = 1, max = 10},
-                {name = "default:gold_lump", min = 1, max = 10},
-                {name = "default:apple", min = 1, max = 10},
-                {name = "default:blueberries", min = 1, max = 10},
-                {name = "default:torch", min = 1, max = 10},
-                {name = "default:stick", min = 1, max = 10},
-                {name = "flowers:mushroom_brown", min = 1, max = 10},
-                {name = "flowers:mushroom_red", min = 1, max = 10}
-            },
-
+            special_follow = witches.data_get("generic_special_follow"),
+            
             do_custom_addendum = function(self)
                 if mr(30000) == 1 and
                     minetest.registered_nodes["fireflies:firefly"] then
@@ -128,29 +112,9 @@ witches.witch_types = {
         description = "Eremitant",
         lore = "The Eremitant have found homes for themselves, who would bother them?",
         additional_properties = {
-            special_follow = {
-                {name = "default:diamond", min = 1, max = 10},
-                {name = "default:gold_lump", min = 1, max = 10},
-                {name = "default:apple", min = 1, max = 10},
-                {name = "default:blueberries", min = 1, max = 10},
-                {name = "default:torch", min = 1, max = 10},
-                {name = "default:stick", min = 1, max = 10},
-                {name = "flowers:mushroom_brown", min = 1, max = 10},
-                {name = "flowers:mushroom_red", min = 1, max = 10}
-            },
-            special_drops = {
-                {name = "default:pick_steel", chance = 1024, min = 1, max = 1},
-                {name = "default:shovel_steel", chance = 1024, min = 1, max = 1},
-                {name = "default:axe_steel", chance = 1024, min = 1, max = 1},
-                {name = "default:pick_diamond", chance = 2048, min = 1, max = 1},
-                {
-                    name = "default:shovel_diamond",
-                    chance = 2048,
-                    min = 1,
-                    max = 1
-                },
-                {name = "default:axe_diamond", chance = 2048, min = 1, max = 1}
-            },
+            special_follow = witches.data_get("cottage_special_follow"),
+            special_drops = witches.data_get("cottage_special_drops"),
+
             do_custom_addendum = function(self)
                 if witches.cottages then
                     witches.claim_witches_chest(self)
@@ -167,16 +131,8 @@ witches.witch_types = {
         description = "Eremitant Artifician",
         lore = "The Eremitant Artificians scout the land for dungeons upon which their cottages may be built",
         additional_properties = {
-            special_follow = {
-                {name = "default:diamond", min = 1, max = 10},
-                {name = "default:gold_lump", min = 1, max = 10},
-                {name = "default:apple", min = 1, max = 10},
-                {name = "default:blueberries", min = 1, max = 10},
-                {name = "default:torch", min = 1, max = 10},
-                {name = "default:stick", min = 1, max = 10},
-                {name = "flowers:mushroom_brown", min = 1, max = 10},
-                {name = "flowers:mushroom_red", min = 1, max = 10}
-            },
+            special_follow = witches.data_get("cottage_special_follow"),
+
             do_custom_addendum = function(self)
                 if witches.cottages then
                     if not self.built_house and mr(10000) == 1 then
@@ -274,37 +230,15 @@ witches.witch_template = { -- your average witch,
         punch_start = 200,
         punch_end = 219
     },
-    drops = {
-        {name = "default:torch", chance = 4, min = 5, max = 20},
-        {name = "default:steel_ingot", chance = 4, min = 2, max = 5},
-        {name = "default:pick_stone", chance = 16, min = 1, max = 1},
-        {name = "default:shovel_stone", chance = 16, min = 1, max = 1},
-        {name = "default:axe_stone", chance = 16, min = 1, max = 1},
-        {name = "mobs:shears", chance = 32, min = 1, max = 1}
-    },
-    -- follow should be left empty as it is filled from a function
+    drops = witches.data_get("template_drops"),
+
+    -- follow should be left empty as it is filled from a function!
+    
     follow = {},
     additional_properties = {
-        special_follow = {
-            {name = "default:diamond", min = 1, max = 10},
-            {name = "default:gold_lump", min = 1, max = 10},
-            {name = "default:apple", min = 1, max = 10},
-            {name = "default:blueberries", min = 1, max = 10},
-            {name = "default:torch", min = 1, max = 10},
-            {name = "default:stick", min = 1, max = 10},
-            {name = "flowers:mushroom_brown", min = 1, max = 10},
-            {name = "flowers:mushroom_red", min = 1, max = 10}
-        },
-        special_drops = {
-            {name = "default:pick_steel", chance = 1024, min = 1, max = 1},
-            {name = "default:shovel_steel", chance = 1024, min = 1, max = 1},
-            {name = "default:axe_steel", chance = 1024, min = 1, max = 1},
-            {name = "default:pick_diamond", chance = 2048, min = 1, max = 1},
-            {name = "default:shovel_diamond", chance = 2048, min = 1, max = 1},
-            {name = "default:axe_diamond", chance = 2048, min = 1, max = 1}
-        }
+        special_follow = witches.data_get("template_special_follow"),
+        special_drops = witches.data_get("template_special_drops"),
     },
-
     on_rightclick = function(self, clicker) witches.quests(self, clicker) end,
 
     do_custom = function(self)
