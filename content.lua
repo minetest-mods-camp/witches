@@ -49,12 +49,12 @@ end
 
 if not witches.data_check["cottage_special_drops"] then
     witches.data_set("cottage_special_drops", {
-        {name = "default:pick_steel", chance = 1024, min = 1, max = 1, testing = 4},
-        {name = "default:shovel_steel", chance = 1024, min = 1, max = 1, testing = 4},
-        {name = "default:axe_steel", chance = 1024, min = 1, max = 1, testing = 4},
-        {name = "default:pick_diamond", chance = 2048, min = 1, max = 1, testing = 4},
-        {name = "default:shovel_diamond", chance = 2048, min = 1, max = 1, testing = 4},
-        {name = "default:axe_diamond", chance = 2048, min = 1, max = 1, testing = 4}
+        {name = "default:pick_steel", chance = 1024, min = 1, max = 1 },
+        {name = "default:shovel_steel", chance = 1024, min = 1, max = 1},
+        {name = "default:axe_steel", chance = 1024, min = 1, max = 1 },
+        {name = "default:pick_diamond", chance = 2048, min = 1, max = 1},
+        {name = "default:shovel_diamond", chance = 2048, min = 1, max = 1},
+        {name = "default:axe_diamond", chance = 2048, min = 1, max = 1}
     })
 
 end

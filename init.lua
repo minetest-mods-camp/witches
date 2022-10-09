@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20221008"
+witches.version = "20221009"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -52,6 +52,10 @@ end
 
 function witches.mr(min, max)
     local v = 1
+    if max and max < min then
+        print("WARNING: max ("..max..") is less than min ("..min..") for math.random!\n Substituting with value of 1!")
+        return v
+    end
     if min then
         if max then
              v = math.random(min,max)
