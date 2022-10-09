@@ -44,16 +44,10 @@ local settings = minetest.settings
 function witches.debug(input, debug_category)
     debug_category = debug_category or ""
     local witches_debug = settings:get_bool("witches_debug",true)
-    local witches_debug_filter = witches.strip_escapes(settings:get_string("witches_debug_filter","none"))
-    if witches_debug then 
-        if witches_debug_filter == "none" then
-        print_s(debug_category .. " " .. input)
-
-        elseif witches_debug_filter == debug_category then
-        print_s(debug_category .. " " .. input)
-        end
-    end
     
+    if witches_debug then 
+        print_s(debug_category .. " " .. input)
+    end
 end
 
 function witches.mr(min, max)
