@@ -342,7 +342,7 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
 
     local item_name = list[item_ix].name
 
-    local min = list[item_ix].min or 0
+    local min = list[item_ix].min or 1
     local max = list[item_ix].max or 1
 
     witches.debug("reward list: " .. dump(list), "witches.gift")
@@ -350,10 +350,16 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
     item_count = mr(min, max)
 
     if item_count < 1 then
-        return witches.debug("reward count 0" .. dump(list), "witches.gift")
+        witches.debug("reward count 0" .. dump(list), "witches.gift")
+        return 
     end
+    local fate = mr(1,list[item_ix].chance)
 
-    if not self.players[pname].gifts[item_name] then
+    if  fate ~= 1 then
+        witches.debug("gift did not pass chance" .. dump(list), "witches.gift")
+        return end
+
+        if not self.players[pname].gifts[item_name] then
         self.players[pname].gifts[item_name] = item_count
     else 
         self.players[pname].gifts[item_name] = self.players[pname].gifts[item_name] + item_count
@@ -370,8 +376,12 @@ function witches.gift(self, pname, drop_chance_min, drop_chance_max, item_wear,
 
     local org_desc = minetest.registered_items[item_name].description
     local meta = stack:get_meta()
-    meta:set_string("description", S("@1's @2", self.secret_name, org_desc))
-    -- print("stack meta "..dump(meta))
+       meta:set_string("description", S("@1's @2", self.secret_name, org_desc))
+       if meta:get_int("light_source") then
+        local illum = meta:get_int("light_source")
+        meta:set_int("light_source", illum + 1)
+       end
+       witches.debug("stack meta "..dump(meta),"witches.gift")
     -- print(dump(inv:get_lists()))
     for i, _ in pairs(inv:get_lists()) do
         -- print(i.." = "..dump(v))
@@ -619,16 +629,15 @@ function witches.take_item(self, clicker)
                 witches.debug("special reward given", "witches.found_item")
 
             end
-        else
-            --otherwise maybe something else
-            if mr(1, 4) == 1 then
-                reward = witches.gift(self, pname)
-                witches.debug(dump(reward), "witches.found_item")
-            end
+        else     
+            reward = witches.gift(self, pname)
+            witches.debug(dump(reward), "witches.found_item")
         end
+        
         if reward and reward.r_text then
             self.players[pname].reward_text = reward.r_text
         end
+
         if reward and reward.r_item then
             witches.debug("reward: " .. reward.r_item, "witches.found_item")
             self.players[pname].reward_item = reward.r_item

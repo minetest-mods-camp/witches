@@ -22,12 +22,12 @@ end
 if not witches.data_check["generic_special_follow"] then
     witches.data_set("generic_special_follow", {
 
-        {name = "default:diamond", min = 1, max = 10},
-        {name = "default:gold_lump", min = 1, max = 10},
+        {name = "default:diamond", min = 1, max = 2},
+        {name = "default:gold_lump", min = 1, max = 2},
         {name = "default:apple", min = 1, max = 10},
         {name = "default:blueberries", min = 1, max = 10},
         {name = "default:torch", min = 1, max = 10},
-        {name = "default:stick", min = 1, max = 10},
+        {name = "default:stick", min = 1, max = 20},
         {name = "flowers:mushroom_brown", min = 1, max = 10},
         {name = "flowers:mushroom_red", min = 1, max = 10}
     })
@@ -36,12 +36,12 @@ end
 if not witches.data_check["cottage_special_follow"] then
     witches.data_set("cottage_special_follow", {
 
-        {name = "default:diamond", min = 1, max = 10},
-        {name = "default:gold_lump", min = 1, max = 10},
+        {name = "default:diamond", min = 1, max = 2},
+        {name = "default:gold_lump", min = 1, max = 2},
         {name = "default:apple", min = 1, max = 10},
         {name = "default:blueberries", min = 1, max = 10},
         {name = "default:torch", min = 1, max = 10},
-        {name = "default:stick", min = 1, max = 10},
+        {name = "default:stick", min = 1, max = 20},
         {name = "flowers:mushroom_brown", min = 1, max = 10},
         {name = "flowers:mushroom_red", min = 1, max = 10}
     })
@@ -61,23 +61,23 @@ end
 
 if not witches.data_check["template_drops"] then
     witches.data_set("template_drops", {
-        {name = "default:torch", chance = 4, min = 5, max = 20},
+        {name = "default:torch", chance = 2, min = 5, max = 20},
         {name = "default:steel_ingot", chance = 4, min = 2, max = 5},
-        {name = "default:pick_stone", chance = 16, min = 1, max = 1},
-        {name = "default:shovel_stone", chance = 16, min = 1, max = 1},
-        {name = "default:axe_stone", chance = 16, min = 1, max = 1},
-        {name = "mobs:shears", chance = 32, min = 1, max = 1}
+        {name = "default:pick_stone", chance = 8, min = 1, max = 1},
+        {name = "default:shovel_stone", chance = 8, min = 1, max = 1},
+        {name = "default:axe_stone", chance = 8, min = 1, max = 1},
+        {name = "mobs:shears", chance = 16, min = 1, max = 1}
     })
 end
 
 if not witches.data_check["template_special_follow"] then
     witches.data_set("template_special_follow", {
-        {name = "default:diamond", min = 1, max = 10},
-        {name = "default:gold_lump", min = 1, max = 10},
+        {name = "default:diamond", min = 1, max = 2},
+        {name = "default:gold_lump", min = 1, max = 2},
         {name = "default:apple", min = 1, max = 10},
         {name = "default:blueberries", min = 1, max = 10},
         {name = "default:torch", min = 1, max = 10},
-        {name = "default:stick", min = 1, max = 10},
+        {name = "default:stick", min = 1, max = 20},
         {name = "flowers:mushroom_brown", min = 1, max = 10},
         {name = "flowers:mushroom_red", min = 1, max = 10}
     })

@@ -2,11 +2,11 @@
 # debug mode
 witches_debug (enable debug) bool false
 
-# debug categories can be words separated by strings such as:
+# debug categories can be words separated by spaces such as:
 # Dungeon gift
 witches_debug_category (filter debug for category) string 
 
-#enable cottages
+#enable cottage generation
 witches_cottages (enable cottages) bool true
 
 # chance (1 or more) of a witch house spawning over a dungeon 
