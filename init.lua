@@ -44,7 +44,7 @@ local settings = minetest.settings
 function witches.debug(input, debug_category)
     debug_category = debug_category or ""
     local setting_debug = settings:get_bool("witches_debug",false)
-    local setting_debug_category = witches.strip_escapes(settings:get("witches_debug_category"))
+    local setting_debug_category = settings:get("witches_debug_category")
     
     if setting_debug and setting_debug_category ~= "" then
         
