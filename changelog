@@ -1,3 +1,4 @@
+    2022/10/09B: Fixed special gift frequency and added debug categories
     2022/10/09: Issue 5: invalid 'random' (interval is empty): check before crash.
     2022/10/08: moved quest item lists out of code and into database for server customizations
     2022/10/05: quest ui checks

@@ -43,9 +43,22 @@ local settings = minetest.settings
 
 function witches.debug(input, debug_category)
     debug_category = debug_category or ""
-    local witches_debug = settings:get_bool("witches_debug",true)
+    local setting_debug = settings:get_bool("witches_debug",false)
+    local setting_debug_category = witches.strip_escapes(settings:get("witches_debug_category"))
     
-    if witches_debug then 
+    if setting_debug and setting_debug_category ~= "" then
+        
+       local filters = {}
+       string.gsub(setting_debug_category, "(%a+)", function (w)
+        table.insert(filters, w)
+       end)
+
+       for i,v in ipairs(filters)  do
+         if string.find(debug_category,v) then
+            print_s(debug_category .. " " .. input)
+         end
+       end
+    elseif setting_debug then 
         print_s(debug_category .. " " .. input)
     end
 end

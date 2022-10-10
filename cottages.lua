@@ -758,10 +758,10 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                 if window_pos[k][i].x == door_frame[k][v].x and
                     window_pos[k][i].z == door_frame[k][v].z then
                     witches.debug(dump(window_pos[k][i]) .. "\n" ..
-                                      dump(door_frame[k][v]),
-                                  "--match found: \n")
+                                      " match found: \n"..dump(door_frame[k][v]),
+                                  "witches.generate_cottage")
                     table.remove(window_pos[k], i)
-                    witches.debug(dump(window_pos[k]), " --remaining window pos")
+                    witches.debug(" remaining window pos: "..dump(window_pos[k]), "witches.generate_cottage")
                 end
             end
         end

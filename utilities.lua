@@ -295,12 +295,10 @@ function witches.special_gifts(self, pname, drop_chance, max_drop)
 
                  return reward
         end
-        if k >= #self.players[pname].gifts then
-            local reward = witches.gift(self, pname)
-            return reward
-        end
     end
-
+    --if no reward available then give a regular item gift..
+    local reward = witches.gift(self, pname)
+    return reward
 end
 
 -- @witches.gift called by witches.found_item(self, clicker)
@@ -572,7 +570,6 @@ function witches.found_item(self, clicker)
         if item:get_count() >= self.item_request.item.count then
             witches.found_item_ask.show_to(self, pname)
         else
-
             witches.find_item_quest.show_to(self, pname)
         end
     end
@@ -610,8 +607,8 @@ function witches.take_item(self, clicker)
         witches.debug(self.secret_name .. " has now received " ..
                           self.players[pname].favors .. " favors from " .. pname,
                       "witches.found_item")
-
-        if self.players[pname].favors >= 5 -- and math.fmod(2, self.players[pname].favors) == 0
+        --every 5 favors give something special
+        if self.players[pname].favors >= 5 and math.fmod(self.players[pname].favors,5) == 0
         then
             if self.witches_chest and self.witches_chest_owner ==
                 self.secret_name then
@@ -623,6 +620,7 @@ function witches.take_item(self, clicker)
 
             end
         else
+            --otherwise maybe something else
             if mr(1, 4) == 1 then
                 reward = witches.gift(self, pname)
                 witches.debug(dump(reward), "witches.found_item")

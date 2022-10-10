@@ -2,6 +2,10 @@
 # debug mode
 witches_debug (enable debug) bool false
 
+# debug categories can be words separated by strings such as:
+# Dungeon gift
+witches_debug_category (filter debug for category) string 
+
 #enable cottages
 witches_cottages (enable cottages) bool true
 
