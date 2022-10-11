@@ -4,7 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20221009"
+witches.version = "20221011"
 print("This is Witches " .. witches.version .. "!")
 
 -- Strips any kind of escape codes (translation, colors) from a string
@@ -46,19 +46,22 @@ function witches.debug(input, debug_category)
     local setting_debug = settings:get_bool("witches_debug",false)
     local setting_debug_category = settings:get("witches_debug_category")
     
-    if setting_debug and setting_debug_category ~= "" then
-        
-       local filters = {}
-       string.gsub(setting_debug_category, "(%a+)", function (w)
-        table.insert(filters, w)
-       end)
+    if setting_debug then
+        if setting_debug_category then
+            
+            local filters = {}
+            string.gsub(setting_debug_category, "(%a+)", function (w)
+                table.insert(filters, w)
+            end)
 
-       for i,v in ipairs(filters)  do
-         if string.find(debug_category,v) then
-            print_s(debug_category .. " " .. input)
-         end
-       end
-    elseif setting_debug then 
+            for i,v in ipairs(filters)  do
+                if string.find(debug_category,v) then
+                    print_s(debug_category .. " " .. input)
+                end
+            end
+        end
+    else
+    
         print_s(debug_category .. " " .. input)
     end
 end

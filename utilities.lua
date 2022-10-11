@@ -752,6 +752,13 @@ function witches.quests(self, clicker)
         -- print(self.secret_name.." wants a ".. self.item_quest.name)
     elseif self.item_request and self.item_request.item and item and
         item:get_name() == self.item_request.item.name then
+            if not item:get_count() then
+                print("Warning: no items counted!!") return
+            end
+            if not self.item_request.item.count then
+                print("Warning: no requested item counted") 
+                self.item_request.item.count = 1
+            end
         if item:get_count() >= self.item_request.item.count then
             -- print(self.item_quest.name.." and "..item:get_name())
             witches.found_item(self, clicker)
