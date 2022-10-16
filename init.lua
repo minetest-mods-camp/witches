@@ -139,7 +139,7 @@ end
 
 dofile(path .. "/magic.lua")
 
-witches.cottages = settings:get_bool("witches_cottages")
+witches.cottages = settings:get_bool("witches_cottages",true)
 if witches.cottages then
     witches.cottages = true
     dofile(path .. "/cottages.lua")

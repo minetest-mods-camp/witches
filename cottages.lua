@@ -10,7 +10,7 @@ local dungeon_cellar_depth_min = tonumber(
 
 local dungeon_cellar_depth_max = tonumber(
                                      minetest.settings:get(
-                                         "witches_dungeon_cellar_depth")) or 5
+                                         "witches_dungeon_cellar_depth")) or 7
 
 local function mts(table)
     local output = minetest.serialize(table)
