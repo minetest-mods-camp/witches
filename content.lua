@@ -94,3 +94,30 @@ if not witches.data_check["template_special_drops"] then
     })
 
 end
+
+if not witches.data_check["cottage_chest_items"] then
+    witches.data_set("cottage_chest_items", {
+        {name = "witches:bucket", chance = 1, min = 1, max = 1},
+        {name = "mobs:shears", chance = 2, min = 1, max = 1},
+        {name = "default:steel_ingot", chance = 2, min = 5, max = 10},
+        {name = "default:gold_ingot", chance = 2, min = 5, max = 10},
+        {name = "default:diamond", chance = 3, min = 3, max = 10},
+        {name = "default:meselamp", chance = 3, min = 1, max = 5},
+        {name = "default:shovel_diamond", chance = 10, min = 1, max = 1},
+        {name = "default:axe_diamond", chance = 10, min = 1, max = 1}
+    })
+
+end
+
+-- protecting these additional furniture nodes is not currently supported, but set here for future use
+-- note that container node inventories are tables and they must be named as defined in their node definitions (main, books, vessels, etc)!
+-- items placed in node inventories must each be tables (only {name = "mod:item_name"} is required, all else is optional)
+-- mind the brackets!
+
+if not witches.data_check["cottage_add_furniture"] then
+    witches.data_set("cottage_add_furniture", {
+        {name = "fireflies:firefly_bottle"},
+        {name = "witches:shelf", chance = 1, min = 1, max = 1, inv = {vessels = {{name = "fireflies:firefly_bottle"},{name = "witches:glass_bottle", min = 1, max = 2}}}, protected = true, infotext = "Bottle Shelf"},
+        {name = "default:bookshelf", chance = 1, min = 1, max = 1, inv = {books = {{name = "default:book", chance = 1, min = 2, max = 4}}}, protected = true, infotext = "Book Shelf"},
+    })
+end

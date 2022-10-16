@@ -22,16 +22,8 @@ local function mtpts(table)
     return output
 end
 
-local function mr(min, max)
-    local v = 1
-    if min then
-        if max then
-             v = math.random(min,max)
-        else
-             v = math.random(min)
-        end
-    end
-    return v
+local function mr(...)
+    return witches.mr(...)
 end
 
 -- lets see if any dungeons are near
@@ -781,10 +773,16 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
         end
 
         local furniture = {
-            bed, "default:furnace", "witches:chest_locked", "default:bookshelf",
-            "witches:shelf"
+            bed, "default:furnace", "witches:chest_locked" 
         }
 
+        local add_furniture = witches.data_get("cottage_add_furniture")
+            for k,_ in ipairs(add_furniture) do
+                table.insert(furniture, add_furniture[k])
+            end
+        
+
+        witches.debug(dump(furniture),"all cottage furniture: ")
         local f_pos1 = {}
         for j in pairs(window_pos) do
             for k, v in ipairs(window_pos[j]) do
@@ -804,7 +802,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                     local f_name = furniture[f_num]
 
                     witches.debug(
-                        "furniture " .. f_name .. " to be placed: " ..
+                        "furniture " .. dump(f_name) .. " to be placed: " ..
                             mtpts(f_pos1), "generate_cottage")
                     if f_name == "beds:bed" then
                         local f_pos2 = vector.new(f_pos1)
@@ -834,7 +832,7 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                         })
 
                     elseif f_name == "default:furnace" then
-                        furnace_front = f_pos1
+                        furnace_front = vector.new(f_pos1)
                         f_pos1[v.fp[1]] = f_pos1[v.fp[1]] - v.fp[2]
                         -- and set stovepipe pos
                         stovepipe_pos = vector.new(f_pos1)
@@ -872,8 +870,11 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                         minetest.registered_nodes[f_name].on_construct(f_pos1);
                         local meta = minetest.get_meta(f_pos1);
                         local inv = meta:get_inventory();
+                        local function locked_node(pos,type,sec_name)
+                            ---tbd
+                        end
                         meta:set_string("secret_type", "witches_chest")
-
+                        
                         if secret_name then
                             meta:set_string("secret_name", secret_name)
                             meta:set_string("owner", secret_name)
@@ -893,23 +894,16 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                         if minetest.get_modpath("fireflies") then
                             inv:add_item("main", {name = "fireflies:bug_net"})
                         end
-                        inv:add_item("main", {name = "default:meselamp"})
-                        for i = 1, mr(3) do
-                            inv:add_item("main", {
-                                name = "default:diamond",
-                                count = mr(1, 10)
-                            })
+
+                        local loot = witches.data_get("cottage_chest_items")
+                        witches.debug(dump(loot), "cottage chest loot")
+                        for _,val in ipairs(loot) do 
+                            if mr(val.chance) == 1 then
+                                inv:add_item("main",
+                                {name = val.name, count = mr(val.min,val.max)})
+                            end
                         end
-                        for i = 1, mr(3) do
-                            inv:add_item("main", {
-                                name = "default:steel_ingot",
-                                count = mr(1, 10)
-                            })
-                        end
-                        for i = 1, mr(3) do
-                            inv:add_item("main",
-                                         {name = "witches:bucket", count = 1})
-                        end
+
                         local snode_pos =
                             vector.new(f_pos1.x, f_pos1.y + 1, f_pos1.z)
                         minetest.set_node(snode_pos, {
@@ -917,12 +911,53 @@ function witches.generate_cottage(pos1, pos2, params, secret_name)
                             protected = 1
                         })
 
-                    elseif f_name ~= bed then
-                        minetest.set_node(f_pos1, {
-                            name = f_name,
-                            paramtype2 = "facedir",
-                            param2 = f_facedir1
-                        })
+                    elseif type(f_name) == "table"  then
+                        local def = minetest.registered_nodes[f_name.name]
+                        witches.debug(dump(def), "cottage furniture def: ")
+                        if not def or def.air_equivalent then
+                            print("Warning! Node: "..f_name.name.." is air_equivalent or not found!")
+                            --forget about it..
+                        elseif def then 
+
+                            minetest.set_node(f_pos1, {
+                                name = f_name.name,
+                                paramtype2 = "facedir",
+                                param2 = f_facedir1
+                            })
+                            
+                            if minetest.registered_nodes[f_name.name].on_construct then
+                                minetest.registered_nodes[f_name.name].on_construct(f_pos1)
+                            else
+                                witches.debug("No on_construct definition set: "..dump(f_name.name), "cottage furniture: ")
+                            end
+                            local meta = minetest.get_meta(f_pos1);
+                                
+                            if f_name.infotext then
+                                meta:set_string("infotext", f_name.infotext)
+                            end
+                            if f_name.protected then
+                                meta:set_string("owner", mtpts(f_pos1))
+                                meta:set_string("secret_name", mtpts(f_pos1))
+                            end
+                            if f_name.inv and type(f_name.inv) == "table" then
+                                witches.debug(dump(f_name.inv), "cottage furniture loot: ")
+
+                                local inv = meta:get_inventory();
+                                for inv_name,_ in pairs(f_name.inv) do
+                                    for _,item in ipairs (f_name.inv[inv_name]) do
+                                        local node_def = minetest.registered_nodes[item.name]
+                                        local item_def = minetest.registered_items[item.name]
+                                        if node_def or item_def then
+                                            if not item.chance or mr(item.chance) == 1 then
+                                                inv:add_item(inv_name,{name = item.name, count = mr(item.min, item.max)})
+                                            end
+                                        else
+                                            print("Warning! Item: "..item.name.." was not found!")
+                                        end
+                                    end
+                                end
+                            end
+                        end
                         --[[         if mr(1,2) == 1 then
                             --witches.debug("placing bottle!")
                             local v_pos1 = vector.new(f_pos1.x,f_pos1.y+1,f_pos1.z)

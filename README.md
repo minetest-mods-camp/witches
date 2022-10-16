@@ -19,13 +19,19 @@ Witches inhabit the land! They are currently in development but, can already:
 
 * If protector (or similar) mod is available and enabled, Witches will not build in these areas! 
   
-* Chance of cottage to spawn over a dungeon if they are near the surface.
+* Chance of cottage to spawn over a dungeon if it is generated near the surface.
 
 * Have a name and origin location which they will tell player.
 
 * Randomly choose hair color and style
 
 * Randomly choose hat style and hat ornaments
+
+* mod_storage (found in the worlds/worldname folder) is now used to seperate customizable content from code updates! 
+
+* Witches quest requested items and rewards are now fully customizable in generated mod_storage database!
+
+* Witches cottage funiture can be changed or added via generated mod_storage database!   
 
 * Basic interactivity:
     will follow player for holding certain items.
@@ -39,11 +45,11 @@ Witches inhabit the land! They are currently in development but, can already:
     * Mobs Redo git repository:  https://notabug.org/TenPlus1/mobs_redo
 
 ## Optional Mods:
-* protector (or similar) - to prevent Witches from placing cottages in protected areas! 
+* protector (or similar) - to prevent Witches from placing cottages or spawning in protected areas! 
   
 * Any mobs from any mobs mod attacking Witches may be turned into a sheep!
 
-* Fireflies (Minetest Game) for certain effects and rewards
+* Fireflies, vessels, and doors from Minetest Game for certain effects and rewards
   
 ## Licenses of Source Media Files:
 * witches_witch.b3d and witch.blend 
@@ -84,5 +90,6 @@ Witches inhabit the land! They are currently in development but, can already:
   Thanks to rubenwardy for awesome help and the Minetest ContentDB
   Thanks to everyone in the Minetest forums and IRC for just being great!
   Thanks to ctate for naming the witches first spell "Yeet"!
+  Thanks to kristovish for testing and providing crash reports from their live populated server!
 
 GET MINETEST: https://www.minetest.net/

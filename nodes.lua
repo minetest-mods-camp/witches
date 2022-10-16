@@ -38,8 +38,8 @@ else
 end
 
 if not minetest.get_modpath("vessels") then
-    minetest.register_alias("witches:shelf", "air")
-    minetest.register_alias("witches:glass_bottle", "air")
+    minetest.register_alias("witches:shelf", "ignore")
+    minetest.register_alias("witches:glass_bottle", "ignore")
     print_s(S("vessels mod not found! Shelf and glass bottle not registered!"))
 else
     minetest.register_alias("witches:shelf", "vessels:shelf")
