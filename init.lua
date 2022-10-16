@@ -60,10 +60,9 @@ function witches.debug(input, debug_category)
                     print_s(debug_category .. " " .. input)
                 end
             end
+        else
+            print_s(debug_category .. " " .. input)
         end
-    else
-    
-        print_s(debug_category .. " " .. input)
     end
 end
 
