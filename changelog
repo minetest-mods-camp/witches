@@ -1,5 +1,6 @@
     2022/10/16:  Cottage chest container items and extra furniture moved to database!
                   Note: Cottages already generated will not be affected.
+    2022/10/11: Fix init and quests again!
     2022/10/09B: Fixed special gift frequency and added debug categories
     2022/10/09: Issue 5: invalid 'random' (interval is empty): check before crash.
     2022/10/08: moved quest item lists out of code and into database for server customizations
