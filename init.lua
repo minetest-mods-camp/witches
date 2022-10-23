@@ -4,9 +4,7 @@
 local path = minetest.get_modpath("witches")
 witches = {}
 
-witches.version = "20221016"
-
-print("This is Witches " .. witches.version .. "!")
+witches.version = "20221022"
 
 -- Strips any kind of escape codes (translation, colors) from a string
 -- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
@@ -41,22 +39,22 @@ local function print_s(input) print(witches.strip_escapes(input)) end
 local S = minetest.get_translator("witches")
 local settings = minetest.settings
 
+print_s(S("This is Witches verison @1!", witches.version))
 
 function witches.debug(input, debug_category)
     debug_category = debug_category or ""
-    local setting_debug = settings:get_bool("witches_debug",false)
+    local setting_debug = settings:get_bool("witches_debug", false)
     local setting_debug_category = settings:get("witches_debug_category")
-    
+
     if setting_debug then
         if setting_debug_category then
-            
-            local filters = {}
-            string.gsub(setting_debug_category, "(%a+)", function (w)
-                table.insert(filters, w)
-            end)
 
-            for i,v in ipairs(filters)  do
-                if string.find(debug_category,v) then
+            local filters = {}
+            string.gsub(setting_debug_category, "(%a+)",
+                        function(w) table.insert(filters, w) end)
+
+            for i, v in ipairs(filters) do
+                if string.find(debug_category, v) then
                     print_s(debug_category .. " " .. input)
                 end
             end
@@ -69,31 +67,33 @@ end
 function witches.mr(min, max)
     local v = 1
     if max and max < min then
-        print("WARNING: max ("..max..") is less than min ("..min..") for math.random!\n Substituting with value of 1!")
+        print("WARNING: max (" .. max .. ") is less than min (" .. min ..
+                  ") for math.random!\n Substituting with value of 1!")
         return v
     end
     if min then
         if max then
-             v = math.random(min,max)
+            v = math.random(min, max)
         else
-             v = math.random(min)
+            v = math.random(min)
         end
     end
     return v
 end
 
 local witches_version = witches.version
+local mobs_req = 20200515
 
 if mobs.version then
     if tonumber(mobs.version) >= tonumber(20200516) then
-        print_s(S("Mobs Redo 20200516 or greater found! (" .. mobs.version ..
-                      ")"))
+        print_s(S("Mobs Redo @1 or greater found! (" .. mobs.version .. ")",
+                  mobs_req))
     else
         print_s(S("You should find a more recent version of Mobs Redo!"))
         print_s(S("https://notabug.org/TenPlus1/mobs_redo"))
     end
 else
-    print_s(S("This mod requires Mobs Redo version 2020516 or greater!"))
+    print_s(S("This mod requires Mobs Redo version @1 or greater!", mobs_req))
     print_s(S("https://notabug.org/TenPlus1/mobs_redo"))
 end
 
@@ -138,7 +138,7 @@ end
 
 dofile(path .. "/magic.lua")
 
-witches.cottages = settings:get_bool("witches_cottages",true)
+witches.cottages = settings:get_bool("witches_cottages", true)
 if witches.cottages then
     witches.cottages = true
     dofile(path .. "/cottages.lua")

@@ -12,6 +12,8 @@ local function mr(...)
      return witches.mr(...)
 end
 
+local S = minetest.get_translator("witches")
+
 local variance = witches.variance
 local rnd_color = witches.rnd_color
 local rnd_colors = witches.rnd_colors
@@ -77,8 +79,8 @@ local spawning = {
 
 witches.witch_types = {
     generic = {
-        description = "Wanderling",
-        lore = "The Wanderlings roam the land, for what do they seek?",
+        description = S("Wanderling"),
+        lore = S("The Wanderlings roam the land, for what do they seek?"),
 
         additional_properties = {
             special_follow = witches.data_get("generic_special_follow"),
@@ -109,8 +111,8 @@ witches.witch_types = {
     },
 
     cottage = {
-        description = "Eremitant",
-        lore = "The Eremitant have found homes for themselves, who would bother them?",
+        description = S("Eremitant"),
+        lore = S("The Eremitant have found homes for themselves, who would bother them?"),
         additional_properties = {
             special_follow = witches.data_get("cottage_special_follow"),
             special_drops = witches.data_get("cottage_special_drops"),
@@ -128,8 +130,8 @@ witches.witch_types = {
     },
 
     cottage_builder = {
-        description = "Eremitant Artifician",
-        lore = "The Eremitant Artificians scout the land for dungeons upon which their cottages may be built",
+        description = S("Eremitant Artifician"),
+        lore = S("The Eremitant Artificians scout the land for dungeons upon which their cottages may be built"),
         additional_properties = {
             special_follow = witches.data_get("cottage_special_follow"),
 
@@ -167,8 +169,8 @@ witches.witch_types = {
 }
 
 witches.witch_template = { -- your average witch,
-    description = "Basic Witch",
-    lore = "This witch has a story yet to be...",
+    description = S("Basic Witch"),
+    lore = S("This witch has a story yet to be..."),
     type = "npc",
     passive = false,
     attack_type = "dogfight",
